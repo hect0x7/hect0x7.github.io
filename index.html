@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#faf8f3">
+  <title>hect0x7 · 作品集</title>
+  <meta name="description" content="hect0x7 的个人作品集 —— 一些用代码做的小东西。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c3272b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="grain"></div>
+
+  <header class="site-header">
+    <a class="brand" href="/">hect0x7</a>
+    <nav>
+      <a href="#works" data-i18n="navWorks">作品</a>
+      <a href="#about" data-i18n="navAbout">关于</a>
+      <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+    <div class="header-actions">
+      <div class="languages" role="group" aria-label="Language">
+        <button data-lang="zh" class="active">中</button>
+        <button data-lang="ja">日</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button class="theme-toggle" aria-label="Toggle theme" aria-pressed="false">
+        <span class="theme-icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow" data-i18n="eyebrow">PORTFOLIO / 作品集</p>
+      <h1 data-i18n-html="heroTitle">我用代码<br>做了一些<em>小东西</em>。</h1>
+      <p class="lead" data-i18n="heroLead">从视觉实验到实用工具，这里收集我在闲暇时写下的作品。</p>
+      <a class="scroll-cue" href="#works"><span data-i18n="scroll">向下浏览</span><i></i></a>
+    </section>
+
+    <section class="works" id="works">
+      <div class="section-head">
+        <span class="section-index">01 <i></i> WORKS</span>
+        <h2 data-i18n="worksTitle">作品</h2>
+      </div>
+      <div class="work-grid" id="workGrid"><!-- 由 works.js 渲染 --></div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="section-head">
+        <span class="section-index">02 <i></i> ABOUT</span>
+        <h2 data-i18n="aboutTitle">关于</h2>
+      </div>
+      <p class="about-body" data-i18n-html="aboutBody">
+        你好，我是 hect0x7。这个站点用来存放我做的一些实验性作品，
+        大多是纯前端的小页面。欢迎在 <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> 上找到我。
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <span>hect0x7</span>
+    <span>© <span id="year"></span></span>
+    <button class="to-top" onclick="scrollTo({top:0,behavior:'smooth'})" data-i18n="toTop">回到顶部 ↑</button>
+  </footer>
+
+  <script src="works.js"></script>
+</body>
+</html>
