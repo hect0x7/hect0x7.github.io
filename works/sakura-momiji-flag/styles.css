@@ -101,7 +101,7 @@ body {
   border-bottom: 1px solid var(--red)
 }
 
-.sound-toggle {
+.motion-toggle {
   border: 0;
   background: none;
   font-family: inherit;
@@ -112,11 +112,11 @@ body {
   cursor: pointer
 }
 
-.sound-toggle b {
+.motion-toggle b {
   font-weight: 400
 }
 
-.sound-toggle span {
+.motion-toggle span {
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -125,7 +125,7 @@ body {
   margin-right: 22px
 }
 
-.sound-toggle[aria-pressed=true] span {
+.motion-toggle[aria-pressed=true] span {
   background: var(--red);
   box-shadow: 12px 0 #e18192, 24px 0 #f0c4cc;
   animation: pulse 1s infinite alternate
@@ -775,7 +775,7 @@ footer button {
     height: 80px
   }
 
-  .site-header nav, .sound-toggle {
+  .site-header nav, .motion-toggle {
     display: none
   }
 
@@ -1137,4 +1137,44 @@ footer button {
   }
 }
 
+main:focus { outline: none }
+.motion-paused *, .motion-paused *::before, .motion-paused *::after { animation-play-state: paused !important }
 
+/* Each act reserves native scroll distance while its media stage is pinned in the viewport. */
+.city-journey { background: #171311; color: #fff; overflow: clip }
+.city-act { position: relative; height: 400svh }
+.city-act-stage { position: sticky; top: 0; height: 100svh; overflow: hidden }
+.city-act-grid { display: flex; width: 300vw; height: 100%; will-change: transform }
+.city-act-intro { position: absolute; z-index: 5; top: clamp(34px, 7vw, 92px); left: clamp(24px, 7vw, 112px); width: min(36rem, calc(100vw - 48px)); text-shadow: 0 2px 26px #160e0d; pointer-events: none }
+.city-act-intro .section-index { color: #e0cfc3 }
+.city-act-intro .act-label { margin: 42px 0 15px; color: #f0d9d1; font-size: 11px; letter-spacing: .22em }
+.city-act-intro h2 { margin: 0; font-family: var(--display); font-size: clamp(48px, 5.5vw, 94px); font-weight: 400; line-height: 1.02; letter-spacing: -.05em }
+.city-act-intro > p:last-child { max-width: 34ch; margin: 20px 0 0; color: #f1e8e2; font-size: 14px; line-height: 2 }
+.city-scene { flex: 0 0 100vw; height: 100%; position: relative; overflow: hidden; background: #201917; color: #fff }
+.city-scene img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s cubic-bezier(.2, .7, .2, 1), filter .6s; filter: saturate(.82) brightness(.78) }
+.city-scene:hover img, .city-scene:focus-within img { transform: scale(1.04); filter: saturate(1) }
+.city-scene::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, #120a07e3 0%, transparent 62%), linear-gradient(90deg, #120a0755, transparent 64%) }
+.city-overlay { position: absolute; z-index: 3; left: clamp(24px, 7vw, 112px); right: 24px; bottom: clamp(42px, 7vw, 104px); max-width: 620px }
+.city-overlay span { font: 10px/1 sans-serif; letter-spacing: .25em; color: #f0c7c0 }
+.city-overlay h3 { font-family: var(--display); font-size: clamp(46px, 6vw, 100px); font-weight: 400; line-height: 1; margin: 17px 0 }
+.city-overlay p { margin: 0; font-size: 14px; line-height: 1.9; color: #f0e8e1; max-width: 34ch }
+.act-indicator { position: absolute; z-index: 6; bottom: clamp(30px, 4vw, 60px); left: 50%; display: flex; gap: 20px; transform: translateX(-50%); font: 11px/1 sans-serif; letter-spacing: .12em; color: #ffffff88 }
+.act-indicator span { display: inline-flex; width: 26px; padding-bottom: 8px; border-bottom: 1px solid transparent; justify-content: center }
+.act-indicator span.active { border-color: #ffb5ba; color: #fff }
+.city-act-red .city-act-stage { background: #230d0f }
+.city-act-red .city-act-intro .act-label { color: #ffb5ba }
+
+@media (max-width: 850px) {
+  .city-act { height: auto }
+  .city-act-stage { position: static; height: auto; overflow: visible }
+  .city-act-grid { display: block; width: 100%; height: auto; transform: none !important }
+  .city-act-intro { position: relative; top: auto; left: auto; width: auto; padding: 100px 26px 50px; text-shadow: none; background: #171311; opacity: 1 !important }
+  .city-act-intro .act-label { margin-top: 28px }
+  .city-act-intro h2 { font-size: clamp(42px, 13vw, 62px) }
+  .city-act-intro > p:last-child { font-size: 13px; margin-top: 14px }
+  .city-scene { height: 92vw; min-height: 480px }
+  .city-overlay { left: 26px; right: 26px; bottom: 48px }
+  .city-overlay h3 { font-size: clamp(42px, 12vw, 62px) }
+  .city-overlay p { font-size: 13px }
+  .act-indicator { display: none }
+}

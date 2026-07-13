@@ -14,7 +14,7 @@
 <body>
 <div class="grain"></div>
 <header class="site-header"><a class="brand" href="#top"><span>花</span><i></i><span>葉</span></a>
-    <nav><a href="#idea" data-i18n="navIdea">构想</a><a href="#seasons" data-i18n="navSeasons">四季</a><a href="#finale"
+    <nav><a href="#idea" data-i18n="navIdea">构想</a><a href="#cities" data-i18n="navCities">城市</a><a href="#finale"
                                                                                                           data-i18n="navFlag">一面旗</a>
     </nav>
     <div class="header-actions">
@@ -23,13 +23,13 @@
             <button data-lang="ja">日</button>
             <button data-lang="en">EN</button>
         </div>
-        <button class="sound-toggle" aria-pressed="false"><span></span><b data-i18n="observe">静观</b></button>
+        <button class="motion-toggle" type="button" aria-pressed="false"><span></span><b data-i18n="motion">缓动</b></button>
     </div>
 </header>
-<main id="top">
+<main id="top" tabindex="-1">
     <section class="hero">
         <div class="hero-copy"><p class="eyebrow"><span data-i18n="eyebrow">日本之红</span> / A TALE OF TWO SEASONS</p>
-            <h1 data-i18n-html="heroTitle">春日成花<br><em>秋日成叶</em></h1>
+            <h1 data-i18n-html="heroTitle">春日成樱<br><em>秋日成叶</em></h1>
             <p class="lead" data-i18n-html="heroLead">樱花落在白色的风里，红叶聚成中央的太阳。<br>春与秋，共同完成一面季节的旗。
             </p><a class="scroll-cue" href="#idea"><span data-i18n="scroll">向下观赏</span><i></i></a></div>
         <div class="hero-art"><img class="hero-generated" src="assets/hero-generated.png"
@@ -64,30 +64,29 @@
             <img src="assets/autumn-generated.png" alt="夕阳下燃烧般绚烂的秋日红叶"><span class="kanji">秋</span>
         </article>
     </section>
-    <section class="landmarks" id="landmarks">
-        <div class="landmark-head">
-            <div class="section-index">02 <span></span> PLACES</div>
-            <p data-i18n="placesKicker">季节落在土地上，便有了名字</p>
-            <h2 data-i18n-html="placesTitle">在日本，<br>看见春秋。</h2></div>
-        <div class="landmark-grid">
-            <article class="landmark landmark-fuji"><img src="assets/landmark-fuji.png" alt="樱花季的富士山与湖面倒影">
-                <div><span>01 / FUJI</span>
-                    <h3 data-i18n="fujiTitle">富士山 · 春</h3>
-                    <p data-i18n="fujiCopy">雪峰收住冬日最后的白，樱花把春天轻轻递向湖面。</p></div>
-            </article>
-            <article class="landmark landmark-kyoto"><img src="assets/landmark-kyoto.png"
-                                                          alt="京都古寺掩映在秋日红叶中">
-                <div><span>02 / KYOTO</span>
-                    <h3 data-i18n="kyotoTitle">京都 · 秋</h3>
-                    <p data-i18n="kyotoCopy">古寺不语，只有红叶替时间燃烧。千年木色，因此更显沉静。</p></div>
-            </article>
-            <article class="landmark landmark-miyajima"><img src="assets/landmark-miyajima.png"
-                                                             alt="严岛神社大鸟居前樱花与红叶交汇">
-                <div><span>03 / MIYAJIMA</span>
-                    <h3 data-i18n="miyajimaTitle">严岛 · 春秋</h3>
-                    <p data-i18n="miyajimaCopy">潮水托起朱红鸟居，樱花与红叶从光影两端，在这里相逢。</p></div>
-            </article>
+    <section class="city-journey" id="cities" aria-labelledby="citiesTitle">
+      <article class="city-act city-act-white">
+        <div class="city-act-stage">
+        <div class="city-act-intro"><div class="section-index">02 <span></span> CITY PASSAGES</div><p class="act-label" data-i18n="actWhiteLabel">第一幕 / 白</p><h2 id="citiesTitle" data-i18n-html="actWhiteTitle">花不是背景，<br>而是城市的光。</h2><p data-i18n="actWhiteLead">仙台、东京与弘前。樱花落下时，城市先学会安静。</p></div>
+        <div class="city-act-grid">
+            <article class="city-scene city-scene-white" data-city="0"><img src="assets/city-sendai-sakura.png" alt="仙台樱花季的白色花道"><div class="city-overlay"><span>01 / SENDAI · SPRING</span><h3 data-i18n="sendaiTitle">仙台 · 白花的川</h3><p data-i18n="sendaiCopy">河岸被近乎白色的花覆住，春天在水面上慢慢展开。</p></div></article>
+            <article class="city-scene city-scene-white" data-city="1"><img src="assets/city-tokyo-sakura.png" alt="东京夜色中的白樱与水岸"><div class="city-overlay"><span>02 / TOKYO · SPRING</span><h3 data-i18n="tokyoTitle">东京 · 夜樱的白</h3><p data-i18n="tokyoCopy">城市把灯光收低，让白色花冠悬在河道上方。</p></div></article>
+            <article class="city-scene city-scene-white" data-city="4"><img src="assets/city-hirosaki-sakura.png" alt="弘前城外盛开的白色樱花"><div class="city-overlay"><span>05 / HIROSAKI · SPRING</span><h3 data-i18n="hirosakiTitle">弘前 · 城下的白</h3><p data-i18n="hirosakiCopy">城墙之外，白色花瓣比雪更轻，也更接近春天。</p></div></article>
         </div>
+        <div class="act-indicator" aria-hidden="true"><span class="active">01</span><span>02</span><span>03</span></div>
+        </div>
+      </article>
+      <article class="city-act city-act-red">
+        <div class="city-act-stage">
+        <div class="city-act-intro"><p class="act-label" data-i18n="actRedLabel">第二幕 / 红</p><h2 data-i18n-html="actRedTitle">叶不是点缀，<br>而是时间的火。</h2><p data-i18n="actRedLead">金泽、京都与奈良。红叶燃起时，城市开始收藏黄昏。</p></div>
+        <div class="city-act-grid">
+            <article class="city-scene city-scene-red" data-city="2"><img src="assets/city-kanazawa-momiji.png" alt="金泽庭园的红叶与石灯笼"><div class="city-overlay"><span>03 / KANAZAWA · AUTUMN</span><h3 data-i18n="kanazawaTitle">金泽 · 庭园的红</h3><p data-i18n="kanazawaCopy">石灯笼守着沉默，红叶把整个庭园点亮。</p></div></article>
+            <article class="city-scene city-scene-red" data-city="3"><img src="assets/city-kyoto-momiji.png" alt="京都小径上的深红红叶"><div class="city-overlay"><span>04 / KYOTO · AUTUMN</span><h3 data-i18n="kyotoTitle">京都 · 时间的红</h3><p data-i18n="kyotoCopy">木格窗与石径不语，红叶替时间燃烧。</p></div></article>
+            <article class="city-scene city-scene-red" data-city="5"><img src="assets/city-nara-momiji.png" alt="奈良秋日红叶与石阶"><div class="city-overlay"><span>06 / NARA · AUTUMN</span><h3 data-i18n="naraTitle">奈良 · 山径的红</h3><p data-i18n="naraCopy">沿着石阶向上，红叶将安静的山寺染成暮色。</p></div></article>
+        </div>
+        <div class="act-indicator" aria-hidden="true"><span class="active">01</span><span>02</span><span>03</span></div>
+        </div>
+      </article>
     </section>
     <section class="fusion" id="finale">
         <div class="fusion-copy">
@@ -107,10 +106,8 @@
     </section>
 </main>
 <footer><span>花と葉のあいだ</span><span>© 2026 SEASONS OF JAPAN</span>
-    <button onclick="scrollTo({top:0,behavior:'smooth'})" data-i18n="top">回到顶部 ↑</button>
+    <button class="back-to-top" type="button" data-i18n="top">回到顶部 ↑</button>
 </footer>
 <script src="script.js"></script>
 </body>
 </html>
-
-
