@@ -1,113 +1,209 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="theme-color" content="#f3efe7">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0a0b0d">
     <title>花与叶之间｜日本之红</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f5f2eb'/%3E%3Ccircle cx='32' cy='32' r='15' fill='%23c82e36'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700;900&family=Shippori+Mincho:wght@400;600;700&display=swap"
-          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="grain"></div>
-<header class="site-header"><a class="brand" href="#top"><span>花</span><i></i><span>葉</span></a>
-    <nav><a href="#idea" data-i18n="navIdea">构想</a><a href="#cities" data-i18n="navCities">城市</a><a href="#finale"
-                                                                                                          data-i18n="navFlag">一面旗</a>
+<header class="site-header">
+    <a class="brand" href="#top" aria-label="返回顶部">
+        <strong>花与叶之间</strong>
+        <span>A FLAG OF TWO SEASONS</span>
+    </a>
+    <nav aria-label="主导航">
+        <a href="#journey" data-copy="navJourney">白与红</a>
+        <a href="#afterglow" data-copy="navStory">一面旗</a>
     </nav>
     <div class="header-actions">
-        <div class="languages">
-            <button data-lang="zh" class="active">中</button>
+        <div class="languages" aria-label="语言切换">
+            <button class="active" data-lang="zh">中</button>
             <button data-lang="ja">日</button>
             <button data-lang="en">EN</button>
         </div>
-        <button class="motion-toggle" type="button" aria-pressed="false"><span></span><b data-i18n="motion">缓动</b></button>
+        <span class="season-dot" aria-hidden="true"></span>
     </div>
 </header>
-<main id="top" tabindex="-1">
-    <section class="hero">
-        <div class="hero-copy"><p class="eyebrow"><span data-i18n="eyebrow">日本之红</span> / A TALE OF TWO SEASONS</p>
-            <h1 data-i18n-html="heroTitle">春日成樱<br><em>秋日成叶</em></h1>
-            <p class="lead" data-i18n-html="heroLead">樱花落在白色的风里，红叶聚成中央的太阳。<br>春与秋，共同完成一面季节的旗。
-            </p><a class="scroll-cue" href="#idea"><span data-i18n="scroll">向下观赏</span><i></i></a></div>
-        <div class="hero-art"><img class="hero-generated" src="assets/hero-generated.png"
-                                   alt="樱花环绕白色留白，红叶汇聚成中央红日"><span class="stamp">春<br>秋</span></div>
-        <p class="vertical-note">花は白に、葉は赤に。<br>二つの季節、一つの旗。</p></section>
-    <section class="manifesto" id="idea">
-        <div class="section-index">01 <span></span> CONCEPT</div>
-        <p class="manifesto-jp">白は、空白ではない。</p>
-        <h2 data-i18n-html="conceptTitle">一片白与一轮红，<br>藏着两次心动。</h2>
-        <div class="manifesto-body"><p data-i18n="conceptP1">
-            白色并非空无：樱花在其中舒展，像春日的呼吸，也像所有尚未写下的可能。</p>
-            <p data-i18n="conceptP2">
-                中央的红，则由秋日红叶汇聚而成。一个象征开始，一个象征圆满；一片留白，托起一轮燃烧的季节。</p></div>
-        <div class="red-thread"></div>
+
+<main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-media">
+            <img src="assets/hero-generated.png" alt="樱花与红叶共同构成的日本季节景观">
+        </div>
+        <div class="hero-shade"></div>
+        <div class="hero-copy">
+            <p class="eyebrow">THE RED OF JAPAN · A TALE OF TWO SEASONS</p>
+            <h1 id="hero-title" data-copy-html="heroTitle">春日成花<br><em>秋日成叶</em></h1>
+            <p data-copy-html="heroLead">樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。</p>
+        </div>
+        <a class="scroll-cue" href="#journey"><span data-copy="scroll">向下启程</span><i></i></a>
+        <div class="hero-stamp" aria-hidden="true">春<br>秋</div>
     </section>
-    <section class="seasons" id="seasons">
-        <article class="season-card spring"><img src="assets/spring-generated.png" alt="晨雾中盛放的春日樱花">
-            <div class="season-content"><span class="season-number">春 / 01</span>
-                <h3>桜<br><small>SAKURA</small></h3>
-                <p data-i18n-html="springCopy">短暂，因此被珍惜。<br>柔软，因此让人靠近。</p>
-                <div class="color-chip"><i></i><span>桜色<br>#EAB4C1</span></div>
+
+    <section class="journey" id="journey" aria-label="樱花之白与红叶之红的横向叙事">
+        <div class="journey-sticky">
+            <div class="aurora" aria-hidden="true"></div>
+            <div class="track">
+                <article class="panel panel-intro" data-title="序章">
+                    <div class="panel-inner intro-inner">
+                        <figure class="panel-visual intro-visual">
+                            <img src="assets/cities/flag-concept-v2.png" alt="由樱花之白与红叶之红构成的季节国旗概念图">
+                            <figcaption data-copy="introOverlay">A FLAG OF TWO SEASONS</figcaption>
+                        </figure>
+                        <div class="panel-copy intro-copy">
+                            <p class="panel-kicker" data-copy="introKicker">构想 · 一面季节的旗</p>
+                            <h2 data-copy-html="introTitle">白不是空白，<br>红也不只是一轮圆。</h2>
+                            <p data-copy="introBody">白色由千万朵樱花舒展而成，中央的红则由秋日枫叶汇聚。向下滚动，看两种季节如何找到各自的位置。</p>
+                            <a href="#afterglow" class="outline-button" data-copy="learnMore">看见完整旗帜</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="东京">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/cities/tokyo-sakura.png" alt="东京水岸夜色与盛开的樱花"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">01 · THE WHITE / TOKYO</p>
+                            <h2 data-copy-html="fujiTitle">白色并非空无，<br>它正在东京盛开。</h2>
+                            <p data-copy="fujiBody">夜色让樱花更接近白。无数花冠沿水岸连成一片，像国旗上尚未被红日占据的春风。</p>
+                            <span class="place-meta">35.6762° N · 139.6503° E</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="大阪">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/cities/osaka-sakura.png" alt="大阪城与清晨盛开的白色樱花"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">02 · THE WHITE / OSAKA</p>
+                            <h2 data-copy-html="osakaTitle">城与花相遇，<br>白色有了轮廓。</h2>
+                            <p data-copy="osakaBody">樱枝越过城墙与水面，把历史建筑包进春日的留白。旗面的白，不再抽象，而是一座城市共同的花期。</p>
+                            <span class="place-meta">34.6937° N · 135.5023° E</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="弘前">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/city-hirosaki-sakura.png" alt="弘前城外盛开的白色樱花"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">03 · THE WHITE / HIROSAKI</p>
+                            <h2 data-copy-html="sakuraTitle">一朵花很轻，<br>千万朵便成为白。</h2>
+                            <p data-copy="sakuraBody">弘前城外，花瓣比残雪更轻，却足以覆盖河岸与天空。旗面的白，因此有了呼吸与层次。</p>
+                            <span class="place-meta">40.6031° N · 140.4638° E</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="吉野">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/cities/yoshino-sakura.png" alt="吉野山被层层白色樱花覆盖"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">04 · THE WHITE / YOSHINO</p>
+                            <h2 data-copy-html="yoshinoTitle">当一整座山盛开，<br>白便抵达完整。</h2>
+                            <p data-copy="yoshinoBody">从山脚到云雾，樱花一层层铺开。千万朵花共同完成国旗的底色，也完成春天最辽阔的留白。</p>
+                            <span class="place-meta">34.3681° N · 135.8579° E</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="金泽">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/city-kanazawa-momiji.png" alt="金泽庭园与红叶石灯笼"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">05 · THE RED / KANAZAWA</p>
+                            <h2 data-copy-html="kyotoTitle">秋天的第一枚叶，<br>点亮中央的红。</h2>
+                            <p data-copy="kyotoBody">红叶从树梢落入水中，颜色开始向中心靠拢。它不是印刷出的圆，而是一整个秋天的聚集。</p>
+                            <span class="place-meta">36.5613° N · 136.6562° E</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="京都">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/city-kyoto-momiji.png" alt="京都古街与深红色枫叶"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">06 · THE RED / KYOTO</p>
+                            <h2 data-copy-html="mapleTitle">一枚叶很小，<br>整座京都便成为红。</h2>
+                            <p data-copy="mapleBody">木格窗、石径与枫叶彼此映照。越来越多的红向内汇聚，国旗中央的太阳开始拥有纹理。</p>
+                            <span class="place-meta">35.0116° N · 135.7681° E</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="日光">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/cities/nikko-maple.png" alt="日光山寺石灯与浓烈红叶"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">07 · THE RED / NIKKO</p>
+                            <h2 data-copy-html="nikkoTitle">红叶越过石灯，<br>向太阳中心聚拢。</h2>
+                            <p data-copy="nikkoBody">日光的山门与石阶给红色一条向内延伸的路径。叶片越密，中央那轮秋日太阳便越接近完整。</p>
+                            <span class="place-meta">36.7199° N · 139.6982° E</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="奈良">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/city-nara-momiji.png" alt="奈良山寺石阶与秋日红叶"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">08 · THE RED / NARA</p>
+                            <h2 data-copy-html="miyajimaTitle">当最后一枚叶归位，<br>一轮红日终于完整。</h2>
+                            <p data-copy="miyajimaBody">奈良的石阶把秋色送向旅程终点。樱花留下白色的风，红叶聚成中央的太阳，一面旗即将完成。</p>
+                            <a href="#afterglow" class="outline-button" data-copy="arrive">完成这面旗</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="panel" data-title="宫岛">
+                    <div class="panel-inner">
+                        <figure class="panel-visual"><img src="assets/cities/miyajima-maple.png" alt="宫岛海上鸟居与秋日红叶"></figure>
+                        <div class="panel-copy">
+                            <p class="panel-kicker">09 · THE RED / MIYAJIMA</p>
+                            <h2 data-copy-html="miyajimaFinalTitle">当红叶环抱鸟居，<br>秋日太阳浮上海面。</h2>
+                            <p data-copy="miyajimaFinalBody">潮水托起朱红色的坐标，枫叶从岸边向中央回应。白色春风与红色秋阳，至此完成同一面旗。</p>
+                            <a href="#afterglow" class="outline-button" data-copy="arrive">完成这面旗</a>
+                        </div>
+                    </div>
+                </article>
             </div>
-            <span class="kanji">春</span></article>
-        <div class="interlude"><span data-i18n="fromPetal">从一片花瓣</span><i></i><b data-i18n="toLeaf">到一枚叶片</b>
-        </div>
-        <article class="season-card autumn">
-            <div class="season-content"><span class="season-number">秋 / 02</span>
-                <h3>紅葉<br><small>MOMIJI</small></h3>
-                <p data-i18n-html="autumnCopy">浓烈，却不喧哗。<br>告别，也可以灿烂。</p>
-                <div class="color-chip"><i></i><span>紅緋<br>#C3272B</span></div>
+
+            <div class="journey-progress" aria-label="横向旅程进度">
+                <div class="progress-items"></div>
             </div>
-            <img src="assets/autumn-generated.png" alt="夕阳下燃烧般绚烂的秋日红叶"><span class="kanji">秋</span>
-        </article>
+            <p class="scroll-hint" data-copy="scrollHint">继续滚动 · 从樱花之白走向红叶之红</p>
+        </div>
     </section>
-    <section class="city-journey" id="cities" aria-labelledby="citiesTitle">
-      <article class="city-act city-act-white">
-        <div class="city-act-stage">
-        <div class="city-act-intro"><div class="section-index">02 <span></span> CITY PASSAGES</div><p class="act-label" data-i18n="actWhiteLabel">第一幕 / 白</p><h2 id="citiesTitle" data-i18n-html="actWhiteTitle">花不是背景，<br>而是城市的光。</h2><p data-i18n="actWhiteLead">仙台、东京与弘前。樱花落下时，城市先学会安静。</p></div>
-        <div class="city-act-grid">
-            <article class="city-scene city-scene-white" data-city="0"><img src="assets/city-sendai-sakura.png" alt="仙台樱花季的白色花道"><div class="city-overlay"><span>01 / SENDAI · SPRING</span><h3 data-i18n="sendaiTitle">仙台 · 白花的川</h3><p data-i18n="sendaiCopy">河岸被近乎白色的花覆住，春天在水面上慢慢展开。</p></div></article>
-            <article class="city-scene city-scene-white" data-city="1"><img src="assets/city-tokyo-sakura.png" alt="东京夜色中的白樱与水岸"><div class="city-overlay"><span>02 / TOKYO · SPRING</span><h3 data-i18n="tokyoTitle">东京 · 夜樱的白</h3><p data-i18n="tokyoCopy">城市把灯光收低，让白色花冠悬在河道上方。</p></div></article>
-            <article class="city-scene city-scene-white" data-city="4"><img src="assets/city-hirosaki-sakura.png" alt="弘前城外盛开的白色樱花"><div class="city-overlay"><span>05 / HIROSAKI · SPRING</span><h3 data-i18n="hirosakiTitle">弘前 · 城下的白</h3><p data-i18n="hirosakiCopy">城墙之外，白色花瓣比雪更轻，也更接近春天。</p></div></article>
+
+    <section class="afterglow" id="afterglow">
+        <div class="flag-finale reveal">
+            <figure class="flag-image">
+                <img src="assets/hero-generated.png" alt="由白色樱花与红色枫叶组成的日本国旗意象">
+                <span class="flag-label">桜の白 · 紅葉の赤</span>
+            </figure>
+            <div class="afterglow-copy">
+                <p class="eyebrow">ONE FLAG · TWO SEASONS</p>
+                <h2 data-copy-html="afterTitle">一面旗<br><em>两种季节的美。</em></h2>
+                <p data-copy="afterBody">白，是樱花游荡的春风；红，是枫叶聚成的秋日太阳。熟悉的日本国旗，因为花与叶而第一次拥有了时间、触感与生命。</p>
+                <div class="season-equation" aria-label="樱花之白加红叶之红等于一面季节之旗">
+                    <span><i class="sakura-swatch"></i>樱花之白</span><b>＋</b><span><i class="momiji-swatch"></i>红叶之红</span><b>＝</b><span>日本之旗</span>
+                </div>
+            </div>
         </div>
-        <div class="act-indicator" aria-hidden="true"><span class="active">01</span><span>02</span><span>03</span></div>
-        </div>
-      </article>
-      <article class="city-act city-act-red">
-        <div class="city-act-stage">
-        <div class="city-act-intro"><p class="act-label" data-i18n="actRedLabel">第二幕 / 红</p><h2 data-i18n-html="actRedTitle">叶不是点缀，<br>而是时间的火。</h2><p data-i18n="actRedLead">金泽、京都与奈良。红叶燃起时，城市开始收藏黄昏。</p></div>
-        <div class="city-act-grid">
-            <article class="city-scene city-scene-red" data-city="2"><img src="assets/city-kanazawa-momiji.png" alt="金泽庭园的红叶与石灯笼"><div class="city-overlay"><span>03 / KANAZAWA · AUTUMN</span><h3 data-i18n="kanazawaTitle">金泽 · 庭园的红</h3><p data-i18n="kanazawaCopy">石灯笼守着沉默，红叶把整个庭园点亮。</p></div></article>
-            <article class="city-scene city-scene-red" data-city="3"><img src="assets/city-kyoto-momiji.png" alt="京都小径上的深红红叶"><div class="city-overlay"><span>04 / KYOTO · AUTUMN</span><h3 data-i18n="kyotoTitle">京都 · 时间的红</h3><p data-i18n="kyotoCopy">木格窗与石径不语，红叶替时间燃烧。</p></div></article>
-            <article class="city-scene city-scene-red" data-city="5"><img src="assets/city-nara-momiji.png" alt="奈良秋日红叶与石阶"><div class="city-overlay"><span>06 / NARA · AUTUMN</span><h3 data-i18n="naraTitle">奈良 · 山径的红</h3><p data-i18n="naraCopy">沿着石阶向上，红叶将安静的山寺染成暮色。</p></div></article>
-        </div>
-        <div class="act-indicator" aria-hidden="true"><span class="active">01</span><span>02</span><span>03</span></div>
-        </div>
-      </article>
-    </section>
-    <section class="fusion" id="finale">
-        <div class="fusion-copy">
-            <div class="section-index light">03 <span></span> HARMONY</div>
-            <p class="kicker" data-i18n="fusionKicker">春与秋，最终相逢</p>
-            <h2 data-i18n-html="fusionTitle">一面旗<br>两种美。</h2>
-            <p data-i18n-html="fusionCopy">白，是樱花漫游的春风。<br>红，是红叶汇聚的太阳。</p></div>
-        <div class="flag-stage">
-            <div class="flag">
-                <div class="flag-light"></div>
-                <img class="flag-complete" src="assets/hero-generated.png" alt="白色旗面中的樱花与红叶太阳"></div>
-            <p data-i18n="flagCaption">风吹过时，花瓣环抱着由红叶汇成的太阳。</p></div>
-    </section>
-    <section class="closing"><p>春を待ち、秋を想う。</p>
-        <h2 data-i18n-html="closingTitle">愿我们都能<br>在盛放时相遇，<br><em>在绚烂后从容。</em></h2>
-        <div class="closing-mark"><span>花</span><i></i><span>葉</span></div>
     </section>
 </main>
-<footer><span>花と葉のあいだ</span><span>© 2026 SEASONS OF JAPAN</span>
-    <button class="back-to-top" type="button" data-i18n="top">回到顶部 ↑</button>
+
+<footer>
+    <p>花与叶之间 · A FLAG OF TWO SEASONS</p>
+    <a href="#top" data-copy="backTop">回到顶部 ↑</a>
 </footer>
+
 <script src="script.js"></script>
 </body>
 </html>
