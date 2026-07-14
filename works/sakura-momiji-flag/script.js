@@ -21,8 +21,8 @@ const easeOut = value => 1 - Math.pow(1 - value, 3);
 
 function buildProgress() {
     progressRoot.innerHTML = panels.map((_, index) => `
-        <button type="button" class="progress-item" aria-label="第 ${index} 幕" data-index="${index}">
-            <span class="progress-number">${index}</span>
+        <button type="button" class="progress-item" aria-label="第 ${index + 1} 幕" data-index="${index}">
+            <span class="progress-number">${index + 1}</span>
             <span class="progress-line"><i class="progress-fill"></i></span>
         </button>`).join('');
     progressRoot.querySelectorAll('.progress-item').forEach(item => {
@@ -83,7 +83,7 @@ function setActive(index, localProgress) {
         activeIndex = index;
         panels.forEach((panel, panelIndex) => panel.classList.toggle('is-active', panelIndex === index));
         [...progressRoot.children].forEach((item, itemIndex) => item.classList.toggle('active', itemIndex === index));
-        sticky.dataset.season = index === 0 ? 'concept' : index <= 5 ? 'spring' : index === 6 ? 'turn' : 'autumn';
+        sticky.dataset.season = index === 0 ? 'concept' : index <= 6 ? 'spring' : index === 7 ? 'turn' : 'autumn';
     }
     document.querySelectorAll('.progress-fill').forEach((item, itemIndex) => {
         item.style.transform = `scaleX(${itemIndex === index ? clamp(localProgress) : 0})`;
@@ -175,7 +175,7 @@ const zh = {
     navJourney: '白与红', navLedger: '花与叶', navStory: '旗成', scroll: '向下观赏',
     heroTitle: '春日成花<br><em>秋日成叶</em>',
     heroLead: '樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。',
-    introOverlay: '一面旗，两个季节', introKicker: '构想 · 一面季节的旗',
+    introOverlay: '一面旗，两个季节', introKicker: '01 · 构想 · 一面季节的旗',
     introTitle: '白来自花，<br>红来自叶。', introBody: '樱花铺开旗面的白，红叶向中央聚成红。先看清两种颜色从何而来，再抵达完整的旗。',
     osakaMintTitle: '花密成廊，<br>白色第一次有了方向。', osakaMintBody: '造币局的晚樱从两侧合拢，行人走进由花构成的白。这里不是背景，而是旗面底色的第一层密度。',
     yoshinoTitle: '一整座山盛开，<br>白色抵达完整。', yoshinoBody: '吉野山从山脚延至云雾，樱花一层层铺开。一路累积的白，至此成为一整片可以远望的春天。',
@@ -200,7 +200,7 @@ const ja = {
     siteTagline: '二つの季節の旗',
     navJourney: '白と赤', navLedger: '花と葉', navStory: '旗となる', scroll: '下へ',
     heroTitle: '春は花となり<br><em>秋は葉となる</em>', heroLead: '桜が春を白く広げ、紅葉が秋を一輪の赤へ集める。<br>二つの季節が、一つの旗を完成させる。',
-    introOverlay: '二つの季節の旗', introKicker: '構想 · 季節でできた旗',
+    introOverlay: '二つの季節の旗', introKicker: '01 · 構想 · 季節でできた旗',
     introTitle: '白は花から、<br>赤は葉から。', introBody: '桜が旗の白を広げ、紅葉が中央の赤へ集まる。二つの色の由来をたどる旅。',
     osakaMintTitle: '花が回廊をつくり、<br>白に方向が生まれる。', osakaMintBody: '造幣局の遅咲きの桜が両側から重なり、人々を花の白へ迎え入れる。ここから旗の地色が密度を持ちはじめる。',
     yoshinoTitle: '山ひとつが咲き、<br>白は満ちていく。', yoshinoBody: '吉野山は麓から霧の先まで、桜を幾重にも重ねる。積み重なった白は、遠くから望める春になる。',
@@ -225,7 +225,7 @@ const en = {
     siteTagline: 'A Flag of Two Seasons',
     navJourney: 'White & Red', navLedger: 'Flower & Leaf', navStory: 'The Flag', scroll: 'Begin',
     heroTitle: 'Spring becomes blossom<br><em>Autumn becomes leaf</em>', heroLead: 'Sakura spreads spring into white. Maple leaves gather autumn into red.<br>Two seasons complete one flag.',
-    introOverlay: 'A FLAG OF TWO SEASONS', introKicker: 'CONCEPT · A SEASONAL FLAG',
+    introOverlay: 'A FLAG OF TWO SEASONS', introKicker: '01 · CONCEPT · A SEASONAL FLAG',
     introTitle: 'White comes from blossom.<br>Red comes from leaf.', introBody: 'Sakura forms the field. Maple leaves gather toward the center. Follow both colors to the finished flag.',
     osakaMintTitle: 'Blossom closes into a passage.<br>White gains direction.', osakaMintBody: 'Late-blooming trees meet above the Mint walkway and people enter a field made from blossom. White gains its first layer of density here.',
     yoshinoTitle: 'A whole mountain blooms.<br>White becomes complete.', yoshinoBody: 'From the foothills into the mist, Yoshino layers blossom upon blossom. The accumulated white becomes a spring that can be seen from afar.',
