@@ -170,6 +170,7 @@ const revealObserver = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(element => revealObserver.observe(element));
 
 const zh = {
+    siteTitle: '花落为素，叶燃成日',
     navJourney: '白与红', navLedger: '花与叶', navStory: '旗成', scroll: '向下观赏',
     heroTitle: '春日成花<br><em>秋日成叶</em>',
     heroLead: '樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。',
@@ -193,6 +194,7 @@ const zh = {
 };
 
 const ja = {
+    siteTitle: '花は白となり、葉は日を燃やす',
     navJourney: '白と赤', navLedger: '花と葉', navStory: '旗となる', scroll: '下へ',
     heroTitle: '春は花となり<br><em>秋は葉となる</em>', heroLead: '桜が春を白く広げ、紅葉が秋を一輪の赤へ集める。<br>二つの季節が、一つの旗を完成させる。',
     introOverlay: 'A FLAG OF TWO SEASONS', introKicker: '構想 · 季節でできた旗',
@@ -215,6 +217,7 @@ const ja = {
 };
 
 const en = {
+    siteTitle: 'Blossoms Fall to White, Leaves Burn into Sun',
     navJourney: 'White & Red', navLedger: 'Flower & Leaf', navStory: 'The Flag', scroll: 'Begin',
     heroTitle: 'Spring becomes blossom<br><em>Autumn becomes leaf</em>', heroLead: 'Sakura spreads spring into white. Maple leaves gather autumn into red.<br>Two seasons complete one flag.',
     introOverlay: 'A FLAG OF TWO SEASONS', introKicker: 'CONCEPT · A SEASONAL FLAG',
@@ -241,6 +244,7 @@ const translations = { zh, ja, en };
 function setLanguage(language) {
     const dictionary = { ...zh, ...(translations[language] || {}) };
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language;
+    document.title = dictionary.siteTitle;
     document.querySelectorAll('[data-lang]').forEach(button => {
         const active = button.dataset.lang === language;
         button.classList.toggle('active', active);

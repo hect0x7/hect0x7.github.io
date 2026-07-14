@@ -7,9 +7,9 @@ const WORKS = [
     year: "2026",
     cover: "works/sakura-momiji-flag/assets/hero-two-seasons.webp",
     title: {
-      zh: "花与叶之间 · 日本之红",
-      ja: "花と葉のあいだ · 日本の赤",
-      en: "Between Flower and Leaf · Japan's Red",
+      zh: "花落为素，叶燃成日",
+      ja: "花は白となり、葉は日を燃やす",
+      en: "Blossoms Fall to White, Leaves Burn into Sun",
     },
     desc: {
       zh: "樱花落成春风的白，红叶聚成中央的太阳 —— 一个关于两个季节、一面旗帜的视觉叙事页面。",
