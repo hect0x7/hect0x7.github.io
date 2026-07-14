@@ -5,7 +5,7 @@ const WORKS = [
   {
     slug: "sakura-momiji-flag",
     year: "2026",
-    cover: "works/sakura-momiji-flag/assets/hero-generated.png",
+    cover: "works/sakura-momiji-flag/assets/hero-two-seasons.webp",
     title: {
       zh: "花与叶之间 · 日本之红",
       ja: "花と葉のあいだ · 日本の赤",
