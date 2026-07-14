@@ -165,7 +165,7 @@ img { display: block; width: 100%; }
 .ledger-band header { padding: 34px 26px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(30,26,23,.12); }
 .ledger-band header span { font-size: 11px; letter-spacing: .2em; color: #8d837a; }
 .ledger-band h3 { margin: 0; font: 700 clamp(26px, 2.7vw, 44px)/1.1 "Noto Serif SC", serif; writing-mode: vertical-rl; }
-.ledger-images { display: grid; grid-template-columns: repeat(5, 1fr); overflow: hidden; }
+.ledger-images { display: grid; grid-template-columns: repeat(var(--image-count, 5), 1fr); overflow: hidden; }
 .ledger-images img { height: 100%; min-height: 380px; object-fit: cover; filter: saturate(.82); transition: flex .7s var(--ease-out), filter .5s, transform .8s var(--ease-out); }
 .ledger-images img:hover { filter: saturate(1.05); transform: scale(1.035); }
 .ledger-equation { min-height: 180px; display: flex; align-items: center; justify-content: center; gap: 22px; font: 700 28px/1 "Noto Serif SC", serif; }
