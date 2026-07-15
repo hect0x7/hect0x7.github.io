@@ -170,9 +170,9 @@ const revealObserver = new IntersectionObserver(entries => {
 document.querySelectorAll('.reveal').forEach(element => revealObserver.observe(element));
 
 const zh = {
-    siteTitle: '花落为素，叶燃成日',
-    siteTagline: '一面旗，两个季节',
-    navJourney: '白与红', navLedger: '花与叶', navStory: '旗成', scroll: '向下观赏',
+    siteTitle: '一面旗，两个季节',
+    siteTagline: '樱花的白，红叶的红',
+    navTop: '序章', navJourney: '白与红', navLedger: '花与叶', navStory: '旗成', scroll: '向下观赏',
     heroTitle: '春日成花<br><em>秋日成叶</em>',
     heroLead: '樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。',
     introOverlay: '一面旗，两个季节', introKicker: '01 · 构想 · 一面季节的旗',
@@ -196,9 +196,9 @@ const zh = {
 };
 
 const ja = {
-    siteTitle: '花は白となり、葉は日を燃やす',
-    siteTagline: '二つの季節の旗',
-    navJourney: '白と赤', navLedger: '花と葉', navStory: '旗となる', scroll: '下へ',
+    siteTitle: '二つの季節の旗',
+    siteTagline: '桜の白、紅葉の赤',
+    navTop: '序', navJourney: '白と赤', navLedger: '花と葉', navStory: '旗となる', scroll: '下へ',
     heroTitle: '春は花となり<br><em>秋は葉となる</em>', heroLead: '桜が春を白く広げ、紅葉が秋を一輪の赤へ集める。<br>二つの季節が、一つの旗を完成させる。',
     introOverlay: '二つの季節の旗', introKicker: '01 · 構想 · 季節でできた旗',
     introTitle: '白は花から、<br>赤は葉から。', introBody: '桜が旗の白を広げ、紅葉が中央の赤へ集まる。二つの色の由来をたどる旅。',
@@ -221,9 +221,9 @@ const ja = {
 };
 
 const en = {
-    siteTitle: 'Blossoms Fall to White, Leaves Burn into Sun',
-    siteTagline: 'A Flag of Two Seasons',
-    navJourney: 'White & Red', navLedger: 'Flower & Leaf', navStory: 'The Flag', scroll: 'Begin',
+    siteTitle: 'A Flag of Two Seasons',
+    siteTagline: 'White of Blossom, Red of Leaf',
+    navTop: 'Overture', navJourney: 'White & Red', navLedger: 'Flower & Leaf', navStory: 'The Flag', scroll: 'Begin',
     heroTitle: 'Spring becomes blossom<br><em>Autumn becomes leaf</em>', heroLead: 'Sakura spreads spring into white. Maple leaves gather autumn into red.<br>Two seasons complete one flag.',
     introOverlay: 'A FLAG OF TWO SEASONS', introKicker: '01 · CONCEPT · A SEASONAL FLAG',
     introTitle: 'White comes from blossom.<br>Red comes from leaf.', introBody: 'Sakura forms the field. Maple leaves gather toward the center. Follow both colors to the finished flag.',
