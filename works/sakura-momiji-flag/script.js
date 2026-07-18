@@ -10,6 +10,9 @@ const heroMedia = document.querySelector('.hero-media');
 const header = document.querySelector('.site-header');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const desktop = matchMedia('(min-width: 901px)');
+const heroParticleCanvas = document.querySelector('.season-particles--hero');
+const journeyParticleCanvas = document.querySelector('.season-particles--journey');
+const particleToggle = document.querySelector('.season-dot');
 
 let metrics = null;
 let ticking = false;
@@ -18,6 +21,228 @@ let headerScrollY = scrollY;
 
 const clamp = (value, min = 0, max = 1) => Math.min(Math.max(value, min), max);
 const easeOut = value => 1 - Math.pow(1 - value, 3);
+
+function createParticleScene(canvas, { count, mode }) {
+    const context = canvas?.getContext('2d');
+    if (!context) return null;
+
+    let width = 0;
+    let height = 0;
+    let visible = false;
+    let frame = 0;
+    let lastTime = performance.now();
+    let season = mode === 'hero' ? 'hero' : 'concept';
+    let seasonProgress = 0;
+    let enabled = true;
+    let currentLeafRatio = .5;
+    let currentAttraction = 0;
+    const particles = [];
+
+    function randomParticle(index) {
+        const depth = .45 + Math.random() * .85;
+        return {
+            index,
+            x: Math.random(),
+            y: Math.random(),
+            size: (8 + Math.random() * 14) * depth,
+            speed: (.012 + Math.random() * .018) * depth,
+            fall: (.028 + Math.random() * .035) * depth,
+            sway: 20 + Math.random() * 46,
+            phase: Math.random() * Math.PI * 2,
+            spin: (Math.random() - .5) * 1.5,
+            angle: Math.random() * Math.PI * 2,
+            orbit: 48 + Math.random() * Math.min(innerWidth, innerHeight) * .24,
+            tone: Math.random(),
+            typeBias: Math.random()
+        };
+    }
+
+    function rebuild() {
+        const targetCount = typeof count === 'function' ? count() : count;
+        particles.length = 0;
+        for (let index = 0; index < targetCount; index += 1) particles.push(randomParticle(index));
+    }
+
+    function resize() {
+        const bounds = canvas.getBoundingClientRect();
+        const dpr = Math.min(devicePixelRatio || 1, 1.75);
+        width = Math.max(1, bounds.width);
+        height = Math.max(1, bounds.height);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        rebuild();
+    }
+
+    function drawPetal(particle, x, y, rotation, alpha) {
+        const size = particle.size;
+        context.save();
+        context.translate(x, y);
+        context.rotate(rotation);
+        context.scale(1, .62 + Math.sin(rotation) * .14);
+        context.beginPath();
+        context.moveTo(0, -size);
+        context.bezierCurveTo(size * .92, -size * .5, size * .72, size * .68, 0, size);
+        context.bezierCurveTo(-size * .72, size * .68, -size * .92, -size * .5, 0, -size);
+        const lightness = particle.tone > .55 ? '255, 236, 241' : '248, 205, 218';
+        context.fillStyle = `rgba(${lightness}, ${alpha})`;
+        context.fill();
+        context.restore();
+    }
+
+    function drawLeaf(particle, x, y, rotation, alpha) {
+        const size = particle.size * 1.08;
+        context.save();
+        context.translate(x, y);
+        context.rotate(rotation);
+        context.beginPath();
+        context.moveTo(0, -size);
+        context.lineTo(size * .22, -size * .4);
+        context.lineTo(size * .68, -size * .62);
+        context.lineTo(size * .52, -size * .12);
+        context.lineTo(size, 0);
+        context.lineTo(size * .42, size * .22);
+        context.lineTo(size * .48, size * .72);
+        context.lineTo(0, size * .42);
+        context.lineTo(-size * .48, size * .72);
+        context.lineTo(-size * .42, size * .22);
+        context.lineTo(-size, 0);
+        context.lineTo(-size * .52, -size * .12);
+        context.lineTo(-size * .68, -size * .62);
+        context.lineTo(-size * .22, -size * .4);
+        context.closePath();
+        const color = particle.tone > .62 ? '224, 82, 55' : particle.tone > .28 ? '181, 40, 44' : '238, 129, 51';
+        context.fillStyle = `rgba(${color}, ${alpha})`;
+        context.fill();
+        context.beginPath();
+        context.moveTo(0, size * .2);
+        context.lineTo(0, size * .92);
+        context.strokeStyle = `rgba(116, 38, 31, ${alpha * .7})`;
+        context.lineWidth = 1;
+        context.stroke();
+        context.restore();
+    }
+
+    function render(time) {
+        frame = 0;
+        if (!visible || document.hidden || !enabled) return;
+        const animated = !reducedMotion.matches;
+        const delta = animated ? Math.min(32, time - lastTime) / 1000 : 0;
+        lastTime = time;
+        context.clearRect(0, 0, width, height);
+
+        let targetLeafRatio = .5;
+        let targetAttraction = 0;
+        if (season === 'spring') targetLeafRatio = .04;
+        else if (season === 'turn') {
+            targetLeafRatio = .04 + easeOut(seasonProgress) * .9;
+            targetAttraction = easeOut(seasonProgress) * .82;
+        } else if (season === 'autumn') {
+            targetLeafRatio = .94;
+            targetAttraction = .12;
+        }
+
+        const response = animated ? Math.min(1, delta * 3.6) : 1;
+        currentLeafRatio += (targetLeafRatio - currentLeafRatio) * response;
+        currentAttraction += (targetAttraction - currentAttraction) * response;
+
+        particles.forEach(particle => {
+            particle.x += particle.speed * delta;
+            particle.y += particle.fall * delta;
+            particle.angle += particle.spin * delta;
+            if (particle.x > 1.08) particle.x = -.08;
+            if (particle.y > 1.1) particle.y = -.1;
+
+            const leafAmount = clamp((currentLeafRatio - particle.typeBias) / .18 + .5);
+            const sway = Math.sin(time * .00055 + particle.phase) * particle.sway;
+            let x = particle.x * width + sway;
+            let y = particle.y * height;
+
+            if (leafAmount > 0 && currentAttraction > 0) {
+                const orbitAngle = particle.phase + time * .00008;
+                const attraction = currentAttraction * leafAmount;
+                const radius = particle.orbit * (1 - attraction * .72);
+                const targetX = width * .54 + Math.cos(orbitAngle) * radius;
+                const targetY = height * .48 + Math.sin(orbitAngle) * radius * .72;
+                x += (targetX - x) * attraction;
+                y += (targetY - y) * attraction;
+            }
+
+            const edgeFade = clamp(Math.min(y / 70, (height - y) / 70));
+            const alpha = clamp(.34 + particle.size / 42, .38, .82) * edgeFade;
+            if (leafAmount < .99) drawPetal(particle, x, y, particle.angle, alpha * (1 - leafAmount) * .96);
+            if (leafAmount > .01) drawLeaf(particle, x, y, particle.angle, alpha * leafAmount);
+        });
+
+        if (animated) frame = requestAnimationFrame(render);
+    }
+
+    function setVisible(nextVisible) {
+        visible = nextVisible;
+        if (visible && enabled && !frame) {
+            lastTime = performance.now();
+            frame = requestAnimationFrame(render);
+        } else if (!visible && frame) {
+            cancelAnimationFrame(frame);
+            frame = 0;
+            context.clearRect(0, 0, width, height);
+        }
+    }
+
+    function syncAnimationPreference() {
+        if ((document.hidden || !enabled) && frame) {
+            cancelAnimationFrame(frame);
+            frame = 0;
+            context.clearRect(0, 0, width, height);
+        } else if (!document.hidden && enabled && visible) {
+            if (frame) cancelAnimationFrame(frame);
+            lastTime = performance.now();
+            frame = requestAnimationFrame(render);
+        }
+    }
+
+    resize();
+    const observer = new IntersectionObserver(entries => setVisible(entries[0]?.isIntersecting), { threshold: .02 });
+    observer.observe(canvas);
+    document.addEventListener('visibilitychange', syncAnimationPreference);
+    reducedMotion.addEventListener('change', syncAnimationPreference);
+    return {
+        resize,
+        setEnabled(nextEnabled) {
+            enabled = nextEnabled;
+            if (!enabled) {
+                if (frame) cancelAnimationFrame(frame);
+                frame = 0;
+                context.clearRect(0, 0, width, height);
+            } else syncAnimationPreference();
+        },
+        setSeason(nextSeason, progress = 0) {
+            season = nextSeason;
+            seasonProgress = clamp(progress);
+        }
+    };
+}
+
+const heroParticles = createParticleScene(heroParticleCanvas, {
+    count: () => desktop.matches ? 40 : 18,
+    mode: 'hero'
+});
+const journeyParticles = createParticleScene(journeyParticleCanvas, {
+    count: () => desktop.matches ? 72 : 24,
+    mode: 'journey'
+});
+
+function setParticlesEnabled(enabled) {
+    particleToggle?.setAttribute('aria-pressed', String(enabled));
+    heroParticles?.setEnabled(enabled);
+    journeyParticles?.setEnabled(enabled);
+    localStorage.setItem('season-particles-enabled', String(enabled));
+}
+
+particleToggle?.addEventListener('click', () => {
+    setParticlesEnabled(particleToggle.getAttribute('aria-pressed') !== 'true');
+});
+setParticlesEnabled(localStorage.getItem('season-particles-enabled') !== 'false');
 
 function buildProgress() {
     progressRoot.innerHTML = panels.map((_, index) => `
@@ -79,12 +304,14 @@ function measure() {
 }
 
 function setActive(index, localProgress) {
+    const season = index === 0 ? 'concept' : index <= 6 ? 'spring' : index === 7 ? 'turn' : 'autumn';
     if (activeIndex !== index) {
         activeIndex = index;
         panels.forEach((panel, panelIndex) => panel.classList.toggle('is-active', panelIndex === index));
         [...progressRoot.children].forEach((item, itemIndex) => item.classList.toggle('active', itemIndex === index));
-        sticky.dataset.season = index === 0 ? 'concept' : index <= 6 ? 'spring' : index === 7 ? 'turn' : 'autumn';
+        sticky.dataset.season = season;
     }
+    journeyParticles?.setSeason(season, localProgress);
     document.querySelectorAll('.progress-fill').forEach((item, itemIndex) => {
         item.style.transform = `scaleX(${itemIndex === index ? clamp(localProgress) : 0})`;
     });
@@ -158,7 +385,11 @@ function requestUpdate() {
 
 buildProgress();
 addEventListener('scroll', requestUpdate, { passive: true });
-addEventListener('resize', measure);
+addEventListener('resize', () => {
+    heroParticles?.resize();
+    journeyParticles?.resize();
+    measure();
+});
 desktop.addEventListener('change', measure);
 addEventListener('load', measure);
 
@@ -172,6 +403,7 @@ document.querySelectorAll('.reveal').forEach(element => revealObserver.observe(e
 const zh = {
     siteTitle: '一面旗，两个季节',
     siteTagline: '樱花的白，红叶的红',
+    particleToggle: '切换季节粒子效果',
     navTop: '序章', navJourney: '白与红', navLedger: '花与叶', navStory: '旗成', scroll: '向下观赏',
     heroTitle: '春日成花<br><em>秋日成叶</em>',
     heroLead: '樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。',
@@ -198,6 +430,7 @@ const zh = {
 const ja = {
     siteTitle: '二つの季節の旗',
     siteTagline: '桜の白、紅葉の赤',
+    particleToggle: '季節の粒子効果を切り替える',
     navTop: '序', navJourney: '白と赤', navLedger: '花と葉', navStory: '旗となる', scroll: '下へ',
     heroTitle: '春は花となり<br><em>秋は葉となる</em>', heroLead: '桜が春を白く広げ、紅葉が秋を一輪の赤へ集める。<br>二つの季節が、一つの旗を完成させる。',
     introOverlay: '二つの季節の旗', introKicker: '01 · 構想 · 季節でできた旗',
@@ -223,6 +456,7 @@ const ja = {
 const en = {
     siteTitle: 'A Flag of Two Seasons',
     siteTagline: 'White of Blossom, Red of Leaf',
+    particleToggle: 'Toggle seasonal particle effects',
     navTop: 'Overture', navJourney: 'White & Red', navLedger: 'Flower & Leaf', navStory: 'The Flag', scroll: 'Begin',
     heroTitle: 'Spring becomes blossom<br><em>Autumn becomes leaf</em>', heroLead: 'Sakura spreads spring into white. Maple leaves gather autumn into red.<br>Two seasons complete one flag.',
     introOverlay: 'A FLAG OF TWO SEASONS', introKicker: '01 · CONCEPT · A SEASONAL FLAG',
@@ -261,6 +495,11 @@ function setLanguage(language) {
     });
     document.querySelectorAll('[data-copy-html]').forEach(element => {
         if (dictionary[element.dataset.copyHtml]) element.innerHTML = dictionary[element.dataset.copyHtml];
+    });
+    document.querySelectorAll('[data-copy-aria]').forEach(element => {
+        if (!dictionary[element.dataset.copyAria]) return;
+        element.setAttribute('aria-label', dictionary[element.dataset.copyAria]);
+        element.setAttribute('title', dictionary[element.dataset.copyAria]);
     });
     localStorage.setItem('hanami-language', language);
 }

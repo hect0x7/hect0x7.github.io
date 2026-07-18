@@ -54,7 +54,15 @@ img { display: block; width: 100%; }
 .languages { border: 1px solid #202124; border-radius: 999px; padding: 3px; }
 .languages button { width: 36px; height: 30px; border: 0; border-radius: 99px; background: transparent; cursor: pointer; font-size: 11px; color: #222; }
 .languages button.active { color: #fff; background: #17181a; }
-.season-dot { width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, #f1afbd 0 48%, #b82b31 52%); }
+.season-dot { position: relative; width: 30px; height: 30px; padding: 0; display: grid; place-items: center; border: 1px solid rgba(17, 18, 20, .38); border-radius: 50%; color: #17181a; background: transparent; cursor: pointer; transition: border-color .25s ease, background .25s ease, opacity .25s ease; }
+.season-dot span { width: 13px; height: 13px; border-radius: 50%; background: linear-gradient(135deg, #f1afbd 0 48%, #b82b31 52%); box-shadow: 0 2px 7px rgba(151, 34, 47, .26); transition: filter .3s ease, transform .3s var(--ease-out); }
+.season-dot::after { content: ""; position: absolute; width: 16px; height: 1px; background: currentColor; opacity: 0; transform: rotate(-45deg) scaleX(.4); transition: opacity .25s ease, transform .3s var(--ease-out); }
+.season-dot:hover { border-color: #17181a; background: rgba(17, 18, 20, .05); }
+.season-dot:hover span { transform: rotate(24deg) scale(1.08); }
+.season-dot[aria-pressed="false"] { opacity: .58; }
+.season-dot[aria-pressed="false"] span { filter: grayscale(1); transform: scale(.84); }
+.season-dot[aria-pressed="false"]::after { opacity: .78; transform: rotate(-45deg) scaleX(1); }
+.season-dot:focus-visible { outline: 2px solid #17181a; outline-offset: 3px; }
 
 .hero {
     min-height: 100svh;
@@ -70,6 +78,8 @@ img { display: block; width: 100%; }
 .hero-media { transform: scale(1.04); will-change: transform; }
 .hero-media img { height: 100%; object-fit: cover; object-position: center; }
 .hero-shade { background: linear-gradient(90deg, rgba(5, 6, 8, .76), rgba(5, 6, 8, .18) 55%, rgba(5, 6, 8, .46)), linear-gradient(0deg, rgba(5, 6, 8, .5), transparent 50%); }
+.season-particles { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .28)); }
+.season-particles--hero { z-index: 1; opacity: 1; }
 .hero-copy { position: relative; z-index: 2; width: min(1380px, calc(100% - 12vw)); margin-top: 3vh; }
 .eyebrow { font-size: 11px; letter-spacing: .24em; color: rgba(255,255,255,.68); text-transform: uppercase; }
 .hero h1, .panel-copy h2, .afterglow h2 { font-family: "Noto Serif SC", serif; margin: 0; font-weight: 900; letter-spacing: 0; }
@@ -88,7 +98,8 @@ img { display: block; width: 100%; }
 .journey-sticky[data-season="turn"] .aurora { background: radial-gradient(circle at 56% 44%, rgba(177,57,52,.34), transparent 32%), radial-gradient(circle at 12% 72%, rgba(221,194,166,.18), transparent 40%), linear-gradient(130deg, #0c0b0d, #251315 60%, #0b0b0d); }
 .journey-sticky[data-season="autumn"] .aurora { background: radial-gradient(circle at 78% 14%, rgba(150,36,33,.44), transparent 38%), radial-gradient(circle at 18% 70%, rgba(83,45,28,.44), transparent 42%), linear-gradient(130deg, #0b090a, #251012 56%, #0b090a); }
 .aurora::after { content: ""; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E"); mix-blend-mode: soft-light; }
-.track { position: absolute; left: 0; top: 0; height: 100%; display: flex; align-items: center; gap: var(--panel-gap); will-change: transform; transform: translate3d(0,0,0); }
+.season-particles--journey { z-index: 3; opacity: .94; }
+.track { position: absolute; z-index: 2; left: 0; top: 0; height: 100%; display: flex; align-items: center; gap: var(--panel-gap); will-change: transform; transform: translate3d(0,0,0); }
 .panel { height: 100%; flex: 0 0 auto; display: grid; place-items: center; }
 .panel-inner { width: min(1240px, 81vw); display: grid; grid-template-columns: minmax(520px, 1.08fr) minmax(390px, .92fr); align-items: center; gap: clamp(38px, 4vw, 76px); }
 .panel-intro .panel-inner { position: relative; width: 100vw; height: 100svh; display: block; }
@@ -201,7 +212,7 @@ footer { min-height: 160px; padding: 0 6vw; display: flex; align-items: center; 
 @media (max-width: 900px) {
     :root { --header-height: 70px; }
     .site-header { padding: 0 18px; }
-    .site-header nav, .season-dot { display: none; }
+    .site-header nav { display: none; }
     .brand strong { font-size: 17px; }
     .languages button { width: 32px; height: 28px; }
     .hero-copy { width: calc(100% - 40px); align-self: end; padding-bottom: 120px; }
@@ -212,6 +223,7 @@ footer { min-height: 160px; padding: 0 6vw; display: flex; align-items: center; 
     .hero-stamp { right: 20px; bottom: 26px; }
     .journey { height: auto; }
     .journey-sticky { position: relative; height: auto; overflow: visible; padding: 90px 0; }
+    .season-particles--journey { display: none; }
     .track { position: relative; height: auto; display: grid; gap: 96px; transform: none !important; }
     .panel { height: auto; width: 100%; }
     .panel-inner, .panel-intro .panel-inner { width: 100%; height: auto; padding: 0 18px; display: grid; grid-template-columns: 1fr; gap: 28px; }
