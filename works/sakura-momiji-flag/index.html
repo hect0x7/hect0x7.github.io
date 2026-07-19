@@ -10,14 +10,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=3">
+    <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
 <header class="site-header">
-    <a class="brand" href="#top">
-        <strong data-copy="siteTitle">一面旗，两个季节</strong>
-        <span data-copy="siteTagline">樱花的白，红叶的红</span>
-    </a>
+    <div class="brand-cluster">
+        <a class="portfolio-home" href="../../" aria-label="返回 hect0x7 作品集主页" title="返回 hect0x7 作品集主页">hect0x7</a>
+        <a class="brand" href="#top">
+            <strong data-copy="siteTitle">一面旗，两个季节</strong>
+            <span data-copy="siteTagline">樱花的白，红叶的红</span>
+        </a>
+    </div>
     <nav aria-label="主导航">
         <a href="#top" data-copy="navTop">序章</a>
         <a href="#journey" data-copy="navJourney">白与红</a>
@@ -81,6 +84,8 @@
         </div>
     </section>
 
+    <canvas class="season-particles season-particles--continuation" aria-hidden="true"></canvas>
+
     <section class="season-ledger" id="season-ledger">
         <div class="ledger-head reveal"><p class="eyebrow">SEASONAL MATERIAL STUDY</p><h2 data-copy-html="ledgerTitle">白与红，<br>共同完成一面旗。</h2><p class="ledger-lead" data-copy="ledgerLead">地点不是清单，而是颜色的证据。</p><div class="ledger-verse" data-copy-html="ledgerVerse"><p class="verse-white"><span class="verse-mark">花</span>樱花经过花廊、人行、水路、雪山田野、山海与群山，<em>铺开白</em>。</p><p class="verse-red"><span class="verse-mark">葉</span>红叶借雪峰、木构、漆影、河谷、塔影与海潮，<em>向中心聚拢</em>。</p></div></div>
         <div class="ledger-pair reveal">
@@ -106,6 +111,7 @@
             </div>
         </div>
     </section>
+
 </main>
 
 <footer>
@@ -113,6 +119,6 @@
     <a href="#top" data-copy="backTop">回到顶部 ↑</a>
 </footer>
 
-<script src="script.js?v=3"></script>
+<script src="script.js?v=14"></script>
 </body>
 </html>
