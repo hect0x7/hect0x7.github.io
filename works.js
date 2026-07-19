@@ -22,6 +22,26 @@ const WORKS = [
       en: ["Visual", "Interactive", "Multilingual"],
     },
   },
+  {
+    slug: "sakura-outfit-guide",
+    year: "2026",
+    cover: "works/sakura-outfit-guide/assets/hero_dual.webp",
+    title: {
+      zh: "春樱穿搭指南",
+      ja: "春桜のスタイルガイド",
+      en: "Spring Sakura Style Guide",
+    },
+    desc: {
+      zh: "男士与女士双版本，从气候、叠穿到赏樱行程，用视觉化 Lookbook 整理日本春日穿搭。",
+      ja: "メンズとレディースの二つの視点で、レイヤードから花見ルートまで春の装いをまとめたビジュアルガイド。",
+      en: "A dual men's and women's visual guide to spring layering, accessories, and cherry-blossom itineraries across Japan.",
+    },
+    tags: {
+      zh: ["双版本", "穿搭", "旅行"],
+      ja: ["二つのスタイル", "ファッション", "旅行"],
+      en: ["Dual Edition", "Style", "Travel"],
+    },
+  },
   // 下一个作品照这个格式往下加即可。
 ];
 
