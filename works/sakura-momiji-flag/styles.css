@@ -42,6 +42,9 @@ img { display: block; width: 100%; }
 }
 .site-header.header-hidden { transform: translateY(calc(-100% - 2px)); }
 
+.brand-cluster { display: flex; align-items: center; gap: 18px; }
+.portfolio-home { display: inline-flex; align-items: center; min-height: 28px; padding-right: 18px; border-right: 1px solid rgba(17,18,20,.2); font: 800 13px/1 "Noto Sans SC", sans-serif; letter-spacing: .04em; }
+.portfolio-home:hover { opacity: .58; }
 .brand { display: grid; line-height: 1; gap: 4px; letter-spacing: .04em; }
 .brand strong { font-family: "Noto Serif SC", serif; font-size: 21px; font-weight: 900; }
 .brand span { font-size: 8px; letter-spacing: .24em; }
@@ -99,6 +102,7 @@ img { display: block; width: 100%; }
 .journey-sticky[data-season="autumn"] .aurora { background: radial-gradient(circle at 78% 14%, rgba(150,36,33,.44), transparent 38%), radial-gradient(circle at 18% 70%, rgba(83,45,28,.44), transparent 42%), linear-gradient(130deg, #0b090a, #251012 56%, #0b090a); }
 .aurora::after { content: ""; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.13'/%3E%3C/svg%3E"); mix-blend-mode: soft-light; }
 .season-particles--journey { z-index: 3; opacity: .94; }
+.season-particles--continuation { position: fixed; z-index: 4; opacity: .94; filter: none; }
 .track { position: absolute; z-index: 2; left: 0; top: 0; height: 100%; display: flex; align-items: center; gap: var(--panel-gap); will-change: transform; transform: translate3d(0,0,0); }
 .panel { height: 100%; flex: 0 0 auto; display: grid; place-items: center; }
 .panel-inner { width: min(1240px, 81vw); display: grid; grid-template-columns: minmax(520px, 1.08fr) minmax(390px, .92fr); align-items: center; gap: clamp(38px, 4vw, 76px); }
@@ -109,6 +113,7 @@ img { display: block; width: 100%; }
 .panel-visual.portrait { width: min(46vw, 680px); }
 .panel-visual.portrait img { object-position: center 48%; }
 .intro-visual { position: absolute; left: 0; top: 50%; height: 100svh; width: 100vw; margin: 0; transform: translateY(-50%); transform-origin: left center; will-change: width, height, left; }
+.intro-visual img { object-fit: cover; background: #050506; }
 .intro-visual figcaption { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font: 600 clamp(30px, 4.4vw, 72px)/1 "Noto Sans SC", sans-serif; letter-spacing: -.04em; text-shadow: 0 4px 25px rgba(0,0,0,.55); transition: opacity .15s linear; }
 .panel-copy { max-width: 540px; opacity: .28; transform: translateY(30px); transition: opacity .65s ease, transform .75s var(--ease-out); }
 .panel.is-active .panel-copy { opacity: 1; transform: translateY(0); }
@@ -189,7 +194,7 @@ img { display: block; width: 100%; }
 .flag-finale { max-width: 1480px; margin: auto; display: grid; grid-template-columns: 1.18fr .82fr; align-items: center; gap: clamp(50px, 7vw, 120px); }
 .flag-image { position: relative; margin: 0; overflow: hidden; box-shadow: 0 40px 100px rgba(80, 50, 45, .16); }
 .flag-image img { aspect-ratio: 16 / 10; height: 100%; object-fit: cover; }
-.flag-label { position: absolute; left: 22px; bottom: 20px; padding: 9px 12px; color: white; background: rgba(17, 17, 18, .5); backdrop-filter: blur(10px); font-size: 10px; letter-spacing: .18em; }
+.flag-label { position: absolute; z-index: 2; left: 22px; bottom: 20px; padding: 9px 12px; color: white; background: rgba(17, 17, 18, .5); backdrop-filter: blur(10px); font-size: 10px; letter-spacing: .18em; }
 .afterglow-copy { max-width: 620px; margin: 0; text-align: left; }
 .afterglow .eyebrow { color: #a33235; }
 .afterglow h2 { margin-top: 24px; font-size: clamp(42px, 6vw, 92px); line-height: 1.08; }
@@ -213,6 +218,8 @@ footer { min-height: 160px; padding: 0 6vw; display: flex; align-items: center; 
     :root { --header-height: 70px; }
     .site-header { padding: 0 18px; }
     .site-header nav { display: none; }
+    .brand-cluster { gap: 12px; }
+    .portfolio-home { padding-right: 12px; }
     .brand strong { font-size: 17px; }
     .languages button { width: 32px; height: 28px; }
     .hero-copy { width: calc(100% - 40px); align-self: end; padding-bottom: 120px; }
@@ -224,6 +231,7 @@ footer { min-height: 160px; padding: 0 6vw; display: flex; align-items: center; 
     .journey { height: auto; }
     .journey-sticky { position: relative; height: auto; overflow: visible; padding: 90px 0; }
     .season-particles--journey { display: none; }
+    .season-particles--continuation { display: block; }
     .track { position: relative; height: auto; display: grid; gap: 96px; transform: none !important; }
     .panel { height: auto; width: 100%; }
     .panel-inner, .panel-intro .panel-inner { width: 100%; height: auto; padding: 0 18px; display: grid; grid-template-columns: 1fr; gap: 28px; }
@@ -256,6 +264,11 @@ footer { min-height: 160px; padding: 0 6vw; display: flex; align-items: center; 
 
 @media (max-width: 560px) {
     .hero h1 { font-size: 44px; }
+    .brand { display: none; }
+}
+
+@media (min-width: 901px) and (max-aspect-ratio: 1/1) {
+    .intro-visual img { object-fit: contain; }
 }
 
 @media (prefers-reduced-motion: reduce) {

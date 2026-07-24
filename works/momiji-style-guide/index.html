@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紅葉穿搭手帖 | Autumn Leaves Style Guide</title>
+<meta name="description" content="从京都古寺到北海道山野，一份关于日本红叶季色彩、温度与旅行穿搭的视觉手帖。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231A1410'/%3E%3Cpath d='M16 4c-2 5-5 8 0 12 5-4 2-7 0-12Zm0 12c-2 4-4 7 0 10 4-3 2-6 0-10ZM5 16c4-2 7-4 11 0-4 4-7 2-11 0Zm11 0c4-4 7-2 11 0-4 2-7 4-11 0Z' fill='%23C73E1D'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-bg: #FAF8F5;
+  --color-bg-dark: #1A1410;
+  --color-cream: #F5EFE6;
+  --color-ink: #1A1410;
+  --color-ink-soft: #4A3F35;
+  --color-momiji: #C73E1D;
+  --color-momiji-deep: #8B2A0E;
+  --color-momiji-light: #E8633A;
+  --color-gold: #C8A951;
+  --color-gold-soft: #D4BC7A;
+  --color-moss: #4A5D3A;
+  --color-stone: #8C7B6B;
+  --color-line: #D9CFC2;
+  --font-jp: 'Noto Serif JP', serif;
+  --font-cn: 'Noto Sans SC', sans-serif;
+  --font-en: 'Cormorant Garamond', serif;
+  --font-en-sans: 'Inter', sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-cn);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== LOADER ===== */
+#loader {
+  position: fixed; inset:0;
+  background: var(--color-bg-dark);
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  transition: opacity 0.8s ease;
+}
+#loader.hidden { opacity:0; pointer-events:none; }
+#loader .leaf {
+  width: 48px; height:48px;
+  animation: floatLeaf 2s ease-in-out infinite;
+}
+#loader p {
+  color: var(--color-gold);
+  font-family: var(--font-jp);
+  letter-spacing: 0.3em;
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+@keyframes floatLeaf {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(15deg); }
+}
+
+/* ===== NAVIGATION ===== */
+nav {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 1000;
+  padding: 18px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(250,248,245,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--color-line);
+  transition: all 0.3s ease;
+}
+nav .logo {
+  display: block;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--color-momiji);
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+.brand-cluster {
+  display: flex; align-items: center; gap: 16px;
+}
+.portfolio-home {
+  display: inline-flex; align-items: center;
+  min-height: 28px;
+  padding-right: 16px;
+  border-right: 1px solid var(--color-line);
+  color: var(--color-ink);
+  text-decoration: none;
+  font-family: var(--font-en-sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.portfolio-home:hover { color: var(--color-momiji); }
+nav .logo span {
+  display: block;
+  font-family: var(--font-en);
+  font-size: 10px;
+  color: var(--color-stone);
+  letter-spacing: 0.2em;
+  font-weight: 400;
+  margin-top: 2px;
+}
+nav .nav-links {
+  display: flex; gap: 36px;
+  list-style: none;
+}
+nav .nav-links a {
+  text-decoration: none;
+  color: var(--color-ink-soft);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  position: relative;
+  transition: color 0.3s;
+}
+nav .nav-links a::after {
+  content:''; position:absolute; bottom:-4px; left:0;
+  width:0; height:1px; background: var(--color-momiji);
+  transition: width 0.3s;
+}
+nav .nav-links a:hover, nav .nav-links a.active {
+  color: var(--color-momiji);
+}
+nav .nav-links a:hover::after, nav .nav-links a.active::after {
+  width: 100%;
+}
+nav .lang-switch {
+  display: flex; gap: 4px;
+  background: var(--color-cream);
+  border-radius: 30px;
+  padding: 4px;
+}
+nav .lang-switch button {
+  border:none; background: transparent;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-en-sans);
+  font-weight: 500;
+  color: var(--color-stone);
+  transition: all 0.3s;
+}
+nav .lang-switch button.active {
+  background: var(--color-ink);
+  color: var(--color-bg);
+}
+
+/* ===== HERO ===== */
+.hero {
+  height: 100vh; min-height: 700px;
+  position: relative;
+  display: flex; align-items: flex-end;
+  padding: 0 40px 80px;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset:0;
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.5) 60%, rgba(26,20,16,0.8) 100%),
+    url("assets/hero-v4.webp") center / cover no-repeat;
+  z-index: 0;
+}
+.hero-bg::before {
+  content:''; position:absolute; inset:0;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(232,99,58,0.3) 0%, transparent 25%),
+    radial-gradient(circle at 85% 15%, rgba(200,169,81,0.2) 0%, transparent 30%),
+    radial-gradient(circle at 50% 70%, rgba(139,42,14,0.3) 0%, transparent 40%);
+}
+.hero-bg::after {
+  content:''; position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23C73E1D' fill-opacity='0.04'%3E%3Cpath d='M40 10 C35 20 30 30 40 40 C50 30 45 20 40 10 Z M40 50 C35 60 30 70 40 80 C50 70 45 60 40 50 Z M10 40 C20 35 30 30 40 40 C30 50 20 45 10 40 Z M50 40 C60 35 70 30 80 40 C70 50 60 45 50 40 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 900px;
+}
+.hero-content .issue {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 30px;
+}
+.hero-content .issue .line {
+  width: 60px; height: 1px; background: var(--color-gold);
+}
+.hero-content .issue span {
+  font-family: var(--font-en);
+  color: var(--color-gold);
+  font-size: 14px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.hero-content h1 {
+  font-family: var(--font-jp);
+  font-size: clamp(48px, 8vw, 120px);
+  font-weight: 900;
+  line-height: 1;
+  color: #FAF8F5;
+  letter-spacing: 0.02em;
+}
+.hero-content h1 .accent {
+  color: var(--color-momiji-light);
+  font-style: italic;
+  font-family: var(--font-en);
+  font-weight: 600;
+}
+.hero-content .subtitle {
+  margin-top: 24px;
+  font-size: 16px;
+  color: rgba(245,239,230,0.7);
+  letter-spacing: 0.15em;
+  max-width: 600px;
+  line-height: 1.8;
+}
+.hero-content .meta {
+  margin-top: 40px;
+  display: flex; gap: 40px;
+  flex-wrap: wrap;
+}
+.hero-content .meta-item {
+  border-left: 2px solid var(--color-gold);
+  padding-left: 16px;
+}
+.hero-content .meta-item .label {
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  color: var(--color-gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.hero-content .meta-item .value {
+  font-family: var(--font-jp);
+  font-size: 18px;
+  color: #F5EFE6;
+  margin-top: 4px;
+}
+.hero-scroll-hint {
+  position: absolute; bottom: 30px; right: 40px;
+  z-index: 2;
+  color: rgba(245,239,230,0.5);
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+.hero-scroll-hint::after {
+  content:''; display:block;
+  width: 1px; height: 50px;
+  background: linear-gradient(180deg, var(--color-gold), transparent);
+  margin: 12px auto 0;
+  animation: scrollLine 2s ease-in-out infinite;
+}
+@keyframes scrollLine {
+  0%,100% { transform: scaleY(1); transform-origin: top; }
+  50% { transform: scaleY(0.3); transform-origin: top; }
+}
+
+/* ===== SECTION COMMON ===== */
+section {
+  padding: 120px 40px;
+  position: relative;
+}
+.section-header {
+  max-width: 1300px;
+  margin: 0 auto 80px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.section-header .left .eyebrow {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-header .left .eyebrow .num {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--color-momiji);
+}
+.section-header .left .eyebrow .line {
+  width: 40px; height: 1px; background: var(--color-momiji);
+}
+.section-header .left .eyebrow span {
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  color: var(--color-stone);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.section-header h2 {
+  font-family: var(--font-jp);
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-ink);
+}
+.section-header h2 em {
+  font-family: var(--font-en);
+  font-style: italic;
+  color: var(--color-momiji);
+  font-weight: 600;
+}
+.section-header .desc {
+  max-width: 380px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--color-ink-soft);
+}
+
+/* ===== SECTION 1: REGION GUIDE ===== */
+#regions {
+  background: var(--color-bg);
+}
+.region-grid {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+.region-card {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+.region-card .card-img {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+.region-card .card-bg {
+  position: absolute; inset:0;
+  transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.region-card:hover .card-bg {
+  transform: scale(1.08);
+}
+.region-card:nth-child(1) .card-bg {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.2) 0%, rgba(26,20,16,0.7) 100%),
+    #1A1410 url("assets/region-kyoto-v4.webp") center / contain no-repeat;
+}
+.region-card:nth-child(2) .card-bg {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.7) 100%),
+    #1A1410 url("assets/region-tokyo-v4.webp") center / contain no-repeat;
+}
+.region-card:nth-child(3) .card-bg {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.7) 100%),
+    #1A1410 url("assets/region-hokkaido-v4.webp") center / contain no-repeat;
+}
+.region-card:nth-child(4) .card-bg {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.2) 0%, rgba(26,20,16,0.6) 100%),
+    #1A1410 url("assets/region-nara-v4.webp") center / contain no-repeat;
+}
+.region-card:nth-child(5) .card-bg {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.7) 100%),
+    #1A1410 url("assets/region-karuizawa-v4.webp") center / contain no-repeat;
+}
+
+/* Decorative pattern overlay on cards */
+.region-card .card-bg::after {
+  content:''; position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.03'%3E%3Cpath d='M30 5 C25 15 20 25 30 35 C40 25 35 15 30 5 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.region-card .card-content {
+  position: absolute; bottom:0; left:0; right:0;
+  padding: 30px;
+  z-index: 2;
+}
+.region-card .card-content .region-num {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--color-gold);
+  margin-bottom: 8px;
+}
+.region-card .card-content h3 {
+  font-family: var(--font-jp);
+  font-size: 24px;
+  font-weight: 700;
+  color: #F5EFE6;
+  margin-bottom: 6px;
+}
+.region-card .card-content .region-en {
+  font-family: var(--font-en);
+  font-size: 13px;
+  color: rgba(245,239,230,0.6);
+  letter-spacing: 0.2em;
+  margin-bottom: 14px;
+}
+.region-card .card-content p {
+  font-size: 12px;
+  color: rgba(245,239,230,0.75);
+  line-height: 1.7;
+}
+.region-card .card-tag {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: #F5EFE6;
+  z-index: 2;
+}
+
+/* ===== SECTION 2: COLOR GUIDE ===== */
+#colors {
+  background: var(--color-bg-dark);
+  color: #F5EFE6;
+}
+#colors .section-header h2 {
+  color: #F5EFE6;
+}
+#colors .section-header .desc {
+  color: rgba(245,239,230,0.6);
+}
+.color-showcase {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.color-palette-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 80px;
+  align-items: center;
+}
+.color-palette-row:nth-child(even) {
+  direction: rtl;
+}
+.color-palette-row:nth-child(even) > * {
+  direction: ltr;
+}
+.color-visual {
+  height: 500px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.color-visual .palette-circle {
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  position: relative;
+}
+.color-visual .palette-circle::before {
+  content:''; position: absolute;
+  inset: -30px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255,255,255,0.2);
+}
+.color-visual .palette-circle::after {
+  content:''; position:absolute;
+  inset: -60px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.palette-1 .palette-circle {
+  background: conic-gradient(from 0deg, #C73E1D, #8B2A0E, #E8633A, #D4502A, #C73E1D);
+  box-shadow: 0 20px 60px rgba(199,62,29,0.4);
+}
+.palette-1 .color-visual {
+  background: radial-gradient(circle at center, rgba(199,62,29,0.15) 0%, rgba(26,20,16,0.8) 70%);
+}
+.palette-2 .palette-circle {
+  background: conic-gradient(from 0deg, #C8A951, #D4BC7A, #B8941F, #E8D49A, #C8A951);
+  box-shadow: 0 20px 60px rgba(200,169,81,0.3);
+}
+.palette-2 .color-visual {
+  background: radial-gradient(circle at center, rgba(200,169,81,0.12) 0%, rgba(26,20,16,0.8) 70%);
+}
+.palette-3 .palette-circle {
+  background: conic-gradient(from 0deg, #4A5D3A, #6B7D5A, #3A4D2A, #8B9D7A, #4A5D3A);
+  box-shadow: 0 20px 60px rgba(74,93,58,0.3);
+}
+.palette-3 .color-visual {
+  background: radial-gradient(circle at center, rgba(74,93,58,0.12) 0%, rgba(26,20,16,0.8) 70%);
+}
+.palette-4 .palette-circle {
+  background: conic-gradient(from 0deg, #5D3A2A, #7D5A4A, #4A2A1A, #9D7A6A, #5D3A2A);
+  box-shadow: 0 20px 60px rgba(93,58,42,0.3);
+}
+.palette-4 .color-visual {
+  background: radial-gradient(circle at center, rgba(93,58,42,0.12) 0%, rgba(26,20,16,0.8) 70%);
+}
+
+.color-info .palette-label {
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  color: var(--color-gold);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.color-info h3 {
+  font-family: var(--font-jp);
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.color-info .palette-en {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-size: 16px;
+  color: rgba(245,239,230,0.5);
+  margin-bottom: 24px;
+}
+.color-info .palette-desc {
+  font-size: 14px;
+  line-height: 1.9;
+  color: rgba(245,239,230,0.7);
+  margin-bottom: 28px;
+}
+.color-swatches {
+  display: flex; gap: 12px;
+  margin-bottom: 24px;
+}
+.color-swatch {
+  flex: 1;
+}
+.color-swatch .swatch-color {
+  height: 60px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.color-swatch .swatch-name {
+  font-size: 11px;
+  color: rgba(245,239,230,0.6);
+  text-align: center;
+}
+.color-swatch .swatch-hex {
+  font-family: var(--font-en-sans);
+  font-size: 9px;
+  color: rgba(245,239,230,0.4);
+  text-align: center;
+  margin-top: 2px;
+}
+.color-tags {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.color-tags span {
+  border: 1px solid rgba(245,239,230,0.2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px;
+  color: rgba(245,239,230,0.6);
+}
+
+/* ===== SECTION 3: TEMPERATURE CALENDAR ===== */
+#calendar {
+  background: var(--color-cream);
+}
+.calendar-wrapper {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.calendar-chart {
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 50px;
+  box-shadow: 0 4px 30px rgba(26,20,16,0.06);
+  margin-bottom: 60px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+.calendar-chart h3 {
+  font-family: var(--font-jp);
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+.calendar-chart .chart-sub {
+  font-size: 12px;
+  color: var(--color-stone);
+  margin-bottom: 36px;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: 140px repeat(3, minmax(220px, 1fr));
+  gap: 0;
+  min-width: 800px;
+}
+.cal-header {
+  padding: 12px 8px;
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  color: var(--color-stone);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-align: center;
+  border-bottom: 2px solid var(--color-line);
+}
+.cal-header:first-child { text-align: left; }
+.cal-row {
+  display: contents;
+}
+.cal-cell {
+  padding: 18px 12px;
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  align-items: center;
+}
+.cal-cell.city {
+  font-family: var(--font-jp);
+  font-weight: 600;
+  font-size: 15px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 1.2;
+}
+.cal-cell.city br { display: none; }
+.cal-en-sub {
+  display: block;
+  font-family: var(--font-en);
+  font-size: 10px;
+  color: var(--color-stone);
+  font-weight: 400;
+  margin-top: 2px;
+}
+.cal-temp {
+  position: relative;
+  min-height: 69px;
+  display: flex; align-items: center;
+}
+.cal-temp-bar {
+  max-width: 220px;
+  height: 8px;
+  border-radius: 4px;
+  position: relative;
+  min-width: 20px;
+}
+.cal-temp-bar .temp-label {
+  position: absolute;
+  top: -22px;
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+}
+.cal-temp-bar .temp-label.low {
+  left: 0;
+}
+.cal-temp-bar .temp-label.high {
+  right: 0;
+}
+.cal-outfit {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  line-height: 1.6;
+}
+.cal-outfit strong {
+  color: var(--color-momiji);
+  font-weight: 600;
+}
+
+.calendar-tips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+}
+.cal-tip {
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 36px;
+  border-top: 3px solid;
+  position: relative;
+}
+.cal-tip:nth-child(1) { border-color: var(--color-momiji); }
+.cal-tip:nth-child(2) { border-color: var(--color-gold); }
+.cal-tip:nth-child(3) { border-color: var(--color-moss); }
+.cal-tip .tip-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  font-family: var(--font-en);
+  font-size: 20px;
+  font-weight: 700;
+}
+.cal-tip:nth-child(1) .tip-icon { background: rgba(199,62,29,0.1); color: var(--color-momiji); }
+.cal-tip:nth-child(2) .tip-icon { background: rgba(200,169,81,0.1); color: var(--color-gold); }
+.cal-tip:nth-child(3) .tip-icon { background: rgba(74,93,58,0.1); color: var(--color-moss); }
+.cal-tip h4 {
+  font-family: var(--font-jp);
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+.cal-tip p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--color-ink-soft);
+}
+
+/* ===== SECTION 4: PHOTO SPOTS ===== */
+#photo {
+  background: var(--color-bg);
+}
+.photo-gallery {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.photo-card {
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.4s;
+}
+.photo-card:hover {
+  transform: translateY(-6px);
+}
+.photo-card .photo-img {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+.photo-card:nth-child(1) .photo-img {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.6) 100%),
+    #1A1410 url("assets/photo-shrine-v4.webp") center / contain no-repeat;
+}
+.photo-card:nth-child(2) .photo-img {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.6) 100%),
+    #1A1410 url("assets/photo-garden-v4.webp") center / contain no-repeat;
+}
+.photo-card:nth-child(3) .photo-img {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.6) 100%),
+    #1A1410 url("assets/photo-park-v4.webp") center / contain no-repeat;
+}
+.photo-card:nth-child(4) .photo-img {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.6) 100%),
+    #1A1410 url("assets/photo-mountain-v4.webp") center / contain no-repeat;
+}
+.photo-card:nth-child(5) .photo-img {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.6) 100%),
+    #1A1410 url("assets/photo-lakeside-v4.webp") center / contain no-repeat;
+}
+.photo-card:nth-child(6) .photo-img {
+  background:
+    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.6) 100%),
+    #1A1410 url("assets/photo-temple-v4.webp") center / contain no-repeat;
+}
+
+.photo-card .photo-img::after {
+  content:''; position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.025'%3E%3Cpath d='M30 5 C25 15 20 25 30 35 C40 25 35 15 30 5 Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.photo-card .photo-overlay {
+  position: absolute; bottom:0; left:0; right:0;
+  padding: 24px;
+  background: linear-gradient(0deg, rgba(26,20,16,0.8) 0%, transparent 100%);
+}
+.photo-card .photo-overlay .spot-num {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--color-gold-soft);
+  margin-bottom: 6px;
+}
+.photo-card .photo-overlay h4 {
+  font-family: var(--font-jp);
+  font-size: 18px;
+  color: #F5EFE6;
+  margin-bottom: 4px;
+}
+.photo-card .photo-overlay .spot-en {
+  font-family: var(--font-en);
+  font-size: 11px;
+  color: rgba(245,239,230,0.5);
+  letter-spacing: 0.15em;
+  margin-bottom: 10px;
+}
+.photo-card .photo-overlay .outfit-suggest {
+  font-size: 11px;
+  color: rgba(245,239,230,0.7);
+  line-height: 1.6;
+  border-top: 1px solid rgba(245,239,230,0.15);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+.photo-card .photo-tag {
+  position: absolute; top: 16px; left: 16px;
+  background: rgba(199,62,29,0.9);
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: #FFF;
+  z-index: 2;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--color-bg-dark);
+  color: #F5EFE6;
+  padding: 80px 40px 40px;
+}
+.footer-content {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+.footer-brand h3 {
+  font-family: var(--font-jp);
+  font-size: 28px;
+  color: var(--color-momiji-light);
+  margin-bottom: 12px;
+}
+.footer-brand p {
+  font-size: 13px;
+  line-height: 1.9;
+  color: rgba(245,239,230,0.5);
+  max-width: 350px;
+}
+.footer-col h5 {
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  color: var(--color-gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.footer-col ul {
+  list-style: none;
+}
+.footer-col ul li {
+  margin-bottom: 10px;
+}
+.footer-col ul li a {
+  color: rgba(245,239,230,0.5);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s;
+}
+.footer-col ul li a:hover {
+  color: var(--color-momiji-light);
+}
+.footer-bottom {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding-top: 30px;
+  border-top: 1px solid rgba(245,239,230,0.1);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-bottom p {
+  font-size: 11px;
+  color: rgba(245,239,230,0.3);
+  letter-spacing: 0.1em;
+}
+.footer-bottom .social {
+  display: flex; gap: 16px;
+}
+.footer-bottom .social a {
+  color: rgba(245,239,230,0.4);
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.3s;
+}
+.footer-bottom .social a:hover {
+  color: var(--color-momiji-light);
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .region-grid { grid-template-columns: repeat(2, 1fr); }
+  .color-palette-row { grid-template-columns: 1fr; gap: 40px; }
+  .color-palette-row:nth-child(even) { direction: ltr; }
+  .photo-gallery { grid-template-columns: repeat(2, 1fr); }
+  .calendar-tips { grid-template-columns: 1fr; }
+  .footer-content { grid-template-columns: 1fr 1fr; }
+  .cal-grid { grid-template-columns: 100px repeat(3, minmax(190px, 1fr)); min-width: 670px; }
+}
+@media (max-width: 768px) {
+  nav { padding: 14px 20px; }
+  .brand-cluster { gap: 10px; }
+  .portfolio-home { padding-right: 10px; }
+  nav .brand-cluster .logo { display: none; }
+  nav .nav-links { display: none; }
+  section { padding: 80px 20px; }
+  .hero { padding: 0 20px 60px; }
+  .hero-bg { background-position: 72% center; }
+  .hero-content h1 { font-size: 48px; }
+  .section-header { flex-direction: column; align-items: flex-start; }
+  .region-grid { grid-template-columns: 1fr; }
+  .photo-gallery { grid-template-columns: 1fr; }
+  .calendar-chart { padding: 24px; }
+  .cal-grid { grid-template-columns: 90px repeat(3, 190px); min-width: 660px; font-size: 11px; }
+  .cal-temp { min-height: 60px; }
+  .cal-cell { padding: 10px 6px; }
+  .footer-content { grid-template-columns: 1fr; gap: 30px; }
+  .hero-scroll-hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body id="top">
+
+<!-- ===== LOADER ===== -->
+<div id="loader">
+  <svg class="leaf" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M24 4 C18 14 12 24 24 34 C36 24 30 14 24 4 Z M24 28 C20 36 16 44 24 48 C32 44 28 36 24 28 Z M8 24 C16 20 20 16 24 24 C16 28 12 28 8 24 Z M28 24 C36 20 40 16 44 24 C36 28 32 28 28 24 Z" fill="#C73E1D"/>
+    <line x1="24" y1="4" x2="24" y2="48" stroke="#C8A951" stroke-width="0.5"/>
+  </svg>
+  <p>紅葉季</p>
+</div>
+
+<!-- ===== NAVIGATION ===== -->
+<nav>
+  <div class="brand-cluster">
+    <a class="portfolio-home" href="../../" aria-label="返回 hect0x7 作品集主页" title="返回 hect0x7 作品集主页">hect0x7</a>
+    <a class="logo" href="#top">
+      <span data-i18n="logo">紅葉穿搭手帖</span>
+      <span data-i18n="logo_sub">AUTUMN LEAVES STYLE GUIDE</span>
+    </a>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#regions" class="active" data-i18n="nav_regions">地区穿搭</a></li>
+    <li><a href="#colors" data-i18n="nav_colors">色彩搭配</a></li>
+    <li><a href="#calendar" data-i18n="nav_calendar">气温日历</a></li>
+    <li><a href="#photo" data-i18n="nav_photo">拍照攻略</a></li>
+  </ul>
+  <div class="lang-switch">
+    <button class="active" onclick="switchLang('zh', event)">中</button>
+    <button onclick="switchLang('ja', event)">日</button>
+    <button onclick="switchLang('en', event)">EN</button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="issue">
+      <div class="line"></div>
+      <span data-i18n="hero_issue">VOL.01 / AUTUMN 2026</span>
+    </div>
+    <h1 data-i18n-html="hero_title">紅葉季の<br>穿搭<span class="accent">手帖</span></h1>
+    <p class="subtitle" data-i18n="hero_subtitle">从京都古寺到北海道山野，一份关于秋天色彩与温度的穿搭美学指南</p>
+    <div class="meta">
+      <div class="meta-item">
+        <div class="label" data-i18n="hero_meta1_label">SEASON</div>
+        <div class="value" data-i18n="hero_meta1_value">11月 · 红叶最盛期</div>
+      </div>
+      <div class="meta-item">
+        <div class="label" data-i18n="hero_meta2_label">REGIONS</div>
+        <div class="value" data-i18n="hero_meta2_value">5大地域 · 30处景点</div>
+      </div>
+      <div class="meta-item">
+        <div class="label" data-i18n="hero_meta3_label">STYLES</div>
+        <div class="value" data-i18n="hero_meta3_value">4套配色 · 20种搭配</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-scroll-hint" data-i18n="hero_scroll">SCROLL DOWN</div>
+</section>
+
+<!-- ===== SECTION 1: REGIONS ===== -->
+<section id="regions">
+  <div class="section-header reveal">
+    <div class="left">
+      <div class="eyebrow">
+        <span class="num">01</span>
+        <div class="line"></div>
+        <span data-i18n="region_eyebrow">REGIONAL STYLE</span>
+      </div>
+      <h2 data-i18n-html="region_title">地区<em>穿搭推荐</em></h2>
+    </div>
+    <p class="desc" data-i18n="region_desc">日本红叶季自北向南渐次绽放，每个地区有着独特的温度与风景。根据不同地域的气候特征与文化氛围，为你量身定制穿搭方案。</p>
+  </div>
+  <div class="region-grid">
+    <div class="region-card reveal">
+      <div class="card-img"><div class="card-bg"></div></div>
+      <div class="card-tag" data-i18n="region_tag_kyoto">古都·优雅</div>
+      <div class="card-content">
+        <div class="region-num">No. 01</div>
+        <h3 data-i18n="region_kyoto_title">京都 · KYOTO</h3>
+        <div class="region-en">Ancient Capital Elegance</div>
+        <p data-i18n="region_kyoto_desc">漫步千年古都的石板小路，和风外套搭配素色内搭，在红叶与古寺间留下一抹沉静的身影。推荐驼色大衣、米色针织衫、深棕长裙。</p>
+      </div>
+    </div>
+    <div class="region-card reveal reveal-delay-1">
+      <div class="card-img"><div class="card-bg"></div></div>
+      <div class="card-tag" data-i18n="region_tag_tokyo">都市·摩登</div>
+      <div class="card-content">
+        <div class="region-num">No. 02</div>
+        <h3 data-i18n="region_tokyo_title">东京 · TOKYO</h3>
+        <div class="region-en">Modern Urban Chic</div>
+        <p data-i18n="region_tokyo_desc">融入都市的摩登节奏，利落剪裁的深色系外套搭配明色围巾，在银杏与红叶交织的街角定格都市秋意。</p>
+      </div>
+    </div>
+    <div class="region-card reveal reveal-delay-2">
+      <div class="card-img"><div class="card-bg"></div></div>
+      <div class="card-tag" data-i18n="region_tag_hokkaido">北国·温暖</div>
+      <div class="card-content">
+        <div class="region-num">No. 03</div>
+        <h3 data-i18n="region_hokkaido_title">北海道 · HOKKAIDO</h3>
+        <div class="region-en">Northern Warmth</div>
+        <p data-i18n="region_hokkaido_desc">北国早寒，厚实大衣与围巾是必备。以深色系为底，点缀红色针织单品，与白雪红叶相映成趣。</p>
+      </div>
+    </div>
+    <div class="region-card reveal">
+      <div class="card-img"><div class="card-bg"></div></div>
+      <div class="card-tag" data-i18n="region_tag_nara">历史·沉静</div>
+      <div class="card-content">
+        <div class="region-num">No. 04</div>
+        <h3 data-i18n="region_nara_title">奈良 · NARA</h3>
+        <div class="region-en">Timeless Serenity</div>
+        <p data-i18n="region_nara_desc">在鹿群与古木之间，选择大地色系的层叠穿搭，柔软质地与自然色调融入这片古老土地的呼吸。推荐棕色系叠穿、棉麻围巾、短靴。</p>
+      </div>
+    </div>
+    <div class="region-card reveal reveal-delay-1">
+      <div class="card-img"><div class="card-bg"></div></div>
+      <div class="card-tag" data-i18n="region_tag_karuizawa">度假·轻盈</div>
+      <div class="card-content">
+        <div class="region-num">No. 05</div>
+        <h3 data-i18n="region_karuizawa_title">轻井泽 · KARUIZAWA</h3>
+        <div class="region-en">Resort Lightness</div>
+        <p data-i18n="region_karuizawa_desc">度假胜地的轻松氛围，毛衣披肩搭配修身长裤，漫步林间小道，享受秋日阳光的温柔。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 2: COLOR GUIDE ===== -->
+<section id="colors">
+  <div class="section-header reveal">
+    <div class="left">
+      <div class="eyebrow">
+        <span class="num">02</span>
+        <div class="line"></div>
+        <span data-i18n="color_eyebrow">COLOR PALETTE</span>
+      </div>
+      <h2 data-i18n-html="color_title">色彩<em>搭配指南</em></h2>
+    </div>
+    <p class="desc" data-i18n="color_desc">红叶季的色彩灵感取自自然本身。从枫红到苔藓绿，四种配色方案帮你将秋天的调色盘穿在身上。</p>
+  </div>
+  <div class="color-showcase">
+    <div class="color-palette-row palette-1 reveal">
+      <div class="color-visual"><div class="palette-circle"></div></div>
+      <div class="color-info">
+        <div class="palette-label" data-i18n="color1_label">PALETTE 01 / SIGNATURE</div>
+        <h3 data-i18n="color1_title">枫红 · MOMIJI</h3>
+        <div class="palette-en">Crimson &amp; Rust</div>
+        <p class="palette-desc" data-i18n="color1_desc">以日本枫叶的标志色为核心，从深红到橘棕的渐变。搭配米色或白色内搭平衡视觉，是红叶季最经典的色彩选择。</p>
+        <div class="color-swatches">
+          <div class="color-swatch"><div class="swatch-color" style="background:#8B2A0E"></div><div class="swatch-name" data-i18n="color1_s1_name">深枫红</div><div class="swatch-hex">#8B2A0E</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#C73E1D"></div><div class="swatch-name" data-i18n="color1_s2_name">枫叶红</div><div class="swatch-hex">#C73E1D</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#E8633A"></div><div class="swatch-name" data-i18n="color1_s3_name">橘霞</div><div class="swatch-hex">#E8633A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#F5EFE6"></div><div class="swatch-name" data-i18n="color1_s4_name">米白</div><div class="swatch-hex">#F5EFE6</div></div>
+        </div>
+        <div class="color-tags">
+          <span data-i18n="color1_tag1">经典</span><span data-i18n="color1_tag2">醒目</span><span data-i18n="color1_tag3">京都风格</span>
+        </div>
+      </div>
+    </div>
+    <div class="color-palette-row palette-2 reveal">
+      <div class="color-visual"><div class="palette-circle"></div></div>
+      <div class="color-info">
+        <div class="palette-label" data-i18n="color2_label">PALETTE 02 / WARM</div>
+        <h3 data-i18n="color2_title">金秋 · KINSHU</h3>
+        <div class="palette-en">Golden Harvest</div>
+        <p class="palette-desc" data-i18n="color2_desc">银杏与稻穗的金黄色调，温暖而优雅。搭配深棕或橄榄绿增加层次感，适合东京街头的秋日午后。</p>
+        <div class="color-swatches">
+          <div class="color-swatch"><div class="swatch-color" style="background:#B8941F"></div><div class="swatch-name" data-i18n="color2_s1_name">深金</div><div class="swatch-hex">#B8941F</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#C8A951"></div><div class="swatch-name" data-i18n="color2_s2_name">芥末金</div><div class="swatch-hex">#C8A951</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#E8D49A"></div><div class="swatch-name" data-i18n="color2_s3_name">浅麦色</div><div class="swatch-hex">#E8D49A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#5D3A2A"></div><div class="swatch-name" data-i18n="color2_s4_name">深棕</div><div class="swatch-hex">#5D3A2A</div></div>
+        </div>
+        <div class="color-tags">
+          <span data-i18n="color2_tag1">温暖</span><span data-i18n="color2_tag2">优雅</span><span data-i18n="color2_tag3">都市风格</span>
+        </div>
+      </div>
+    </div>
+    <div class="color-palette-row palette-3 reveal">
+      <div class="color-visual"><div class="palette-circle"></div></div>
+      <div class="color-info">
+        <div class="palette-label" data-i18n="color3_label">PALETTE 03 / NATURAL</div>
+        <h3 data-i18n="color3_title">苔藓 · MOSS</h3>
+        <div class="palette-en">Forest &amp; Moss</div>
+        <p class="palette-desc" data-i18n="color3_desc">取自苔藓与常绿树的自然色调，与红叶形成绝妙对比。适合户外场景与山林漫步，沉稳而不失生机。</p>
+        <div class="color-swatches">
+          <div class="color-swatch"><div class="swatch-color" style="background:#3A4D2A"></div><div class="swatch-name" data-i18n="color3_s1_name">深苔</div><div class="swatch-hex">#3A4D2A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#4A5D3A"></div><div class="swatch-name" data-i18n="color3_s2_name">苔藓绿</div><div class="swatch-hex">#4A5D3A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#8B9D7A"></div><div class="swatch-name" data-i18n="color3_s3_name">浅草</div><div class="swatch-hex">#8B9D7A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#C73E1D"></div><div class="swatch-name" data-i18n="color3_s4_name">点缀红</div><div class="swatch-hex">#C73E1D</div></div>
+        </div>
+        <div class="color-tags">
+          <span data-i18n="color3_tag1">自然</span><span data-i18n="color3_tag2">沉稳</span><span data-i18n="color3_tag3">户外风格</span>
+        </div>
+      </div>
+    </div>
+    <div class="color-palette-row palette-4 reveal">
+      <div class="color-visual"><div class="palette-circle"></div></div>
+      <div class="color-info">
+        <div class="palette-label" data-i18n="color4_label">PALETTE 04 / EARTH</div>
+        <h3 data-i18n="color4_title">大地 · EARTH</h3>
+        <div class="palette-en">Warm Earth Tones</div>
+        <p class="palette-desc" data-i18n="color4_desc">棕色系的温暖包裹感，是秋天最舒适的选择。从焦糖到栗色，搭配任何红叶背景都不会突兀，百搭且高级。</p>
+        <div class="color-swatches">
+          <div class="color-swatch"><div class="swatch-color" style="background:#4A2A1A"></div><div class="swatch-name" data-i18n="color4_s1_name">深栗</div><div class="swatch-hex">#4A2A1A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#5D3A2A"></div><div class="swatch-name" data-i18n="color4_s2_name">焦糖</div><div class="swatch-hex">#5D3A2A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#9D7A6A"></div><div class="swatch-name" data-i18n="color4_s3_name">浅棕</div><div class="swatch-hex">#9D7A6A</div></div>
+          <div class="color-swatch"><div class="swatch-color" style="background:#D4BC7A"></div><div class="swatch-name" data-i18n="color4_s4_name">亚麻金</div><div class="swatch-hex">#D4BC7A</div></div>
+        </div>
+        <div class="color-tags">
+          <span data-i18n="color4_tag1">百搭</span><span data-i18n="color4_tag2">高级感</span><span data-i18n="color4_tag3">日常风格</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 3: CALENDAR ===== -->
+<section id="calendar">
+  <div class="section-header reveal">
+    <div class="left">
+      <div class="eyebrow">
+        <span class="num">03</span>
+        <div class="line"></div>
+        <span data-i18n="cal_eyebrow">TEMPERATURE GUIDE</span>
+      </div>
+      <h2 data-i18n-html="cal_title">气温与<em>穿搭日历</em></h2>
+    </div>
+    <p class="desc" data-i18n="cal_desc">11月是日本红叶最盛期，但各地温差显著。从北海道的初冬到九州的暖秋，一键掌握各地气温与穿衣指南。</p>
+  </div>
+  <div class="calendar-wrapper">
+    <div class="calendar-chart reveal">
+      <h3 data-i18n="cal_chart_title">11月各地气温与穿搭建议</h3>
+      <p class="chart-sub" data-i18n="cal_chart_sub">数据基于历年11月平均值 · 实际天气请出发前确认</p>
+      <div class="cal-grid">
+        <div class="cal-header" data-i18n="cal_h_city">城市</div>
+        <div class="cal-header" data-i18n="cal_h_early">上旬 (11/1-10)</div>
+        <div class="cal-header" data-i18n="cal_h_mid">中旬 (11/11-20)</div>
+        <div class="cal-header" data-i18n="cal_h_late">下旬 (11/21-30)</div>
+        <div class="cal-cell city"><span data-i18n="cal_sapporo">札幌</span><br><span class="cal-en-sub">SAPPORO</span></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:55%;background:linear-gradient(90deg,#3A6B8C,#5A8CA6)"><span class="temp-label low">3°C</span><span class="temp-label high">10°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:45%;background:linear-gradient(90deg,#2A5B7C,#4A7C96)"><span class="temp-label low">0°C</span><span class="temp-label high">7°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:38%;background:linear-gradient(90deg,#1A4B6C,#3A6C86)"><span class="temp-label low">-2°C</span><span class="temp-label high">5°C</span></div></div>
+        <div class="cal-cell city"><span data-i18n="cal_tokyo">东京</span><br><span class="cal-en-sub">TOKYO</span></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:82%;background:linear-gradient(90deg,#C8A951,#E8D49A)"><span class="temp-label low">12°C</span><span class="temp-label high">19°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:75%;background:linear-gradient(90deg,#B8941F,#D4BC7A)"><span class="temp-label low">9°C</span><span class="temp-label high">16°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:68%;background:linear-gradient(90deg,#A8840F,#C4A46A)"><span class="temp-label low">7°C</span><span class="temp-label high">14°C</span></div></div>
+        <div class="cal-cell city"><span data-i18n="cal_kyoto">京都</span><br><span class="cal-en-sub">KYOTO</span></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:80%;background:linear-gradient(90deg,#C8A951,#E8D49A)"><span class="temp-label low">11°C</span><span class="temp-label high">18°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:72%;background:linear-gradient(90deg,#B8941F,#D4BC7A)"><span class="temp-label low">8°C</span><span class="temp-label high">15°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:65%;background:linear-gradient(90deg,#A8840F,#C4A46A)"><span class="temp-label low">6°C</span><span class="temp-label high">13°C</span></div></div>
+        <div class="cal-cell city"><span data-i18n="cal_osaka">大阪</span><br><span class="cal-en-sub">OSAKA</span></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:83%;background:linear-gradient(90deg,#C8A951,#E8D49A)"><span class="temp-label low">12°C</span><span class="temp-label high">19°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:76%;background:linear-gradient(90deg,#B8941F,#D4BC7A)"><span class="temp-label low">9°C</span><span class="temp-label high">16°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:69%;background:linear-gradient(90deg,#A8840F,#C4A46A)"><span class="temp-label low">7°C</span><span class="temp-label high">14°C</span></div></div>
+        <div class="cal-cell city"><span data-i18n="cal_fukuoka">福冈</span><br><span class="cal-en-sub">FUKUOKA</span></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:86%;background:linear-gradient(90deg,#C8A951,#E8D49A)"><span class="temp-label low">13°C</span><span class="temp-label high">20°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:79%;background:linear-gradient(90deg,#B8941F,#D4BC7A)"><span class="temp-label low">10°C</span><span class="temp-label high">17°C</span></div></div>
+        <div class="cal-cell cal-temp"><div class="cal-temp-bar" style="width:72%;background:linear-gradient(90deg,#A8840F,#C4A46A)"><span class="temp-label low">8°C</span><span class="temp-label high">15°C</span></div></div>
+      </div>
+    </div>
+    <div class="calendar-tips">
+      <div class="cal-tip reveal">
+        <div class="tip-icon">A</div>
+        <h4 data-i18n="cal_tip1_title">叠穿法则</h4>
+        <p data-i18n="cal_tip1_desc">红叶季早晚温差可达10°C以上。建议采用「外套+针织+内搭」三层叠穿法，方便随时增减。内搭选择薄款打底，中间层以针织衫为主，外层防风大衣收尾。</p>
+      </div>
+      <div class="cal-tip reveal reveal-delay-1">
+        <div class="tip-icon">B</div>
+        <h4 data-i18n="cal_tip2_title">配件策略</h4>
+        <p data-i18n="cal_tip2_desc">一条质感围巾是红叶季的万能单品——既可保暖，又能为整体穿搭注入色彩亮点。帽子推荐贝雷帽或宽檐帽，手套选择皮质薄款，兼顾温度与风度。</p>
+      </div>
+      <div class="cal-tip reveal reveal-delay-2">
+        <div class="tip-icon">C</div>
+        <h4 data-i18n="cal_tip3_title">鞋履选择</h4>
+        <p data-i18n="cal_tip3_desc">红叶名胜多有石阶山路，舒适度优先。推荐切尔西靴、低跟短靴或运动鞋。颜色以深棕、黑色为佳，百搭且耐脏。避免高跟鞋与白色鞋款。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECTION 4: PHOTO SPOTS ===== -->
+<section id="photo">
+  <div class="section-header reveal">
+    <div class="left">
+      <div class="eyebrow">
+        <span class="num">04</span>
+        <div class="line"></div>
+        <span data-i18n="photo_eyebrow">PHOTO GUIDE</span>
+      </div>
+      <h2 data-i18n-html="photo_title">拍照<em>打卡攻略</em></h2>
+    </div>
+    <p class="desc" data-i18n="photo_desc">精选日本红叶季最美拍摄圣地，附上每个场景的最佳穿搭建议，让你的旅行照片成为杂志大片。</p>
+  </div>
+  <div class="photo-gallery">
+    <div class="photo-card tall reveal">
+      <div class="photo-img"><div class="photo-tag" data-i18n="photo_tag1">神社</div></div>
+      <div class="photo-overlay">
+        <div class="spot-num">SPOT 01</div>
+        <h4 data-i18n="photo1_title">京都·清水寺</h4>
+        <div class="spot-en">KIYOMIZU-DERA TEMPLE</div>
+        <div class="outfit-suggest" data-i18n="photo1_outfit">穿搭建议：和风外套或素色长裙，避免过于鲜艳的颜色抢了红叶风头。木屐或平底鞋方便登石阶。</div>
+      </div>
+    </div>
+    <div class="photo-card reveal reveal-delay-1">
+      <div class="photo-img"><div class="photo-tag" data-i18n="photo_tag2">庭园</div></div>
+      <div class="photo-overlay">
+        <div class="spot-num">SPOT 02</div>
+        <h4 data-i18n="photo2_title">京都·岚山竹林</h4>
+        <div class="spot-en">ARASHIYAMA BAMBOO GROVE</div>
+        <div class="outfit-suggest" data-i18n="photo2_outfit">穿搭建议：白色或米色系穿搭，与翠绿竹林形成清新对比。飘逸长裙或利落裤装均可。</div>
+      </div>
+    </div>
+    <div class="photo-card reveal reveal-delay-2">
+      <div class="photo-img"><div class="photo-tag" data-i18n="photo_tag3">公园</div></div>
+      <div class="photo-overlay">
+        <div class="spot-num">SPOT 03</div>
+        <h4 data-i18n="photo3_title">东京·明治神宫外苑</h4>
+        <div class="spot-en">MEIJI JINGU GAIEN</div>
+        <div class="outfit-suggest" data-i18n="photo3_outfit">穿搭建议：金色银杏大道搭配深色系大衣，明暗对比出高级感。贝雷帽是点睛之笔。</div>
+      </div>
+    </div>
+    <div class="photo-card wide reveal">
+      <div class="photo-img"><div class="photo-tag" data-i18n="photo_tag4">山林</div></div>
+      <div class="photo-overlay">
+        <div class="spot-num">SPOT 04</div>
+        <h4 data-i18n="photo4_title">北海道·定山溪温泉</h4>
+        <div class="spot-en">JOZANKEI ONSEN, HOKKAIDO</div>
+        <div class="outfit-suggest" data-i18n="photo4_outfit">穿搭建议：厚实大衣搭配红色围巾，在雪景红叶中格外醒目。温泉旅馆可准备浴衣外搭。</div>
+      </div>
+    </div>
+    <div class="photo-card reveal reveal-delay-1">
+      <div class="photo-img"><div class="photo-tag" data-i18n="photo_tag5">湖畔</div></div>
+      <div class="photo-overlay">
+        <div class="spot-num">SPOT 05</div>
+        <h4 data-i18n="photo5_title">长野·上高地</h4>
+        <div class="spot-en">KAMIKOCHI, NAGANO</div>
+        <div class="outfit-suggest" data-i18n="photo5_outfit">穿搭建议：户外风格穿搭，冲锋衣或抓绒外套，搭配登山靴。苔藓绿色系融入自然。</div>
+      </div>
+    </div>
+    <div class="photo-card reveal reveal-delay-2">
+      <div class="photo-img"><div class="photo-tag" data-i18n="photo_tag6">寺院</div></div>
+      <div class="photo-overlay">
+        <div class="spot-num">SPOT 06</div>
+        <h4 data-i18n="photo6_title">奈良·东大寺</h4>
+        <div class="spot-en">TODAI-JI TEMPLE, NARA</div>
+        <div class="outfit-suggest" data-i18n="photo6_outfit">穿搭建议：大地色系层叠穿搭，与古寺沉稳氛围呼应。棉麻质地围巾增添柔和感。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <h3 data-i18n="footer_brand">紅葉穿搭手帖</h3>
+      <p data-i18n="footer_desc">一份关于日本红叶季穿搭美学的数字手帖。将秋天的色彩与温度，穿成一首行走的诗。</p>
+    </div>
+    <div class="footer-col">
+      <h5 data-i18n="footer_col1">CONTENTS</h5>
+      <ul>
+        <li><a href="#regions" data-i18n="nav_regions">地区穿搭</a></li>
+        <li><a href="#colors" data-i18n="nav_colors">色彩搭配</a></li>
+        <li><a href="#calendar" data-i18n="nav_calendar">气温日历</a></li>
+        <li><a href="#photo" data-i18n="nav_photo">拍照攻略</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5 data-i18n="footer_col2">REGIONS</h5>
+      <ul>
+        <li><a href="#regions" data-i18n="region_kyoto_title">京都</a></li>
+        <li><a href="#regions" data-i18n="region_tokyo_title">东京</a></li>
+        <li><a href="#regions" data-i18n="region_hokkaido_title">北海道</a></li>
+        <li><a href="#regions" data-i18n="region_nara_title">奈良</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5 data-i18n="footer_col3">SEASON</h5>
+      <ul>
+        <li><a href="#" data-i18n="footer_season1">11月红叶最盛期</a></li>
+        <li><a href="#" data-i18n="footer_season2">12月初冬衔接</a></li>
+        <li><a href="#" data-i18n="footer_season3">10月末秋前奏</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p data-i18n="footer_copyright">© 2026 AUTUMN LEAVES STYLE GUIDE. ALL RIGHTS RESERVED.</p>
+    <div class="social">
+      <a href="#">Instagram</a>
+      <a href="#">Pinterest</a>
+      <a href="#">Twitter</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ===== I18N DATA =====
+const i18n = {
+  zh: {
+    logo: "紅葉穿搭手帖",
+    logo_sub: "AUTUMN LEAVES STYLE GUIDE",
+    nav_regions: "地区穿搭",
+    nav_colors: "色彩搭配",
+    nav_calendar: "气温日历",
+    nav_photo: "拍照攻略",
+    hero_issue: "VOL.01 / AUTUMN 2026",
+    hero_title: '紅葉季の<br>穿搭<span class="accent">手帖</span>',
+    hero_subtitle: "从京都古寺到北海道山野，一份关于秋天色彩与温度的穿搭美学指南",
+    hero_meta1_label: "SEASON",
+    hero_meta1_value: "11月 · 红叶最盛期",
+    hero_meta2_label: "REGIONS",
+    hero_meta2_value: "5大地域 · 30处景点",
+    hero_meta3_label: "STYLES",
+    hero_meta3_value: "4套配色 · 20种搭配",
+    hero_scroll: "向下滚动",
+    region_eyebrow: "REGIONAL STYLE",
+    region_title: "地区<em>穿搭推荐</em>",
+    region_desc: "日本红叶季自北向南渐次绽放，每个地区有着独特的温度与风景。根据不同地域的气候特征与文化氛围，为你量身定制穿搭方案。",
+    region_tag_kyoto: "古都·优雅",
+    region_tag_tokyo: "都市·摩登",
+    region_tag_hokkaido: "北国·温暖",
+    region_tag_nara: "历史·沉静",
+    region_tag_karuizawa: "度假·轻盈",
+    region_kyoto_title: "京都 · KYOTO",
+    region_tokyo_title: "东京 · TOKYO",
+    region_hokkaido_title: "北海道 · HOKKAIDO",
+    region_nara_title: "奈良 · NARA",
+    region_karuizawa_title: "轻井泽 · KARUIZAWA",
+    region_kyoto_desc: "漫步千年古都的石板小路，和风外套搭配素色内搭，在红叶与古寺间留下一抹沉静的身影。推荐驼色大衣、米色针织衫、深棕长裙。",
+    region_tokyo_desc: "融入都市的摩登节奏，利落剪裁的深色系外套搭配明色围巾，在银杏与红叶交织的街角定格都市秋意。",
+    region_hokkaido_desc: "北国早寒，厚实大衣与围巾是必备。以深色系为底，点缀红色针织单品，与白雪红叶相映成趣。",
+    region_nara_desc: "在鹿群与古木之间，选择大地色系的层叠穿搭，柔软质地与自然色调融入这片古老土地的呼吸。推荐棕色系叠穿、棉麻围巾、短靴。",
+    region_karuizawa_desc: "度假胜地的轻松氛围，毛衣披肩搭配修身长裤，漫步林间小道，享受秋日阳光的温柔。",
+    color_eyebrow: "COLOR PALETTE",
+    color_title: "色彩<em>搭配指南</em>",
+    color_desc: "红叶季的色彩灵感取自自然本身。从枫红到苔藓绿，四种配色方案帮你将秋天的调色盘穿在身上。",
+    color1_label: "PALETTE 01 / SIGNATURE",
+    color1_title: "枫红 · MOMIJI",
+    color1_desc: "以日本枫叶的标志色为核心，从深红到橘棕的渐变。搭配米色或白色内搭平衡视觉，是红叶季最经典的色彩选择。",
+    color1_s1_name: "深枫红",
+    color1_s2_name: "枫叶红",
+    color1_s3_name: "橘霞",
+    color1_s4_name: "米白",
+    color1_tag1: "经典",
+    color1_tag2: "醒目",
+    color1_tag3: "京都风格",
+    color2_label: "PALETTE 02 / WARM",
+    color2_title: "金秋 · KINSHU",
+    color2_desc: "银杏与稻穗的金黄色调，温暖而优雅。搭配深棕或橄榄绿增加层次感，适合东京街头的秋日午后。",
+    color2_s1_name: "深金",
+    color2_s2_name: "芥末金",
+    color2_s3_name: "浅麦色",
+    color2_s4_name: "深棕",
+    color2_tag1: "温暖",
+    color2_tag2: "优雅",
+    color2_tag3: "都市风格",
+    color3_label: "PALETTE 03 / NATURAL",
+    color3_title: "苔藓 · MOSS",
+    color3_desc: "取自苔藓与常绿树的自然色调，与红叶形成绝妙对比。适合户外场景与山林漫步，沉稳而不失生机。",
+    color3_s1_name: "深苔",
+    color3_s2_name: "苔藓绿",
+    color3_s3_name: "浅草",
+    color3_s4_name: "点缀红",
+    color3_tag1: "自然",
+    color3_tag2: "沉稳",
+    color3_tag3: "户外风格",
+    color4_label: "PALETTE 04 / EARTH",
+    color4_title: "大地 · EARTH",
+    color4_desc: "棕色系的温暖包裹感，是秋天最舒适的选择。从焦糖到栗色，搭配任何红叶背景都不会突兀，百搭且高级。",
+    color4_s1_name: "深栗",
+    color4_s2_name: "焦糖",
+    color4_s3_name: "浅棕",
+    color4_s4_name: "亚麻金",
+    color4_tag1: "百搭",
+    color4_tag2: "高级感",
+    color4_tag3: "日常风格",
+    cal_eyebrow: "TEMPERATURE GUIDE",
+    cal_title: "气温与<em>穿搭日历</em>",
+    cal_desc: "11月是日本红叶最盛期，但各地温差显著。从北海道的初冬到九州的暖秋，一键掌握各地气温与穿衣指南。",
+    cal_chart_title: "11月各地气温与穿搭建议",
+    cal_chart_sub: "数据基于历年11月平均值 · 实际天气请出发前确认",
+    cal_h_city: "城市",
+    cal_h_early: "上旬 (11/1-10)",
+    cal_h_mid: "中旬 (11/11-20)",
+    cal_h_late: "下旬 (11/21-30)",
+    cal_sapporo: "札幌",
+    cal_tokyo: "东京",
+    cal_kyoto: "京都",
+    cal_osaka: "大阪",
+    cal_fukuoka: "福冈",
+    cal_tip1_title: "叠穿法则",
+    cal_tip1_desc: "红叶季早晚温差可达10°C以上。建议采用「外套+针织+内搭」三层叠穿法，方便随时增减。内搭选择薄款打底，中间层以针织衫为主，外层防风大衣收尾。",
+    cal_tip2_title: "配件策略",
+    cal_tip2_desc: "一条质感围巾是红叶季的万能单品——既可保暖，又能为整体穿搭注入色彩亮点。帽子推荐贝雷帽或宽檐帽，手套选择皮质薄款，兼顾温度与风度。",
+    cal_tip3_title: "鞋履选择",
+    cal_tip3_desc: "红叶名胜多有石阶山路，舒适度优先。推荐切尔西靴、低跟短靴或运动鞋。颜色以深棕、黑色为佳，百搭且耐脏。避免高跟鞋与白色鞋款。",
+    photo_eyebrow: "PHOTO GUIDE",
+    photo_title: "拍照<em>打卡攻略</em>",
+    photo_desc: "精选日本红叶季最美拍摄圣地，附上每个场景的最佳穿搭建议，让你的旅行照片成为杂志大片。",
+    photo_tag1: "神社",
+    photo_tag2: "庭园",
+    photo_tag3: "公园",
+    photo_tag4: "山林",
+    photo_tag5: "湖畔",
+    photo_tag6: "寺院",
+    photo1_title: "京都·清水寺",
+    photo2_title: "京都·岚山竹林",
+    photo3_title: "东京·明治神宫外苑",
+    photo4_title: "北海道·定山溪温泉",
+    photo5_title: "长野·上高地",
+    photo6_title: "奈良·东大寺",
+    photo1_outfit: "穿搭建议：和风外套或素色长裙，避免过于鲜艳的颜色抢了红叶风头。木屐或平底鞋方便登石阶。",
+    photo2_outfit: "穿搭建议：白色或米色系穿搭，与翠绿竹林形成清新对比。飘逸长裙或利落裤装均可。",
+    photo3_outfit: "穿搭建议：金色银杏大道搭配深色系大衣，明暗对比出高级感。贝雷帽是点睛之笔。",
+    photo4_outfit: "穿搭建议：厚实大衣搭配红色围巾，在雪景红叶中格外醒目。温泉旅馆可准备浴衣外搭。",
+    photo5_outfit: "穿搭建议：户外风格穿搭，冲锋衣或抓绒外套，搭配登山靴。苔藓绿色系融入自然。",
+    photo6_outfit: "穿搭建议：大地色系层叠穿搭，与古寺沉稳氛围呼应。棉麻质地围巾增添柔和感。",
+    footer_brand: "紅葉穿搭手帖",
+    footer_desc: "一份关于日本红叶季穿搭美学的数字手帖。将秋天的色彩与温度，穿成一首行走的诗。",
+    footer_col1: "CONTENTS",
+    footer_col2: "REGIONS",
+    footer_col3: "SEASON",
+    footer_season1: "11月红叶最盛期",
+    footer_season2: "12月初冬衔接",
+    footer_season3: "10月末秋前奏",
+    footer_copyright: "© 2026 AUTUMN LEAVES STYLE GUIDE. ALL RIGHTS RESERVED."
+  },
+  ja: {
+    logo: "紅葉スタイル手帖",
+    logo_sub: "AUTUMN LEAVES STYLE GUIDE",
+    nav_regions: "地域別スタイル",
+    nav_colors: "カラーガイド",
+    nav_calendar: "気温カレンダー",
+    nav_photo: "撮影スポット",
+    hero_issue: "VOL.01 / AUTUMN 2026",
+    hero_title: '紅葉季の<br>スタイル<span class="accent">手帖</span>',
+    hero_subtitle: "京都の古寺から北海道の山野まで、秋の色彩と温度を纏うスタイル美学のガイド",
+    hero_meta1_label: "SEASON",
+    hero_meta1_value: "11月 · 紅葉最盛期",
+    hero_meta2_label: "REGIONS",
+    hero_meta2_value: "5大地域 · 30箇所",
+    hero_meta3_label: "STYLES",
+    hero_meta3_value: "4配色 · 20スタイル",
+    hero_scroll: "スクロール",
+    region_eyebrow: "REGIONAL STYLE",
+    region_title: "地域別<em>スタイル</em>",
+    region_desc: "日本の紅葉シーズンは北から南へと開花し、地域ごとに独自の気候と風景があります。それぞれの地域の気候特性と文化的雰囲気に合わせたスタイルを提案します。",
+    region_tag_kyoto: "古都·優雅",
+    region_tag_tokyo: "都市·モダン",
+    region_tag_hokkaido: "北国·暖か",
+    region_tag_nara: "歴史·静寂",
+    region_tag_karuizawa: "リゾート·軽快",
+    region_kyoto_title: "京都 · KYOTO",
+    region_tokyo_title: "東京 · TOKYO",
+    region_hokkaido_title: "北海道 · HOKKAIDO",
+    region_nara_title: "奈良 · NARA",
+    region_karuizawa_title: "軽井沢 · KARUIZAWA",
+    region_kyoto_desc: "千年の都の石畳を歩き、和風アウターに淡色のインナーを合わせ、紅葉と古寺の間に静かな佇まいを残す。キャメルコート、ベージュニット、ダークブラウンのロングスカートがおすすめ。",
+    region_tokyo_desc: "都市のモダンなリズムに合わせ、切りっぱなしのダークカラー外套に明るい色のマフラーを合わせ、銀杏と紅葉が交差する街角で秋の都市を切り取る。",
+    region_hokkaido_desc: "北国は早く寒くなり、厚手のコートとマフラーが必須。ダークカラーをベースに、赤のニットアイテムを添えて、雪と紅葉に映える。",
+    region_nara_desc: "鹿と古木の間で、アースカラーのレイヤードスタイルを選び、柔らかな質感と自然な色調でこの古い土地の息遣いに溶け込む。ブラウン系レイヤード、コットンリネンマフラー、ブーツがおすすめ。",
+    region_karuizawa_desc: "リゾート地のリラックスした雰囲気、ニットショールにスリムパンツを合わせ、林道を散歩しながら秋の陽光の優しさを楽しむ。",
+    color_eyebrow: "COLOR PALETTE",
+    color_title: "カラー<em>コーディネート</em>",
+    color_desc: "紅葉シーズンの色彩インスピレーションは自然そのものから。モミジレッドから苔の緑まで、4つの配色プランで秋のパレットを身にまとう。",
+    color1_label: "PALETTE 01 / SIGNATURE",
+    color1_title: "紅葉 · MOMIJI",
+    color1_desc: "日本のカエデの象徴色を中心に、深紅からオレンジブラウンへのグラデーション。ベージュや白のインナーで視覚のバランスを取り、紅葉シーズン最も古典的な色選択。",
+    color1_s1_name: "深紅葉",
+    color1_s2_name: "紅葉赤",
+    color1_s3_name: "橘霞",
+    color1_s4_name: "米白",
+    color1_tag1: "クラシック",
+    color1_tag2: "目を引く",
+    color1_tag3: "京都スタイル",
+    color2_label: "PALETTE 02 / WARM",
+    color2_title: "金秋 · KINSHU",
+    color2_desc: "銀杏と稲穂の黄金色調、暖かく優雅。ダークブラウンやオリーブグリーンを合わせて層次感を増し、東京の街角の秋の午後に。",
+    color2_s1_name: "深金",
+    color2_s2_name: "マスタード",
+    color2_s3_name: "麦色",
+    color2_s4_name: "ダークブラウン",
+    color2_tag1: "暖かい",
+    color2_tag2: "優雅",
+    color2_tag3: "都市スタイル",
+    color3_label: "PALETTE 03 / NATURAL",
+    color3_title: "苔 · MOSS",
+    color3_desc: "苔と常緑樹の自然な色調で、紅葉と絶妙なコントラスト。アウトドアシーンや山歩きに最適、落ち着きと生命力を兼ね備える。",
+    color3_s1_name: "深苔",
+    color3_s2_name: "苔緑",
+    color3_s3_name: "浅草",
+    color3_s4_name: "差し色赤",
+    color3_tag1: "ナチュラル",
+    color3_tag2: "落ち着き",
+    color3_tag3: "アウトドア",
+    color4_label: "PALETTE 04 / EARTH",
+    color4_title: "大地 · EARTH",
+    color4_desc: "ブラウン系の温かい包み感は、秋の最も快適な選択。キャラメルからマロンまで、どんな紅葉背景にも違和感なく、万能で上品。",
+    color4_s1_name: "深栗",
+    color4_s2_name: "キャラメル",
+    color4_s3_name: "ライトブラウン",
+    color4_s4_name: "リネン金",
+    color4_tag1: "万能",
+    color4_tag2: "上品",
+    color4_tag3: "デイリースタイル",
+    cal_eyebrow: "TEMPERATURE GUIDE",
+    cal_title: "気温と<em>スタイルカレンダー</em>",
+    cal_desc: "11月は日本の紅葉最盛期ですが、地域により気温差が顕著。北海道の初冬から九州の暖秋まで、各地の気温と服装ガイドを把握。",
+    cal_chart_title: "11月各地気温とスタイル提案",
+    cal_chart_sub: "データは過去の11月平均値に基づく · 実際の天気は出発前に確認を",
+    cal_h_city: "都市",
+    cal_h_early: "上旬 (11/1-10)",
+    cal_h_mid: "中旬 (11/11-20)",
+    cal_h_late: "下旬 (11/21-30)",
+    cal_sapporo: "札幌",
+    cal_tokyo: "東京",
+    cal_kyoto: "京都",
+    cal_osaka: "大阪",
+    cal_fukuoka: "福岡",
+    cal_tip1_title: "レイヤリング法則",
+    cal_tip1_desc: "紅葉シーズンは朝晩の寒暖差が10°C以上になることも。「アウター+ニット+インナー」の3枚重ねを推奨。インナーは薄手、中間層はニット、外側は風防コートで。",
+    cal_tip2_title: "アクセサリー戦略",
+    cal_tip2_desc: "質感のあるマフラーは紅葉シーズンの万能アイテム。保暖しつつ、スタイルに色のアクセントを加える。帽子はベレー帽やつば広帽、手袋は革の薄手で温度とおしゃれを両立。",
+    cal_tip3_title: "フットウェア選択",
+    cal_tip3_desc: "紅葉名所は石段や山道が多いので、快適さ優先。チェルシーブーツ、ローヒールブーツ、スニーカーを推奨。色はダークブラウンや黒がベスト。ヒールや白い靴は避けて。",
+    photo_eyebrow: "PHOTO GUIDE",
+    photo_title: "撮影<em>スポットガイド</em>",
+    photo_desc: "日本の紅葉シーズン最美の撮影聖地を厳選、各シーンのベストスタイル提案付きで、旅行写真を雑誌の1ページに。",
+    photo_tag1: "神社",
+    photo_tag2: "庭園",
+    photo_tag3: "公園",
+    photo_tag4: "山林",
+    photo_tag5: "湖畔",
+    photo_tag6: "寺院",
+    photo1_title: "京都·清水寺",
+    photo2_title: "京都·嵐山竹林",
+    photo3_title: "東京·明治神宮外苑",
+    photo4_title: "北海道·定山渓温泉",
+    photo5_title: "長野·上高地",
+    photo6_title: "奈良·東大寺",
+    photo1_outfit: "スタイル提案：和風アウターや淡色ロングドレス、鮮やかすぎる色は紅葉の邪魔をしないよう。下駄やフラットシューズで石段に。",
+    photo2_outfit: "スタイル提案：白やベージュ系で、緑の竹林と清新なコントラスト。シルエットドレスもスマートパンツも。",
+    photo3_outfit: "スタイル提案：金色の銀並木道にダーク系コート、明暗コントラストで上品さを。ベレー帽がポイント。",
+    photo4_outfit: "スタイル提案：厚手コートに赤マフラー、雪景紅葉に映える。温泉旅館では浴衣の上羽織を。",
+    photo5_outfit: "スタイル提案：アウトドアスタイル、マウンテンパーカーかフリース、トレッキングブーツで。モスグリーンで自然に溶け込む。",
+    photo6_outfit: "スタイル提案：アースカラーのレイヤードで、古寺の落ち着いた雰囲気に。コットンリネンマフラーで柔らかさを。",
+    footer_brand: "紅葉スタイル手帖",
+    footer_desc: "日本の紅葉シーズンのスタイル美学に関するデジタル手帖。秋の色彩と温度を、歩く詩のように纏う。",
+    footer_col1: "CONTENTS",
+    footer_col2: "REGIONS",
+    footer_col3: "SEASON",
+    footer_season1: "11月紅葉最盛期",
+    footer_season2: "12月初冬へ",
+    footer_season3: "10月末秋の前奏",
+    footer_copyright: "© 2026 AUTUMN LEAVES STYLE GUIDE. ALL RIGHTS RESERVED."
+  },
+  en: {
+    logo: "MOMIJI STYLE",
+    logo_sub: "AUTUMN LEAVES STYLE GUIDE",
+    nav_regions: "Regions",
+    nav_colors: "Colors",
+    nav_calendar: "Climate",
+    nav_photo: "Photo Spots",
+    hero_issue: "VOL.01 / AUTUMN 2026",
+    hero_title: 'Autumn Leaves<br>Style <span class="accent">Journal</span>',
+    hero_subtitle: "From Kyoto's ancient temples to Hokkaido's mountain wilderness — a style guide to the colors and temperatures of autumn",
+    hero_meta1_label: "SEASON",
+    hero_meta1_value: "November · Peak Foliage",
+    hero_meta2_label: "REGIONS",
+    hero_meta2_value: "5 Regions · 30 Spots",
+    hero_meta3_label: "STYLES",
+    hero_meta3_value: "4 Palettes · 20 Looks",
+    hero_scroll: "SCROLL DOWN",
+    region_eyebrow: "REGIONAL STYLE",
+    region_title: "Regional <em>Style Guide</em>",
+    region_desc: "Japan's autumn foliage blooms from north to south, each region with its own climate and landscape. Tailored outfit recommendations for every destination.",
+    region_tag_kyoto: "Ancient · Elegant",
+    region_tag_tokyo: "Urban · Modern",
+    region_tag_hokkaido: "Northern · Warm",
+    region_tag_nara: "Historic · Serene",
+    region_tag_karuizawa: "Resort · Light",
+    region_kyoto_title: "Kyoto · 京都",
+    region_tokyo_title: "Tokyo · 東京",
+    region_hokkaido_title: "Hokkaido · 北海道",
+    region_nara_title: "Nara · 奈良",
+    region_karuizawa_title: "Karuizawa · 軽井沢",
+    region_kyoto_desc: "Stroll the stone paths of the ancient capital. Japanese-style outerwear over muted tones leaves a serene silhouette among red leaves and temples. Camel coat, beige knit, dark brown skirt recommended.",
+    region_tokyo_desc: "Match the city's modern rhythm — sharply cut dark coats with bright scarves, capturing urban autumn where ginkgo and maple intertwine.",
+    region_hokkaido_desc: "The north turns cold early. Heavy coats and scarves are essential. Dark base with red knit accents stands out against snow and foliage.",
+    region_nara_desc: "Among deer and ancient trees, layered earth tones blend softly into this timeless landscape. Brown layering, cotton-linen scarf, ankle boots recommended.",
+    region_karuizawa_desc: "Resort-town ease — knit shawl over slim trousers, strolling forest paths in gentle autumn sunlight.",
+    color_eyebrow: "COLOR PALETTE",
+    color_title: "Color <em>Coordination</em>",
+    color_desc: "Autumn's color inspiration comes from nature itself. From maple red to moss green, four palettes bring the season's spectrum to your wardrobe.",
+    color1_label: "PALETTE 01 / SIGNATURE",
+    color1_title: "Maple · MOMIJI",
+    color1_desc: "Built around the iconic Japanese maple hue, from deep crimson to rust orange. Balance with cream or white inner layers — the most classic autumn choice.",
+    color1_s1_name: "Deep Maple",
+    color1_s2_name: "Maple Red",
+    color1_s3_name: "Sunset Orange",
+    color1_s4_name: "Cream White",
+    color1_tag1: "Classic",
+    color1_tag2: "Striking",
+    color1_tag3: "Kyoto Style",
+    color2_label: "PALETTE 02 / WARM",
+    color2_title: "Golden · KINSHU",
+    color2_desc: "The golden tones of ginkgo and rice stalks — warm and elegant. Pair with dark brown or olive green for depth, perfect for Tokyo autumn afternoons.",
+    color2_s1_name: "Deep Gold",
+    color2_s2_name: "Mustard",
+    color2_s3_name: "Wheat",
+    color2_s4_name: "Dark Brown",
+    color2_tag1: "Warm",
+    color2_tag2: "Elegant",
+    color2_tag3: "Urban Style",
+    color3_label: "PALETTE 03 / NATURAL",
+    color3_title: "Moss · MOSS",
+    color3_desc: "Natural tones from moss and evergreens, creating beautiful contrast with autumn leaves. Ideal for outdoor scenes and mountain walks — calm yet vibrant.",
+    color3_s1_name: "Deep Moss",
+    color3_s2_name: "Moss Green",
+    color3_s3_name: "Sage",
+    color3_s4_name: "Accent Red",
+    color3_tag1: "Natural",
+    color3_tag2: "Grounded",
+    color3_tag3: "Outdoor Style",
+    color4_label: "PALETTE 04 / EARTH",
+    color4_title: "Earth · EARTH",
+    color4_desc: "The warm embrace of brown tones — autumn's most comfortable choice. From caramel to chestnut, it pairs effortlessly with any foliage backdrop. Versatile and sophisticated.",
+    color4_s1_name: "Chestnut",
+    color4_s2_name: "Caramel",
+    color4_s3_name: "Tan",
+    color4_s4_name: "Linen Gold",
+    color4_tag1: "Versatile",
+    color4_tag2: "Sophisticated",
+    color4_tag3: "Everyday Style",
+    cal_eyebrow: "TEMPERATURE GUIDE",
+    cal_title: "Climate & <em>Style Calendar</em>",
+    cal_desc: "November is peak foliage season in Japan, but temperatures vary dramatically by region. From Hokkaido's early winter to Kyushu's mild autumn — your complete climate guide.",
+    cal_chart_title: "November Temperatures & Style Guide",
+    cal_chart_sub: "Based on historical November averages · Check actual forecast before departure",
+    cal_h_city: "City",
+    cal_h_early: "Early (Nov 1-10)",
+    cal_h_mid: "Mid (Nov 11-20)",
+    cal_h_late: "Late (Nov 21-30)",
+    cal_sapporo: "Sapporo",
+    cal_tokyo: "Tokyo",
+    cal_kyoto: "Kyoto",
+    cal_osaka: "Osaka",
+    cal_fukuoka: "Fukuoka",
+    cal_tip1_title: "Layering Rules",
+    cal_tip1_desc: "Temperature swings of 10°C+ are common during foliage season. Three-layer system: outer coat + knit mid-layer + base layer for easy adjustment. Thin base, knit middle, windproof outer.",
+    cal_tip2_title: "Accessories",
+    cal_tip2_desc: "A quality scarf is the ultimate autumn accessory — warmth and a color accent in one. Berets or wide-brim hats for headwear; thin leather gloves balance warmth and style.",
+    cal_tip3_title: "Footwear",
+    cal_tip3_desc: "Foliage spots often involve stone steps and mountain paths — comfort first. Chelsea boots, low-heel ankle boots, or sneakers. Dark brown or black for versatility. Avoid heels and white shoes.",
+    photo_eyebrow: "PHOTO GUIDE",
+    photo_title: "Photo <em>Spot Guide</em>",
+    photo_desc: "Curated selection of Japan's most beautiful autumn foliage photography locations, each with tailored outfit suggestions for magazine-worthy travel photos.",
+    photo_tag1: "Shrine",
+    photo_tag2: "Garden",
+    photo_tag3: "Park",
+    photo_tag4: "Mountain",
+    photo_tag5: "Lakeside",
+    photo_tag6: "Temple",
+    photo1_title: "Kyoto · Kiyomizu-dera",
+    photo2_title: "Kyoto · Arashiyama Bamboo",
+    photo3_title: "Tokyo · Meiji Jingu Gaien",
+    photo4_title: "Hokkaido · Jozankei Onsen",
+    photo5_title: "Nagano · Kamikochi",
+    photo6_title: "Nara · Todai-ji",
+    photo1_outfit: "Style tip: Japanese-style coat or muted long dress. Avoid overly bright colors that compete with the foliage. Flat shoes for stone steps.",
+    photo2_outfit: "Style tip: White or beige tones create fresh contrast with the green bamboo. Flowy dress or tailored trousers both work.",
+    photo3_outfit: "Style tip: Dark coat against the golden ginkgo avenue for sophisticated contrast. A beret is the perfect finishing touch.",
+    photo4_outfit: "Style tip: Heavy coat with red scarf stands out against snow and foliage. Bring a yukata layer for the onsen inn.",
+    photo5_outfit: "Style tip: Outdoor style — shell jacket or fleece with hiking boots. Moss green blends into nature.",
+    photo6_outfit: "Style tip: Earth-tone layers echo the temple's serene atmosphere. Cotton-linen scarf adds softness.",
+    footer_brand: "MOMIJI STYLE",
+    footer_desc: "A digital journal of Japanese autumn foliage style aesthetics. Wear the colors and temperatures of autumn like a walking poem.",
+    footer_col1: "CONTENTS",
+    footer_col2: "REGIONS",
+    footer_col3: "SEASON",
+    footer_season1: "November Peak Foliage",
+    footer_season2: "December Early Winter",
+    footer_season3: "October Late Autumn",
+    footer_copyright: "© 2026 AUTUMN LEAVES STYLE GUIDE. ALL RIGHTS RESERVED."
+  }
+};
+
+// ===== LANGUAGE SWITCHING =====
+function switchLang(lang, evt) {
+  const target = evt ? evt.target : null;
+  document.querySelectorAll('.lang-switch button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  if (target) {
+    target.classList.add('active');
+  }
+
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : (lang === 'ja' ? 'ja' : 'en');
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[lang] && i18n[lang][key]) {
+      el.textContent = i18n[lang][key];
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (i18n[lang] && i18n[lang][key]) {
+      el.innerHTML = i18n[lang][key];
+    }
+  });
+}
+
+// ===== LOADER =====
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hidden');
+  }, 800);
+});
+
+// ===== SCROLL REVEAL =====
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => {
+  revealObserver.observe(el);
+});
+
+// ===== NAV ACTIVE STATE ON SCROLL =====
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const sectionTop = section.offsetTop - 120;
+    if (window.scrollY >= sectionTop) {
+      current = section.getAttribute('id');
+    }
+  });
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+    if (link.getAttribute('href') === '#' + current) {
+      link.classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>

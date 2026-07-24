@@ -42,6 +42,26 @@ const WORKS = [
       en: ["Dual Edition", "Style", "Travel"],
     },
   },
+  {
+    slug: "momiji-style-guide",
+    year: "2026",
+    cover: "works/momiji-style-guide/assets/hero-v4.webp",
+    title: {
+      zh: "紅葉季の穿搭手帖",
+      ja: "紅葉のスタイル手帖",
+      en: "Autumn Leaves Style Guide",
+    },
+    desc: {
+      zh: "从京都古寺到北海道山野，以地区、色彩与温度整理一份日本红叶季旅行穿搭指南。",
+      ja: "京都の古寺から北海道の山野まで、地域・色・気温でたどる紅葉旅のスタイルガイド。",
+      en: "A travel wardrobe guide to Japan's autumn leaves, shaped by region, color, and temperature.",
+    },
+    tags: {
+      zh: ["时尚", "旅行", "多语言"],
+      ja: ["ファッション", "旅", "多言語"],
+      en: ["Fashion", "Travel", "Multilingual"],
+    },
+  },
   // 下一个作品照这个格式往下加即可。
 ];
 
@@ -170,6 +190,13 @@ if (themeToggle) {
   themeToggle.addEventListener("click", () => {
     const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
     applyTheme(current === "dark" ? "light" : "dark");
+  });
+}
+
+const toTopButton = document.querySelector(".to-top");
+if (toTopButton) {
+  toTopButton.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }
 

@@ -126,6 +126,28 @@ h1, h2, h3, h4 {
     gap: 24px;
 }
 
+.brand-cluster {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 0 0 auto;
+}
+
+.portfolio-home {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding-right: 16px;
+    border-right: 1px solid rgba(255, 255, 255, 0.36);
+    color: var(--clr-white);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.portfolio-home:hover { opacity: 0.65; }
+.navbar.scrolled .portfolio-home { color: var(--clr-text-main); border-right-color: rgba(29, 29, 31, 0.18); }
+
 .logo {
     font-family: var(--font-heading);
     font-size: 1.5rem;
@@ -256,10 +278,40 @@ body.audience-changing .vibe-content {
     left: 0;
     width: 100%;
     height: 100%;
+    background-image: var(--hero-image-mobile);
     background-size: cover;
     background-position: center;
     transform: scale(1.05); /* Slight scale for slow zoom effect */
     animation: slowZoom 20s ease-out infinite alternate;
+}
+
+html[data-audience="men"] .hero-bg {
+    background-position: center 34%;
+}
+
+html[data-audience="women"] .hero-bg {
+    background-position: center 32%;
+}
+
+@media (min-width: 769px) {
+    .hero-bg {
+        background-image: var(--hero-image-desktop);
+        background-size: cover;
+        background-position: center;
+        animation: none;
+        transform: none;
+    }
+
+    html[data-audience="men"] .hero-bg {
+        background-position: center bottom;
+    }
+
+    html[data-audience="men"] .hero-content > p:not(.audience-kicker) {
+        max-width: 560px;
+        margin-right: auto;
+        margin-left: auto;
+        transform: translateX(-180px);
+    }
 }
 
 @keyframes slowZoom {
@@ -531,6 +583,10 @@ body.audience-changing .vibe-content {
     background-attachment: fixed;
 }
 
+html[data-audience="men"] .vibe-bg {
+    background-position: center 25%;
+}
+
 .vibe-overlay {
     position: absolute;
     top: 0;
@@ -705,6 +761,29 @@ body.audience-changing .vibe-content {
 }
 
 @media (max-width: 768px) {
+    html[data-audience="men"] .hero-bg {
+        background-position: center 38%;
+    }
+
+    html[data-audience="women"] .hero-bg {
+        background-position: center 78%;
+    }
+
+    .hero-content .audience-kicker {
+        position: relative;
+        top: -48px;
+    }
+
+    .vibe-content {
+        width: 100%;
+        padding: 0 24px;
+    }
+
+    .vibe-content h2 {
+        font-size: 2rem;
+        line-height: 1.25;
+    }
+
     .nav-links {
         display: none;
     }
@@ -712,6 +791,9 @@ body.audience-changing .vibe-content {
     .nav-container {
         gap: 14px;
     }
+
+    .brand-cluster { gap: 10px; }
+    .portfolio-home { padding-right: 10px; }
 
     .audience-switch {
         margin-left: auto;

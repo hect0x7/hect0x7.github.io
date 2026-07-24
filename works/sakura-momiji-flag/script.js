@@ -12,7 +12,14 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const desktop = matchMedia('(min-width: 901px)');
 const heroParticleCanvas = document.querySelector('.season-particles--hero');
 const journeyParticleCanvas = document.querySelector('.season-particles--journey');
+const continuationParticleCanvas = document.querySelector('.season-particles--continuation');
 const particleToggle = document.querySelector('.season-dot');
+const seasonLedger = document.querySelector('.season-ledger');
+const afterglow = document.querySelector('.afterglow');
+const flagImage = document.querySelector('.flag-image');
+const ledgerHead = document.querySelector('.ledger-head');
+const afterglowCopy = document.querySelector('.afterglow-copy');
+const flagLabel = document.querySelector('.flag-label');
 
 let metrics = null;
 let ticking = false;
@@ -22,7 +29,7 @@ let headerScrollY = scrollY;
 const clamp = (value, min = 0, max = 1) => Math.min(Math.max(value, min), max);
 const easeOut = value => 1 - Math.pow(1 - value, 3);
 
-function createParticleScene(canvas, { count, mode }) {
+function createParticleScene(canvas, { count, mode, observe = true, maxDpr = 1.75, targetElement = null, avoidElements = [], clipStartElement = null, clipEndElement = null }) {
     const context = canvas?.getContext('2d');
     if (!context) return null;
 
@@ -36,10 +43,28 @@ function createParticleScene(canvas, { count, mode }) {
     let enabled = true;
     let currentLeafRatio = .5;
     let currentAttraction = 0;
+    let continuationMix = 0;
+    let finaleProgress = 0;
+    let finaleActive = false;
+    let finaleComplete = false;
     const particles = [];
 
     function randomParticle(index) {
         const depth = .45 + Math.random() * .85;
+        const finaleLeaf = index % 3 === 0;
+        let targetX;
+        let targetY;
+        if (finaleLeaf) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = Math.sqrt(Math.random()) * .155;
+            targetX = .5 + Math.cos(angle) * radius;
+            targetY = .5 + Math.sin(angle) * radius * 1.58;
+        } else {
+            do {
+                targetX = .04 + Math.random() * .92;
+                targetY = .07 + Math.random() * .86;
+            } while (Math.pow((targetX - .5) / .19, 2) + Math.pow((targetY - .5) / .3, 2) < 1);
+        }
         return {
             index,
             x: Math.random(),
@@ -53,7 +78,10 @@ function createParticleScene(canvas, { count, mode }) {
             angle: Math.random() * Math.PI * 2,
             orbit: 48 + Math.random() * Math.min(innerWidth, innerHeight) * .24,
             tone: Math.random(),
-            typeBias: Math.random()
+            typeBias: Math.random(),
+            finaleLeaf,
+            targetX,
+            targetY
         };
     }
 
@@ -63,9 +91,18 @@ function createParticleScene(canvas, { count, mode }) {
         for (let index = 0; index < targetCount; index += 1) particles.push(randomParticle(index));
     }
 
+    function adoptParticles(sourceParticles) {
+        const targetCount = typeof count === 'function' ? count() : count;
+        particles.length = 0;
+        for (let index = 0; index < targetCount; index += 1) {
+            const source = sourceParticles[index];
+            particles.push(source ? { ...source, index } : randomParticle(index));
+        }
+    }
+
     function resize() {
         const bounds = canvas.getBoundingClientRect();
-        const dpr = Math.min(devicePixelRatio || 1, 1.75);
+        const dpr = Math.min(devicePixelRatio || 1, maxDpr);
         width = Math.max(1, bounds.width);
         height = Math.max(1, bounds.height);
         canvas.width = Math.round(width * dpr);
@@ -145,7 +182,17 @@ function createParticleScene(canvas, { count, mode }) {
         const response = animated ? Math.min(1, delta * 3.6) : 1;
         currentLeafRatio += (targetLeafRatio - currentLeafRatio) * response;
         currentAttraction += (targetAttraction - currentAttraction) * response;
-
+        const targetRect = finaleActive && targetElement ? targetElement.getBoundingClientRect() : null;
+        const avoidRects = avoidElements.map(element => element.getBoundingClientRect());
+        const clipTop = clipStartElement ? clamp(clipStartElement.getBoundingClientRect().top, 0, height) : 0;
+        const clipBottom = clipEndElement ? clamp(clipEndElement.getBoundingClientRect().bottom, 0, height) : height;
+        if (finaleActive) finaleProgress = Math.min(1, finaleProgress + delta * .68);
+        const finaleEase = easeOut(finaleProgress);
+        const mergeAlpha = 1 - clamp((finaleProgress - .82) / .18);
+        context.save();
+        context.beginPath();
+        context.rect(0, clipTop, width, Math.max(0, clipBottom - clipTop));
+        context.clip();
         particles.forEach(particle => {
             particle.x += particle.speed * delta;
             particle.y += particle.fall * delta;
@@ -158,6 +205,13 @@ function createParticleScene(canvas, { count, mode }) {
             let x = particle.x * width + sway;
             let y = particle.y * height;
 
+            if (targetRect) {
+                const targetX = targetRect.left + particle.targetX * targetRect.width;
+                const targetY = targetRect.top + particle.targetY * targetRect.height;
+                x += (targetX - x) * finaleEase;
+                y += (targetY - y) * finaleEase;
+            }
+
             if (leafAmount > 0 && currentAttraction > 0) {
                 const orbitAngle = particle.phase + time * .00008;
                 const attraction = currentAttraction * leafAmount;
@@ -169,17 +223,37 @@ function createParticleScene(canvas, { count, mode }) {
             }
 
             const edgeFade = clamp(Math.min(y / 70, (height - y) / 70));
-            const alpha = clamp(.34 + particle.size / 42, .38, .82) * edgeFade;
-            if (leafAmount < .99) drawPetal(particle, x, y, particle.angle, alpha * (1 - leafAmount) * .96);
-            if (leafAmount > .01) drawLeaf(particle, x, y, particle.angle, alpha * leafAmount);
+            const overlapsCopy = avoidRects.some(rect => x > rect.left - particle.size && x < rect.right + particle.size &&
+                y > rect.top - particle.size && y < rect.bottom + particle.size);
+            const alpha = overlapsCopy ? 0 : clamp(.34 + particle.size / 42, .38, .82) * edgeFade * mergeAlpha;
+            if (mode === 'continuation') {
+                const petalAmount = particle.finaleLeaf ? 0 : clamp((continuationMix - particle.typeBias * .42) / .58);
+                if (petalAmount < .99) drawLeaf(particle, x, y, particle.angle, alpha * (1 - petalAmount));
+                if (petalAmount > .01) drawPetal(particle, x, y, particle.angle, alpha * petalAmount * .96);
+            } else if (season === 'autumn') {
+                drawLeaf(particle, x, y, particle.angle, alpha);
+            } else {
+                if (leafAmount < .99) {
+                    drawPetal(particle, x, y, particle.angle, alpha * (1 - leafAmount) * .96);
+                }
+                if (leafAmount > .01) {
+                    drawLeaf(particle, x, y, particle.angle, alpha * leafAmount);
+                }
+            }
         });
+        context.restore();
 
+        if (finaleActive && finaleProgress >= 1) {
+            finaleComplete = true;
+            context.clearRect(0, 0, width, height);
+            return;
+        }
         if (animated) frame = requestAnimationFrame(render);
     }
 
     function setVisible(nextVisible) {
         visible = nextVisible;
-        if (visible && enabled && !frame) {
+        if (visible && enabled && !frame && !finaleComplete) {
             lastTime = performance.now();
             frame = requestAnimationFrame(render);
         } else if (!visible && frame) {
@@ -202,12 +276,34 @@ function createParticleScene(canvas, { count, mode }) {
     }
 
     resize();
-    const observer = new IntersectionObserver(entries => setVisible(entries[0]?.isIntersecting), { threshold: .02 });
-    observer.observe(canvas);
+    if (observe) {
+        const observer = new IntersectionObserver(entries => setVisible(entries[0]?.isIntersecting), { threshold: .02 });
+        observer.observe(canvas);
+    }
     document.addEventListener('visibilitychange', syncAnimationPreference);
     reducedMotion.addEventListener('change', syncAnimationPreference);
     return {
         resize,
+        setVisible,
+        snapshotParticles() {
+            return particles.map(particle => ({ ...particle }));
+        },
+        adoptParticles,
+        setContinuationMix(progress) {
+            continuationMix = clamp(progress);
+        },
+        setFinale(nextActive) {
+            if (nextActive && !finaleActive && !finaleComplete) {
+                finaleActive = true;
+                finaleProgress = 0;
+                syncAnimationPreference();
+            } else if (!nextActive && (finaleActive || finaleComplete)) {
+                finaleActive = false;
+                finaleComplete = false;
+                finaleProgress = 0;
+                if (visible && enabled) syncAnimationPreference();
+            }
+        },
         setEnabled(nextEnabled) {
             enabled = nextEnabled;
             if (!enabled) {
@@ -231,13 +327,26 @@ const journeyParticles = createParticleScene(journeyParticleCanvas, {
     count: () => desktop.matches ? 72 : 24,
     mode: 'journey'
 });
+const continuationParticles = createParticleScene(continuationParticleCanvas, {
+    count: () => desktop.matches ? 72 : 24,
+    mode: 'continuation',
+    observe: false,
+    maxDpr: 1.25,
+    targetElement: flagImage,
+    avoidElements: [ledgerHead, afterglowCopy, flagLabel],
+    clipStartElement: seasonLedger,
+    clipEndElement: afterglow
+});
 
 function setParticlesEnabled(enabled) {
     particleToggle?.setAttribute('aria-pressed', String(enabled));
     heroParticles?.setEnabled(enabled);
     journeyParticles?.setEnabled(enabled);
+    continuationParticles?.setEnabled(enabled);
     localStorage.setItem('season-particles-enabled', String(enabled));
 }
+
+let continuationAdopted = false;
 
 particleToggle?.addEventListener('click', () => {
     setParticlesEnabled(particleToggle.getAttribute('aria-pressed') !== 'true');
@@ -325,6 +434,24 @@ function update() {
         heroMedia.style.transform = `translate3d(0, ${heroProgress * 72}px, 0) scale(${1.04 + heroProgress * .04})`;
     }
 
+    const continuationStart = seasonLedger.offsetTop;
+    const continuationEnd = afterglow.offsetTop + afterglow.offsetHeight;
+    const ledgerRect = seasonLedger.getBoundingClientRect();
+    const continuationVisible = currentScrollY + innerHeight > continuationStart && currentScrollY < continuationEnd;
+    if (currentScrollY + innerHeight <= continuationStart) continuationAdopted = false;
+    if (continuationVisible && !continuationAdopted) {
+        continuationParticles?.adoptParticles(journeyParticles?.snapshotParticles() || []);
+        continuationAdopted = true;
+    }
+    const continuationMix = clamp((innerHeight - ledgerRect.top) / Math.max(innerHeight * .7, 1));
+    continuationParticles?.setContinuationMix(continuationMix);
+    continuationParticles?.setVisible(continuationVisible);
+    const flagRect = flagImage.getBoundingClientRect();
+    const flagVisibleHeight = Math.min(flagRect.bottom, innerHeight) - Math.max(flagRect.top, 0);
+    const flagFullyVisible = continuationVisible && flagRect.bottom <= innerHeight && flagVisibleHeight >= flagRect.height * .85;
+    if (flagFullyVisible) continuationParticles?.setFinale(true);
+    if (flagRect.top >= innerHeight) continuationParticles?.setFinale(false);
+
     if (!metrics || !desktop.matches) {
         header.classList.remove('header-hidden');
         return;
@@ -336,15 +463,19 @@ function update() {
 
     if (raw < introPhase) {
         const morph = easeOut(raw / introPhase);
+        const targetWidth = innerWidth * .58;
+        const targetHeight = Math.min(innerHeight * .66, targetWidth * 9 / 16);
         introVisual.style.width = `${innerWidth * (1 - .42 * morph)}px`;
-        introVisual.style.height = `${innerHeight * (1 - .34 * morph)}px`;
+        introVisual.style.height = `${innerHeight + (targetHeight - innerHeight) * morph}px`;
         introVisual.style.left = `${morph * innerWidth * .08}px`;
         introOverlay.style.opacity = String(1 - clamp(morph * 1.55));
         introCopy.style.opacity = String(clamp((morph - .88) / .12));
         introCopy.style.transform = `translateY(calc(-50% + ${(1 - morph) * 24}px))`;
     } else {
-        introVisual.style.width = '58vw';
-        introVisual.style.height = '66vh';
+        const targetWidth = innerWidth * .58;
+        const targetHeight = Math.min(innerHeight * .66, targetWidth * 9 / 16);
+        introVisual.style.width = `${targetWidth}px`;
+        introVisual.style.height = `${targetHeight}px`;
         introVisual.style.left = '8vw';
         introOverlay.style.opacity = '0';
         introCopy.style.opacity = '1';
@@ -388,6 +519,7 @@ addEventListener('scroll', requestUpdate, { passive: true });
 addEventListener('resize', () => {
     heroParticles?.resize();
     journeyParticles?.resize();
+    continuationParticles?.resize();
     measure();
 });
 desktop.addEventListener('change', measure);

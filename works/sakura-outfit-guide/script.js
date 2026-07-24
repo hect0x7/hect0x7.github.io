@@ -208,12 +208,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (audience === 'women') {
-            heroBackground.style.backgroundImage = `url('${getWomenAssetPath('assets/hero_sakura.png')}')`;
-            heroBackground.style.backgroundPosition = 'center 32%';
+            heroBackground.style.setProperty('--hero-image-mobile', "url('assets/women/hero_sakura_v2.webp')");
+            heroBackground.style.setProperty('--hero-image-desktop', "url('assets/women/hero_sakura_desktop_v1.webp')");
             vibeBackground.style.backgroundImage = `url('${getWomenAssetPath('assets/evening_yozakura.png')}')`;
         } else {
-            heroBackground.style.backgroundImage = `url('${getMenAssetPath('assets/hero_sakura.png')}')`;
-            heroBackground.style.backgroundPosition = 'center 18%';
+            heroBackground.style.setProperty('--hero-image-mobile', "url('assets/men-youth/hero_sakura_v3.webp')");
+            heroBackground.style.setProperty('--hero-image-desktop', "url('assets/men-youth/hero_sakura_desktop_v1.webp')");
             vibeBackground.style.backgroundImage = `url('${getMenAssetPath('assets/evening_yozakura.png')}')`;
         }
     };
@@ -258,8 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
             button.setAttribute('aria-pressed', String(isActive));
         });
 
-        if (announce && audienceStatus) {
-            audienceStatus.textContent = `已切换至${audience === 'women' ? '女士' : '男士'}穿搭版本`;
+        if (audienceStatus) {
+            audienceStatus.textContent = announce
+                ? `已切换至${audience === 'women' ? '女士' : '男士'}穿搭版本`
+                : `当前为${audience === 'women' ? '女士' : '男士'}穿搭版本`;
         }
 
         try {
