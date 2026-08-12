@@ -114,7 +114,7 @@ img { display: block; width: 100%; }
 .panel-visual.portrait img { object-position: center 48%; }
 .intro-visual { position: absolute; left: 0; top: 50%; height: 100svh; width: 100vw; margin: 0; transform: translateY(-50%); transform-origin: left center; will-change: width, height, left; }
 .intro-visual img { object-fit: cover; background: #050506; }
-.intro-visual figcaption { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font: 600 clamp(30px, 4.4vw, 72px)/1 "Noto Sans SC", sans-serif; letter-spacing: -.04em; text-shadow: 0 4px 25px rgba(0,0,0,.55); transition: opacity .15s linear; }
+.intro-visual figcaption { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font: 900 clamp(30px, 4.4vw, 72px)/1 "Noto Serif SC", serif; letter-spacing: 0; text-shadow: 0 4px 25px rgba(0,0,0,.55); transition: opacity .15s linear; }
 .panel-copy { max-width: 540px; opacity: .28; transform: translateY(30px); transition: opacity .65s ease, transform .75s var(--ease-out); }
 .panel.is-active .panel-copy { opacity: 1; transform: translateY(0); }
 .intro-copy { position: absolute; z-index: 2; left: 70vw; top: 50%; width: min(25vw, 430px); opacity: 0; transform: translateY(calc(-50% + 24px)); pointer-events: none; }
