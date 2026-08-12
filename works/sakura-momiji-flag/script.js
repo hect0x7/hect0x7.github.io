@@ -367,8 +367,7 @@ function buildProgress() {
 // 把某一幕映射回它对应的 scrollY 位置，实现数字跳转。
 // 反解 update() 中的 virtualProgress → raw → scrollY。
 function scrollToPanel(index) {
-    if (!metrics || !desktop.matches) {
-        // 移动端没有横向轨道，直接滚到对应面板。
+    if (!metrics) {
         panels[index]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }
@@ -387,13 +386,6 @@ function scrollToPanel(index) {
 }
 
 function measure() {
-    if (!desktop.matches) {
-        metrics = null;
-        journey.style.height = '';
-        track.style.transform = '';
-        return;
-    }
-
     journey.style.height = `${panels.length * 100 + 80}vh`;
     const firstPanel = panels[0];
     const lastPanel = panels.at(-1);
@@ -452,7 +444,7 @@ function update() {
     if (flagFullyVisible) continuationParticles?.setFinale(true);
     if (flagRect.top >= innerHeight) continuationParticles?.setFinale(false);
 
-    if (!metrics || !desktop.matches) {
+    if (!metrics) {
         header.classList.remove('header-hidden');
         return;
     }
@@ -463,20 +455,21 @@ function update() {
 
     if (raw < introPhase) {
         const morph = easeOut(raw / introPhase);
-        const targetWidth = innerWidth * .58;
-        const targetHeight = Math.min(innerHeight * .66, targetWidth * 9 / 16);
-        introVisual.style.width = `${innerWidth * (1 - .42 * morph)}px`;
+        const targetWidth = innerWidth * (desktop.matches ? .58 : .9);
+        const targetHeight = Math.min(innerHeight * (desktop.matches ? .66 : .54), targetWidth * 9 / 16);
+        const targetLeft = innerWidth * (desktop.matches ? .08 : .05);
+        introVisual.style.width = `${innerWidth + (targetWidth - innerWidth) * morph}px`;
         introVisual.style.height = `${innerHeight + (targetHeight - innerHeight) * morph}px`;
-        introVisual.style.left = `${morph * innerWidth * .08}px`;
+        introVisual.style.left = `${morph * targetLeft}px`;
         introOverlay.style.opacity = String(1 - clamp(morph * 1.55));
         introCopy.style.opacity = String(clamp((morph - .88) / .12));
         introCopy.style.transform = `translateY(calc(-50% + ${(1 - morph) * 24}px))`;
     } else {
-        const targetWidth = innerWidth * .58;
-        const targetHeight = Math.min(innerHeight * .66, targetWidth * 9 / 16);
+        const targetWidth = innerWidth * (desktop.matches ? .58 : .9);
+        const targetHeight = Math.min(innerHeight * (desktop.matches ? .66 : .54), targetWidth * 9 / 16);
         introVisual.style.width = `${targetWidth}px`;
         introVisual.style.height = `${targetHeight}px`;
-        introVisual.style.left = '8vw';
+        introVisual.style.left = desktop.matches ? '8vw' : '5vw';
         introOverlay.style.opacity = '0';
         introCopy.style.opacity = '1';
         introCopy.style.transform = 'translateY(-50%)';
@@ -492,14 +485,14 @@ function update() {
 }
 
 function requestUpdate() {
-    if (desktop.matches && metrics && (
+    if (metrics && (
         metrics.viewportWidth !== innerWidth ||
         metrics.viewportHeight !== innerHeight ||
         metrics.trackWidth !== track.scrollWidth
     )) measure();
 
     const currentScrollY = scrollY;
-    if (metrics && desktop.matches) {
+    if (metrics) {
         const insideJourney = currentScrollY > metrics.start + 24 && currentScrollY < metrics.start + metrics.distance - 24;
         const delta = currentScrollY - headerScrollY;
         if (!insideJourney) header.classList.remove('header-hidden');

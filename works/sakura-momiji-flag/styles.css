@@ -215,7 +215,7 @@ footer { min-height: 160px; padding: 0 6vw; display: flex; align-items: center; 
 @keyframes cue { 0%, 20% { transform: translateX(-100%); } 70%, 100% { transform: translateX(100%); } }
 
 @media (max-width: 900px) {
-    :root { --header-height: 70px; }
+    :root { --header-height: 70px; --panel-gap: 24px; }
     .site-header { padding: 0 18px; }
     .site-header nav { display: none; }
     .brand-cluster { gap: 12px; }
@@ -228,21 +228,22 @@ footer { min-height: 160px; padding: 0 6vw; display: flex; align-items: center; 
     .hero-media img { object-position: 58% center; }
     .scroll-cue { left: 20px; bottom: 34px; }
     .hero-stamp { right: 20px; bottom: 26px; }
-    .journey { height: auto; }
-    .journey-sticky { position: relative; height: auto; overflow: visible; padding: 90px 0; }
-    .season-particles--journey { display: none; }
     .season-particles--continuation { display: block; }
-    .track { position: relative; height: auto; display: grid; gap: 96px; transform: none !important; }
-    .panel { height: auto; width: 100%; }
-    .panel-inner, .panel-intro .panel-inner { width: 100%; height: auto; padding: 0 18px; display: grid; grid-template-columns: 1fr; gap: 28px; }
-    .panel-intro .panel-inner { padding: 0; }
-    .panel-intro .panel-copy { padding: 0 18px; }
-    .panel-visual, .intro-visual, .panel-visual.portrait { width: 100%; height: min(66vh, 560px); }
-    .intro-visual { position: relative; left: auto !important; top: auto; height: 62vh; transform: none; }
-    .panel-copy, .intro-copy { position: relative; left: auto; top: auto; width: auto; opacity: 1 !important; transform: none !important; pointer-events: auto; }
-    .panel-copy h2 { font-size: 38px; }
+    .panel-inner { width: calc(100vw - 36px); grid-template-columns: 1fr; align-content: center; gap: 18px; }
+    .panel-visual, .panel-visual.portrait { width: 100%; height: min(48svh, 430px); }
+    .panel-copy { max-width: none; }
+    .panel-copy h2 { font-size: clamp(28px, 8vw, 38px); }
+    .panel-copy > p:not(.panel-kicker) { margin-top: 14px; font-size: 12px; line-height: 1.65; }
+    .panel-kicker { margin-bottom: 12px; font-size: 9px; }
+    .place-meta { margin-top: 16px; }
+    .outline-button { height: 42px; margin-top: 18px; }
+    .intro-copy { left: 5vw; top: 76%; width: 90vw; max-width: none; }
+    .panel-intro .intro-copy { padding: 0; }
     .intro-visual figcaption { padding: 20px; text-align: center; font-size: 31px; }
-    .journey-progress, .scroll-hint { display: none; }
+    .journey-progress { left: 18px; right: 18px; bottom: 22px; width: auto; transform: none; }
+    .progress-items { gap: 4px; }
+    .progress-number { display: none; }
+    .scroll-hint { display: none; }
     .season-ledger { padding: 100px 18px; }
     .ledger-head { text-align: left; margin-bottom: 62px; }
     .ledger-head > p:last-child { margin-left: 0; }
