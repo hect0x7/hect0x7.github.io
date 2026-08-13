@@ -10,6 +10,7 @@ const heroMedia = document.querySelector('.hero-media');
 const header = document.querySelector('.site-header');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const desktop = matchMedia('(min-width: 901px)');
+const compactLandscape = matchMedia('(max-width: 900px) and (max-height: 500px) and (orientation: landscape)');
 const heroParticleCanvas = document.querySelector('.season-particles--hero');
 const journeyParticleCanvas = document.querySelector('.season-particles--journey');
 const continuationParticleCanvas = document.querySelector('.season-particles--continuation');
@@ -20,14 +21,55 @@ const flagImage = document.querySelector('.flag-image');
 const ledgerHead = document.querySelector('.ledger-head');
 const afterglowCopy = document.querySelector('.afterglow-copy');
 const flagLabel = document.querySelector('.flag-label');
+const flagFinale = document.querySelector('.flag-finale');
+const finaleCoda = document.querySelector('.finale-coda');
+const redBand = document.querySelector('.ledger-red');
+const autoplayStart = document.querySelector('.autoplay-start');
+const headerAutoplay = document.querySelector('.header-autoplay');
+const autoplayDock = document.querySelector('.autoplay-dock');
+const autoplayToggle = document.querySelector('.autoplay-toggle');
+const autoplayClose = document.querySelector('.autoplay-close');
+const autoplayStateLabel = document.querySelector('.autoplay-state-label');
+const autoplayPosition = document.querySelector('.autoplay-position');
+const autoplaySpeedButtons = [...document.querySelectorAll('[data-autoplay-speed]')];
+const navLinks = [...document.querySelectorAll('.site-header nav a')];
 
 let metrics = null;
 let ticking = false;
 let activeIndex = -1;
 let headerScrollY = scrollY;
+let currentLanguage = 'zh';
+let layoutRefreshTimer = 0;
+let layoutRefreshWaypoint = null;
+let layoutRefreshGeneration = 0;
+let layoutRefreshUserTakeover = false;
+let pointerGesture = null;
+let suppressAutoplayClick = false;
+let manualCodaReveal = false;
+
+const INTRO_PHASE = .17;
+const stableViewportUnit = CSS.supports('height', '100svh') ? 'svh' : 'vh';
+const autoplay = {
+    state: 'idle',
+    timeline: [],
+    waypointIndex: 0,
+    phase: 'move',
+    elapsed: 0,
+    duration: 0,
+    startY: 0,
+    targetY: 0,
+    holdAfterMove: null,
+    lastTimestamp: 0,
+    frame: 0,
+    pauseY: 0,
+    semanticWaypointIndex: 0,
+    runGeneration: 0,
+    playbackRate: localStorage.getItem('season-autoplay-speed') === '2' ? 2 : 1
+};
 
 const clamp = (value, min = 0, max = 1) => Math.min(Math.max(value, min), max);
 const easeOut = value => 1 - Math.pow(1 - value, 3);
+const easeInOut = value => value < .5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 
 function createParticleScene(canvas, { count, mode, observe = true, maxDpr = 1.75, targetElement = null, avoidElements = [], clipStartElement = null, clipEndElement = null }) {
     const context = canvas?.getContext('2d');
@@ -360,46 +402,94 @@ function buildProgress() {
             <span class="progress-line"><i class="progress-fill"></i></span>
         </button>`).join('');
     progressRoot.querySelectorAll('.progress-item').forEach(item => {
-        item.addEventListener('click', () => scrollToPanel(Number(item.dataset.index)));
+        item.addEventListener('click', () => {
+            pauseAutoplay();
+            scrollToPanel(Number(item.dataset.index));
+        });
     });
 }
 
-// 把某一幕映射回它对应的 scrollY 位置，实现数字跳转。
-// 反解 update() 中的 virtualProgress → raw → scrollY。
+function scrollYForRaw(raw) {
+    if (!metrics) return journey.offsetTop;
+    return metrics.start + clamp(raw) * metrics.distance;
+}
+
+function introTargetMetrics() {
+    if (compactLandscape.matches) {
+        const width = innerWidth * .52;
+        return {
+            width,
+            height: Math.min(metrics.viewportHeight * .64, width * 9 / 16),
+            left: innerWidth * .04
+        };
+    }
+    const width = innerWidth * (desktop.matches ? .58 : .9);
+    return {
+        width,
+        height: Math.min(metrics.viewportHeight * (desktop.matches ? .66 : .54), width * 9 / 16),
+        left: innerWidth * (desktop.matches ? .08 : .05)
+    };
+}
+
+function scrollYForPanel(index) {
+    if (!metrics || index === 0) return scrollYForRaw(0);
+    const centeredTranslate = metrics.panelCenters[index] - innerWidth / 2;
+    const translateProgress = clamp(centeredTranslate / Math.max(metrics.maxTranslate, 1));
+    return scrollYForRaw(INTRO_PHASE + translateProgress * (1 - INTRO_PHASE));
+}
+
 function scrollToPanel(index) {
     if (!metrics) {
         panels[index]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
     }
-    const introPhase = .17;
-    let raw;
-    if (index === 0) {
-        raw = 0;
-    } else {
-        // 目标 virtualProgress 落在该幕中部，确保滚动后它被判定为 active。
-        const target = Math.min(index + .5, panels.length - .01);
-        const translateProgress = (target - .82) / (panels.length - .82);
-        raw = introPhase + translateProgress * (1 - introPhase);
-    }
-    const top = metrics.start + clamp(raw) * metrics.distance;
+    const top = scrollYForPanel(index);
     scrollTo({ top, behavior: 'smooth' });
 }
 
+function panelStateForTranslate(translateProgress) {
+    const centers = metrics.panelCenters;
+    const viewportCenter = metrics.maxTranslate * translateProgress + innerWidth / 2;
+    let index = centers.length - 1;
+
+    for (let panelIndex = 0; panelIndex < centers.length - 1; panelIndex += 1) {
+        const boundary = (centers[panelIndex] + centers[panelIndex + 1]) / 2;
+        if (viewportCenter < boundary) {
+            index = panelIndex;
+            break;
+        }
+    }
+
+    const previousBoundary = index === 0
+        ? centers[0] - (centers[1] - centers[0]) / 2
+        : (centers[index - 1] + centers[index]) / 2;
+    const nextBoundary = index === centers.length - 1
+        ? centers.at(-1) + (centers.at(-1) - centers.at(-2)) / 2
+        : (centers[index] + centers[index + 1]) / 2;
+
+    return {
+        index,
+        localProgress: clamp((viewportCenter - previousBoundary) / Math.max(nextBoundary - previousBoundary, 1))
+    };
+}
+
 function measure() {
-    journey.style.height = `${panels.length * 100 + 80}vh`;
+    journey.style.height = `${panels.length * 100 + 80}${stableViewportUnit}`;
     const firstPanel = panels[0];
     const lastPanel = panels.at(-1);
     const lastInner = lastPanel.querySelector('.panel-inner');
-    const finalLeft = Math.max(32, (innerWidth - lastInner.offsetWidth) / 2);
+    const finalLeft = Math.max(desktop.matches ? 32 : 18, (innerWidth - lastInner.offsetWidth) / 2);
     const maxTranslate = lastPanel.offsetLeft - finalLeft;
+    const layoutHeight = sticky.offsetHeight || innerHeight;
 
     metrics = {
         start: journey.offsetTop,
-        distance: journey.offsetHeight - innerHeight,
+        distance: journey.offsetHeight - layoutHeight,
         maxTranslate: Math.max(0, maxTranslate - firstPanel.offsetLeft),
         viewportWidth: innerWidth,
-        viewportHeight: innerHeight,
-        trackWidth: track.scrollWidth
+        viewportHeight: layoutHeight,
+        trackWidth: track.scrollWidth,
+        panelCenters: panels.map(panel => panel.offsetLeft + panel.offsetWidth / 2)
     };
     update();
 }
@@ -421,6 +511,21 @@ function setActive(index, localProgress) {
 function update() {
     ticking = false;
     const currentScrollY = scrollY;
+    const navTargets = [0, journey.offsetTop, seasonLedger.offsetTop, afterglow.offsetTop];
+    let navIndex = navTargets.length - 1;
+    for (let index = 0; index < navTargets.length - 1; index += 1) {
+        if (currentScrollY < navTargets[index + 1] - innerHeight * .28) {
+            navIndex = index;
+            break;
+        }
+    }
+    navLinks.forEach((link, index) => {
+        const active = index === navIndex;
+        link.classList.toggle('is-active', active);
+        if (active) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+    });
+    autoplayDock?.classList.toggle('is-continuation', navIndex >= 2);
     const heroProgress = clamp(currentScrollY / Math.max(innerHeight, 1), 0, 1.15);
     if (heroMedia && !reducedMotion.matches) {
         heroMedia.style.transform = `translate3d(0, ${heroProgress * 72}px, 0) scale(${1.04 + heroProgress * .04})`;
@@ -439,10 +544,15 @@ function update() {
     continuationParticles?.setContinuationMix(continuationMix);
     continuationParticles?.setVisible(continuationVisible);
     const flagRect = flagImage.getBoundingClientRect();
-    const flagVisibleHeight = Math.min(flagRect.bottom, innerHeight) - Math.max(flagRect.top, 0);
-    const flagFullyVisible = continuationVisible && flagRect.bottom <= innerHeight && flagVisibleHeight >= flagRect.height * .85;
+    const flagVisibleHeight = Math.max(0, Math.min(flagRect.bottom, innerHeight) - Math.max(flagRect.top, 0));
+    const flagVisibleRatio = flagVisibleHeight / Math.max(1, Math.min(flagRect.height, innerHeight));
+    const flagFullyVisible = continuationVisible && flagVisibleRatio >= .82;
     if (flagFullyVisible) continuationParticles?.setFinale(true);
     if (flagRect.top >= innerHeight) continuationParticles?.setFinale(false);
+    const codaBounds = finaleCoda.getBoundingClientRect();
+    if (canRevealFinaleCodaManually() && codaBounds.bottom > header.offsetHeight && codaBounds.top < innerHeight) {
+        finaleCoda.classList.add('visible');
+    }
 
     if (!metrics) {
         header.classList.remove('header-hidden');
@@ -450,49 +560,48 @@ function update() {
     }
 
     const raw = clamp((currentScrollY - metrics.start) / metrics.distance);
-    const introPhase = .17;
+    const layoutHeight = metrics.viewportHeight;
+    const introTarget = introTargetMetrics();
     let translateProgress = 0;
 
-    if (raw < introPhase) {
-        const morph = easeOut(raw / introPhase);
-        const targetWidth = innerWidth * (desktop.matches ? .58 : .9);
-        const targetHeight = Math.min(innerHeight * (desktop.matches ? .66 : .54), targetWidth * 9 / 16);
-        const targetLeft = innerWidth * (desktop.matches ? .08 : .05);
-        introVisual.style.width = `${innerWidth + (targetWidth - innerWidth) * morph}px`;
-        introVisual.style.height = `${innerHeight + (targetHeight - innerHeight) * morph}px`;
-        introVisual.style.left = `${morph * targetLeft}px`;
+    if (raw < INTRO_PHASE) {
+        const morph = easeOut(raw / INTRO_PHASE);
+        introVisual.style.width = `${innerWidth + (introTarget.width - innerWidth) * morph}px`;
+        introVisual.style.height = `${layoutHeight + (introTarget.height - layoutHeight) * morph}px`;
+        introVisual.style.left = `${morph * introTarget.left}px`;
         introOverlay.style.opacity = String(1 - clamp(morph * 1.55));
         introCopy.style.opacity = String(clamp((morph - .88) / .12));
         introCopy.style.transform = `translateY(calc(-50% + ${(1 - morph) * 24}px))`;
     } else {
-        const targetWidth = innerWidth * (desktop.matches ? .58 : .9);
-        const targetHeight = Math.min(innerHeight * (desktop.matches ? .66 : .54), targetWidth * 9 / 16);
-        introVisual.style.width = `${targetWidth}px`;
-        introVisual.style.height = `${targetHeight}px`;
-        introVisual.style.left = desktop.matches ? '8vw' : '5vw';
+        introVisual.style.width = `${introTarget.width}px`;
+        introVisual.style.height = `${introTarget.height}px`;
+        introVisual.style.left = `${introTarget.left}px`;
         introOverlay.style.opacity = '0';
         introCopy.style.opacity = '1';
         introCopy.style.transform = 'translateY(-50%)';
-        translateProgress = clamp((raw - introPhase) / (1 - introPhase));
+        translateProgress = clamp((raw - INTRO_PHASE) / (1 - INTRO_PHASE));
     }
 
     track.style.transform = `translate3d(${-metrics.maxTranslate * translateProgress}px, 0, 0)`;
-    const virtualProgress = raw < introPhase
-        ? raw / introPhase * .82
-        : .82 + translateProgress * (panels.length - .82);
-    const panelIndex = Math.min(panels.length - 1, Math.floor(virtualProgress));
-    setActive(panelIndex, virtualProgress - panelIndex);
+    if (raw < INTRO_PHASE) {
+        setActive(0, raw / INTRO_PHASE * .5);
+    } else {
+        const panelState = panelStateForTranslate(translateProgress);
+        setActive(panelState.index, panelState.localProgress);
+    }
 }
 
 function requestUpdate() {
     if (metrics && (
         metrics.viewportWidth !== innerWidth ||
-        metrics.viewportHeight !== innerHeight ||
+        metrics.viewportHeight !== sticky.offsetHeight ||
         metrics.trackWidth !== track.scrollWidth
     )) measure();
 
     const currentScrollY = scrollY;
-    if (metrics) {
+    if (autoplay.state === 'idle') {
+        header.classList.remove('header-hidden');
+    } else if (metrics) {
         const insideJourney = currentScrollY > metrics.start + 24 && currentScrollY < metrics.start + metrics.distance - 24;
         const delta = currentScrollY - headerScrollY;
         if (!insideJourney) header.classList.remove('header-hidden');
@@ -507,29 +616,458 @@ function requestUpdate() {
     }
 }
 
+function elementScrollTarget(element, alignment = .5) {
+    const bounds = element.getBoundingClientRect();
+    const documentTop = scrollY + bounds.top;
+    const visibleHeight = Math.min(bounds.height, innerHeight * .82);
+    return clamp(documentTop - (innerHeight - visibleHeight) * alignment, 0, document.documentElement.scrollHeight - innerHeight);
+}
+
+function autoplaySafeViewport() {
+    const headerSpace = header.offsetHeight + (desktop.matches ? 22 : 14);
+    const dockSpace = (autoplayDock?.offsetHeight || 56) + (desktop.matches ? 48 : 34);
+    return {
+        top: Math.min(headerSpace, innerHeight * .32),
+        bottom: Math.max(innerHeight * .58, innerHeight - dockSpace)
+    };
+}
+
+function elementDocumentBounds(element) {
+    const bounds = element.getBoundingClientRect();
+    const top = scrollY + bounds.top;
+    return { top, bottom: top + bounds.height, height: bounds.height };
+}
+
+function verticalFlowTargets(element) {
+    const bounds = elementDocumentBounds(element);
+    const safe = autoplaySafeViewport();
+    const maxScroll = document.documentElement.scrollHeight - innerHeight;
+    let start = clamp(bounds.top - safe.top, 0, maxScroll);
+    let end = clamp(bounds.bottom - safe.bottom, 0, maxScroll);
+
+    if (end - start < 90) {
+        const center = elementScrollTarget(element, .5);
+        const drift = Math.min(150, Math.max(90, bounds.height * .22));
+        start = clamp(center - drift / 2, 0, maxScroll);
+        end = clamp(center + drift / 2, start, maxScroll);
+    }
+    return { start, end };
+}
+
+function flowDuration(distance) {
+    const durationAtReadingSpeed = distance / Math.max(innerHeight * .18, 1) * 1000;
+    return Math.max(durationAtReadingSpeed, 4200);
+}
+
+function finaleLandingTarget() {
+    return elementScrollTarget(desktop.matches ? flagFinale : flagImage, desktop.matches ? .5 : .42);
+}
+
+function finaleCodaTarget() {
+    const safe = autoplaySafeViewport();
+    const bounds = elementDocumentBounds(finaleCoda);
+    const safeHeight = safe.bottom - safe.top;
+    const visibleTop = safe.top + Math.max(0, (safeHeight - bounds.height) / 2);
+    return clamp(bounds.top - visibleTop, 0, document.documentElement.scrollHeight - innerHeight);
+}
+
+function resetFinaleCoda() {
+    finaleCoda.classList.remove('visible');
+}
+
+function revealFinaleCoda() {
+    finaleCoda.classList.add('visible');
+}
+
+function canRevealFinaleCodaManually() {
+    return manualCodaReveal || autoplay.state === 'idle' || autoplay.state === 'disabled' || autoplay.state === 'ended';
+}
+
+function buildAutoplayTimeline() {
+    const heroWaypoint = {
+        kind: 'panel',
+        panelIndex: 0,
+        getY: () => 0,
+        move: 1,
+        hold: 2400
+    };
+    const panelWaypoints = panels.map((_, index) => ({
+        kind: 'panel',
+        panelIndex: index,
+        getY: () => scrollYForPanel(index),
+        move: index === 0 ? 1300 : 1200,
+        hold: index === 0 ? 1700 : index === 7 ? 4600 : 3400
+    }));
+
+    panelWaypoints.splice(1, 0, {
+        kind: 'panel',
+        panelIndex: 0,
+        getY: () => scrollYForRaw(INTRO_PHASE),
+        move: 1500,
+        hold: 3500
+    });
+
+    return [
+        heroWaypoint,
+        ...panelWaypoints,
+        { kind: 'ledger', labelKey: 'autoplayLedger', getY: () => elementScrollTarget(ledgerHead, .45), move: 1500, hold: 3800 },
+        { kind: 'flow', labelKey: 'autoplayLedger', getY: () => verticalFlowTargets(redBand).end, move: flowDuration, hold: 0, easing: value => value },
+        { kind: 'finale', labelKey: 'autoplayFinale', getY: finaleLandingTarget, move: distance => clamp(1700 + distance * .65, 1800, 4200), hold: 700 },
+        { kind: 'finale', labelKey: 'autoplayFinale', getY: finaleCodaTarget, move: 1100, hold: 4200, onEnter: revealFinaleCoda }
+    ];
+}
+
+function autoplayDictionary() {
+    return { ...zh, ...(translations[currentLanguage] || {}) };
+}
+
+function updateAutoplayUI(dictionary = null) {
+    if (!autoplayDock || !autoplayToggle) return;
+    dictionary = dictionary || autoplayDictionary();
+    headerAutoplay.hidden = autoplay.state !== 'idle';
+    autoplayDock.hidden = autoplay.state === 'idle' || autoplay.state === 'disabled';
+    autoplayDock.dataset.state = autoplay.state;
+    autoplayDock.setAttribute('aria-hidden', String(autoplay.state === 'idle' || autoplay.state === 'disabled'));
+    const playing = autoplay.state === 'playing';
+    autoplayToggle.dataset.mode = playing ? 'pause' : 'play';
+    autoplayToggle.setAttribute('aria-pressed', String(playing));
+    const actionLabel = autoplay.state === 'ended' ? dictionary.autoplayReplayAria : playing ? dictionary.autoplayPauseAria : dictionary.autoplayResumeAria;
+    autoplayToggle.setAttribute('aria-label', actionLabel);
+    autoplayToggle.setAttribute('title', actionLabel);
+    const stateLabel = autoplay.state === 'ended'
+        ? dictionary.autoplayEnded
+        : autoplay.state === 'paused' ? dictionary.autoplayPaused : dictionary.autoplayPlaying;
+    if (autoplayStateLabel.textContent !== stateLabel) autoplayStateLabel.textContent = stateLabel;
+
+    const waypoint = autoplay.timeline[autoplay.waypointIndex];
+    if (waypoint?.kind === 'panel') {
+        const displayIndex = Math.min(panels.length, waypoint.panelIndex + 1);
+        autoplayPosition.textContent = `${String(displayIndex).padStart(2, '0')} / ${panels.length}`;
+    } else if (waypoint) {
+        autoplayPosition.textContent = dictionary[waypoint.labelKey] || dictionary.autoplayFinale;
+    }
+}
+
+function setAutoplaySpeed(rate) {
+    autoplay.playbackRate = rate === 2 ? 2 : 1;
+    autoplaySpeedButtons.forEach(button => {
+        button.setAttribute('aria-pressed', String(Number(button.dataset.autoplaySpeed) === autoplay.playbackRate));
+    });
+    localStorage.setItem('season-autoplay-speed', String(autoplay.playbackRate));
+}
+
+function enterAutoplayWaypoint(index, fromCurrentPosition = true) {
+    const waypoint = autoplay.timeline[index];
+    if (!waypoint) {
+        finishAutoplay();
+        return;
+    }
+    autoplay.waypointIndex = index;
+    autoplay.semanticWaypointIndex = index;
+    autoplay.phase = 'move';
+    autoplay.elapsed = 0;
+    autoplay.startY = fromCurrentPosition ? scrollY : autoplay.timeline[Math.max(0, index - 1)]?.getY() || scrollY;
+    waypoint.onEnter?.();
+    autoplay.targetY = waypoint.getY();
+    const distance = Math.abs(autoplay.targetY - autoplay.startY);
+    autoplay.duration = typeof waypoint.move === 'function' ? waypoint.move(distance) : waypoint.move;
+    autoplay.holdAfterMove = waypoint.hold;
+    updateAutoplayUI();
+}
+
+function autoplayFrame(timestamp, generation) {
+    if (autoplay.state !== 'playing' || generation !== autoplay.runGeneration) return;
+    if (!autoplay.lastTimestamp) autoplay.lastTimestamp = timestamp;
+    const delta = Math.min(48, timestamp - autoplay.lastTimestamp);
+    autoplay.lastTimestamp = timestamp;
+    autoplay.elapsed += delta * autoplay.playbackRate;
+    const waypoint = autoplay.timeline[autoplay.waypointIndex];
+    if (!waypoint) {
+        finishAutoplay();
+        return;
+    }
+
+    if (autoplay.phase === 'move') {
+        const progress = clamp(autoplay.elapsed / Math.max(1, autoplay.duration));
+        const easing = waypoint.easing || easeInOut;
+        window.scrollTo(0, autoplay.startY + (autoplay.targetY - autoplay.startY) * easing(progress));
+        if (progress >= 1) {
+            autoplay.phase = 'hold';
+            autoplay.elapsed = 0;
+            autoplay.duration = autoplay.holdAfterMove;
+        }
+    } else if (autoplay.elapsed >= autoplay.duration) {
+        enterAutoplayWaypoint(autoplay.waypointIndex + 1);
+    }
+
+    if (autoplay.state === 'playing' && generation === autoplay.runGeneration) {
+        autoplay.frame = requestAnimationFrame(nextTimestamp => autoplayFrame(nextTimestamp, generation));
+    }
+}
+
+function findForwardAutoplayWaypoint() {
+    if (!autoplay.timeline.length) return 0;
+    const forwardIndex = autoplay.timeline.findIndex(waypoint => waypoint.getY() >= scrollY - 8);
+    return forwardIndex < 0 ? autoplay.timeline.length - 1 : forwardIndex;
+}
+
+function startAutoplay({ replay = false } = {}) {
+    if (reducedMotion.matches) return;
+    if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
+    const generation = ++autoplay.runGeneration;
+    const previousState = autoplay.state;
+    manualCodaReveal = false;
+    if (!autoplay.timeline.length || replay || previousState === 'ended') autoplay.timeline = buildAutoplayTimeline();
+    autoplay.state = 'playing';
+    autoplay.lastTimestamp = 0;
+    document.documentElement.classList.add('autoplay-driving');
+    autoplayStart.hidden = true;
+    if (replay || previousState === 'ended') {
+        resetFinaleCoda();
+        const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+        const previousBodyScrollBehavior = document.body.style.scrollBehavior;
+        document.documentElement.style.scrollBehavior = 'auto';
+        document.body.style.scrollBehavior = 'auto';
+        document.documentElement.getBoundingClientRect();
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        document.documentElement.style.scrollBehavior = previousScrollBehavior;
+        document.body.style.scrollBehavior = previousBodyScrollBehavior;
+        update();
+        enterAutoplayWaypoint(0);
+    } else if (previousState === 'paused' && Math.abs(scrollY - autoplay.pauseY) <= 8) {
+        updateAutoplayUI();
+    } else {
+        enterAutoplayWaypoint(findForwardAutoplayWaypoint());
+    }
+    autoplay.frame = requestAnimationFrame(timestamp => autoplayFrame(timestamp, generation));
+}
+
+function pauseAutoplay() {
+    if (autoplay.state !== 'playing') return;
+    autoplay.runGeneration += 1;
+    autoplay.state = 'paused';
+    autoplay.pauseY = scrollY;
+    autoplay.lastTimestamp = 0;
+    if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
+    autoplay.frame = 0;
+    document.documentElement.classList.remove('autoplay-driving');
+    header.classList.remove('header-hidden');
+    updateAutoplayUI();
+}
+
+function finishAutoplay() {
+    autoplay.runGeneration += 1;
+    autoplay.state = 'ended';
+    autoplay.lastTimestamp = 0;
+    if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
+    autoplay.frame = 0;
+    document.documentElement.classList.remove('autoplay-driving');
+    header.classList.remove('header-hidden');
+    updateAutoplayUI();
+}
+
+function closeAutoplay() {
+    autoplay.runGeneration += 1;
+    if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
+    autoplay.frame = 0;
+    autoplay.state = 'idle';
+    autoplay.lastTimestamp = 0;
+    autoplay.pauseY = scrollY;
+    manualCodaReveal = true;
+    cancelPendingLayoutRebase();
+    document.documentElement.classList.remove('autoplay-driving');
+    autoplayStart.hidden = false;
+    header.classList.remove('header-hidden');
+    updateAutoplayUI();
+}
+
+function disableAutoplay() {
+    autoplay.runGeneration += 1;
+    if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
+    autoplay.frame = 0;
+    autoplay.state = 'disabled';
+    document.documentElement.classList.remove('autoplay-driving');
+    autoplayStart.hidden = true;
+    updateAutoplayUI();
+}
+
+function toggleAutoplay() {
+    if (autoplay.state === 'playing') pauseAutoplay();
+    else startAutoplay({ replay: autoplay.state === 'ended' });
+}
+
+function isAutoplayControl(target) {
+    return target instanceof Element && Boolean(target.closest('[data-autoplay-control]'));
+}
+
+function handleUserInterruption(event) {
+    if (isAutoplayControl(event.target)) return;
+    manualCodaReveal = true;
+    cancelPendingLayoutRebase();
+    pauseAutoplay();
+}
+
+function cancelPendingLayoutRebase() {
+    if (!layoutRefreshTimer && layoutRefreshWaypoint === null) return;
+    layoutRefreshUserTakeover = true;
+    layoutRefreshWaypoint = null;
+}
+
+autoplayStart?.addEventListener('click', () => startAutoplay({ replay: true }));
+headerAutoplay?.addEventListener('click', () => startAutoplay());
+autoplayToggle?.addEventListener('click', event => {
+    if (suppressAutoplayClick) {
+        suppressAutoplayClick = false;
+        event.preventDefault();
+        return;
+    }
+    toggleAutoplay();
+});
+autoplayClose?.addEventListener('click', closeAutoplay);
+autoplaySpeedButtons.forEach(button => button.addEventListener('click', event => {
+    if (suppressAutoplayClick) {
+        suppressAutoplayClick = false;
+        event.preventDefault();
+        return;
+    }
+    setAutoplaySpeed(Number(button.dataset.autoplaySpeed));
+}));
+addEventListener('wheel', () => {
+    manualCodaReveal = true;
+    cancelPendingLayoutRebase();
+    pauseAutoplay();
+}, { passive: true });
+addEventListener('touchstart', handleUserInterruption, { passive: true });
+addEventListener('touchmove', () => {
+    manualCodaReveal = true;
+    cancelPendingLayoutRebase();
+    pauseAutoplay();
+}, { passive: true });
+addEventListener('pointerdown', event => {
+    pointerGesture = {
+        id: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        startedOnControl: isAutoplayControl(event.target)
+    };
+    if (event.pointerType === 'touch' || pointerGesture.startedOnControl) return;
+    handleUserInterruption(event);
+}, { passive: true });
+addEventListener('pointermove', event => {
+    if (!pointerGesture || pointerGesture.id !== event.pointerId) return;
+    if (Math.hypot(event.clientX - pointerGesture.x, event.clientY - pointerGesture.y) < 10) return;
+    const shouldInterrupt = autoplay.state === 'playing' || layoutRefreshTimer || layoutRefreshWaypoint !== null;
+    if (!shouldInterrupt) return;
+    suppressAutoplayClick = pointerGesture.startedOnControl;
+    cancelPendingLayoutRebase();
+    pauseAutoplay();
+}, { passive: true });
+const endPointerGesture = event => {
+    if (pointerGesture?.id !== event.pointerId) return;
+    pointerGesture = null;
+    if (suppressAutoplayClick) {
+        setTimeout(() => {
+            suppressAutoplayClick = false;
+        }, 0);
+    }
+};
+addEventListener('pointerup', endPointerGesture, { passive: true });
+addEventListener('pointercancel', endPointerGesture, { passive: true });
+addEventListener('keydown', event => {
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) return;
+    if (event.key === ' ' && isAutoplayControl(event.target)) return;
+    manualCodaReveal = true;
+    cancelPendingLayoutRebase();
+    pauseAutoplay();
+});
+document.addEventListener('click', event => {
+    if (!isAutoplayControl(event.target)) {
+        manualCodaReveal = true;
+        pauseAutoplay();
+    }
+});
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) pauseAutoplay();
+});
+
 buildProgress();
+setAutoplaySpeed(autoplay.playbackRate);
 addEventListener('scroll', requestUpdate, { passive: true });
-addEventListener('resize', () => {
+function refreshLayout() {
+    layoutRefreshTimer = 0;
+    const waypointIndex = layoutRefreshWaypoint;
+    layoutRefreshWaypoint = null;
+    layoutRefreshUserTakeover = false;
+
     heroParticles?.resize();
     journeyParticles?.resize();
     continuationParticles?.resize();
     measure();
-});
-desktop.addEventListener('change', measure);
+
+    if (waypointIndex === null || !autoplay.timeline.length) return;
+    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, autoplay.timeline[waypointIndex].getY());
+    document.documentElement.style.scrollBehavior = previousScrollBehavior;
+    update();
+    enterAutoplayWaypoint(waypointIndex);
+    autoplay.pauseY = scrollY;
+}
+
+function scheduleLayoutRefresh() {
+    const widthChanged = !metrics || metrics.viewportWidth !== innerWidth;
+    const stableHeightChanged = !metrics || metrics.viewportHeight !== sticky.offsetHeight;
+    const trackChanged = !metrics || metrics.trackWidth !== track.scrollWidth;
+    if (!widthChanged && !stableHeightChanged && !trackChanged && !layoutRefreshTimer) return;
+
+    if (!layoutRefreshUserTakeover && layoutRefreshWaypoint === null && autoplay.timeline.length && (
+        autoplay.state === 'playing' ||
+        (autoplay.state === 'paused' && Math.abs(scrollY - autoplay.pauseY) <= 8)
+    )) {
+        layoutRefreshWaypoint = autoplay.semanticWaypointIndex;
+    }
+    pauseAutoplay();
+    clearTimeout(layoutRefreshTimer);
+    const generation = ++layoutRefreshGeneration;
+    layoutRefreshTimer = setTimeout(() => {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (generation === layoutRefreshGeneration) refreshLayout();
+        }));
+    }, 120);
+}
+
+addEventListener('resize', scheduleLayoutRefresh);
+desktop.addEventListener('change', scheduleLayoutRefresh);
+compactLandscape.addEventListener('change', scheduleLayoutRefresh);
 addEventListener('load', measure);
+reducedMotion.addEventListener('change', () => {
+    if (reducedMotion.matches) disableAutoplay();
+    else {
+        autoplay.state = 'idle';
+        autoplayStart.hidden = false;
+        updateAutoplayUI();
+    }
+});
 
 const revealObserver = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('visible');
+        if (!entry.isIntersecting) return;
+        if (entry.target === finaleCoda && !canRevealFinaleCodaManually() && !finaleCoda.classList.contains('visible')) return;
+        entry.target.classList.add('visible');
     });
-}, { threshold: .18 });
+}, { threshold: .08 });
 document.querySelectorAll('.reveal').forEach(element => revealObserver.observe(element));
 
 const zh = {
     siteTitle: '一面旗，两个季节',
     siteTagline: '樱花的白，红叶的红',
     particleToggle: '切换季节粒子效果',
-    navTop: '序章', navJourney: '白与红', navLedger: '花与叶', navStory: '旗成', scroll: '向下观赏',
+    autoplayStart: '自动播放', autoplayStartAria: '自动播放完整叙事', autoplayHeader: '自动播放', autoplayHeaderAria: '从当前位置自动播放', sceneAria: '第 {n} 幕',
+    autoplayPlaying: '正在自动播放', autoplayPaused: '自动播放已暂停', autoplayEnded: '播放完成',
+    autoplayPauseAria: '暂停自动播放', autoplayResumeAria: '继续自动播放', autoplayReplayAria: '重新播放完整叙事', autoplayCloseAria: '关闭自动播放',
+    autoplaySpeedAria: '播放速度', autoplaySpeed1Aria: '1倍速', autoplaySpeed2Aria: '2倍速',
+    autoplayLedger: '白与红', autoplayWhite: '樱花铺开', autoplayEquation: '花叶相逢', autoplayRed: '红叶聚拢', autoplayFinale: '旗成',
+    navTop: '一念', navJourney: '花与叶', navLedger: '白与红', navStory: '旗成', scroll: '向下观赏',
     heroTitle: '春日成花<br><em>秋日成叶</em>',
     heroLead: '樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。',
     introOverlay: '一面旗，两个季节', introKicker: '01 · 构想 · 一面季节的旗',
@@ -549,14 +1087,19 @@ const zh = {
     arrive: '查看季节采样', scrollHint: '继续滚动 · 看白如何铺开，红如何聚拢',
     ledgerTitle: '白与红，<br>共同完成一面旗。', ledgerLead: '地点不是清单，而是颜色的证据。', ledgerVerse: '<p class="verse-white"><span class="verse-mark">花</span>樱花经过花廊、人行、水路、雪山田野、山海与群山，<em>铺开白</em>。</p><p class="verse-red"><span class="verse-mark">葉</span>红叶借雪峰、木构、漆影、河谷、塔影与海潮，<em>向中心聚拢</em>。</p>', ledgerWhite: '樱花之白', ledgerRed: '红叶之红',
     flagLabel: '樱花之白 · 红叶之红', equationSakura: '樱花之白', equationMomiji: '红叶之红', equationFlag: '日本之旗',
-    afterTitle: '一面旗<br><em>两种季节的美。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白，是六处樱花风景<em>共同铺开的底色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>红，是六处红叶风景<em>向中央汇成的太阳</em>。</p>', afterCoda: '熟悉的日本国旗，因此拥有了地点、时间与生命。', backTop: '回到顶部 ↑'
+    afterTitle: '一面旗<br><em>两种季节的美。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白，是六处樱花风景<em>共同铺开的底色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>红，是六处红叶风景<em>向中央汇成的太阳</em>。</p>', afterCoda: '熟悉的日本国旗，因此拥有了地点、时间与生命。', finaleCoda: '一念初生，花叶入景，<br><span>凝为白红，最终成旗。</span>', finaleCodaInline: '一念初生，花叶入景，凝为<span class="footer-white">白</span><span class="footer-red">红</span>，最终成旗。', backTop: '回到顶部 ↑'
 };
 
 const ja = {
     siteTitle: '二つの季節の旗',
     siteTagline: '桜の白、紅葉の赤',
     particleToggle: '季節の粒子効果を切り替える',
-    navTop: '序', navJourney: '白と赤', navLedger: '花と葉', navStory: '旗となる', scroll: '下へ',
+    autoplayStart: '自動再生', autoplayStartAria: '物語を最初から自動再生', autoplayHeader: '自動再生', autoplayHeaderAria: '現在位置から自動再生', sceneAria: '第 {n} 幕',
+    autoplayPlaying: '自動再生中', autoplayPaused: '一時停止中', autoplayEnded: '再生完了',
+    autoplayPauseAria: '自動再生を一時停止', autoplayResumeAria: '自動再生を続ける', autoplayReplayAria: '物語をもう一度再生', autoplayCloseAria: '自動再生を閉じる',
+    autoplaySpeedAria: '再生速度', autoplaySpeed1Aria: '1倍速', autoplaySpeed2Aria: '2倍速',
+    autoplayLedger: '白と赤', autoplayWhite: '桜が広がる', autoplayEquation: '花と葉の出会い', autoplayRed: '紅葉が集う', autoplayFinale: '旗となる',
+    navTop: '一念', navJourney: '花と葉', navLedger: '白と赤', navStory: '旗となる', scroll: '下へ',
     heroTitle: '春は花となり<br><em>秋は葉となる</em>', heroLead: '桜が春を白く広げ、紅葉が秋を一輪の赤へ集める。<br>二つの季節が、一つの旗を完成させる。',
     introOverlay: '二つの季節の旗', introKicker: '01 · 構想 · 季節でできた旗',
     introTitle: '白は花から、<br>赤は葉から。', introBody: '桜が旗の白を広げ、紅葉が中央の赤へ集まる。二つの色の由来をたどる旅。',
@@ -575,14 +1118,19 @@ const ja = {
     arrive: '季節の標本を見る', scrollHint: 'スクロール · 白が広がり、赤が集まるまで',
     ledgerTitle: '白と赤。<br>一つの旗へ。', ledgerLead: '地名は一覧ではなく、色の証しである。', ledgerVerse: '<p class="verse-white"><span class="verse-mark">花</span>桜は花の回廊、人の道、水路、雪山の田野、山海、群山へ、<em>白を広げ</em>。</p><p class="verse-red"><span class="verse-mark">葉</span>紅葉は雪峰、木組み、漆の影、川谷、塔影、潮を借りて、<em>中心へ集う</em>。</p>', ledgerWhite: '桜の白', ledgerRed: '紅葉の赤',
     flagLabel: '桜の白 · 紅葉の赤', equationSakura: '桜の白', equationMomiji: '紅葉の赤', equationFlag: '日本の旗',
-    afterTitle: '一つの旗<br><em>二つの季節。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白は、六つの桜風景が<em>ともに広げた地色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>赤は、六つの紅葉風景が<em>中央へ集めた太陽</em>。</p>', afterCoda: '見慣れた日本の旗が、こうして地・時・生命を宿す。', backTop: 'トップへ ↑'
+    afterTitle: '一つの旗<br><em>二つの季節。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白は、六つの桜風景が<em>ともに広げた地色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>赤は、六つの紅葉風景が<em>中央へ集めた太陽</em>。</p>', afterCoda: '見慣れた日本の旗が、こうして地・時・生命を宿す。', finaleCoda: '一念より生まれ、花と葉は景となり、<br><span>白と赤に凝り、やがて旗となる。</span>', finaleCodaInline: '一念より生まれ、花と葉は景となり、<span class="footer-white">白</span>と<span class="footer-red">赤</span>に凝り、やがて旗となる。', backTop: 'トップへ ↑'
 };
 
 const en = {
     siteTitle: 'A Flag of Two Seasons',
     siteTagline: 'White of Blossom, Red of Leaf',
     particleToggle: 'Toggle seasonal particle effects',
-    navTop: 'Overture', navJourney: 'White & Red', navLedger: 'Flower & Leaf', navStory: 'The Flag', scroll: 'Begin',
+    autoplayStart: 'Play story', autoplayStartAria: 'Play the full story automatically', autoplayHeader: 'Play story', autoplayHeaderAria: 'Play automatically from here', sceneAria: 'Scene {n}',
+    autoplayPlaying: 'Story playing', autoplayPaused: 'Story paused', autoplayEnded: 'Story complete',
+    autoplayPauseAria: 'Pause automatic playback', autoplayResumeAria: 'Resume automatic playback', autoplayReplayAria: 'Replay the full story', autoplayCloseAria: 'Close automatic playback',
+    autoplaySpeedAria: 'Playback speed', autoplaySpeed1Aria: 'Normal speed', autoplaySpeed2Aria: 'Double speed',
+    autoplayLedger: 'White & Red', autoplayWhite: 'Blossom Spreads', autoplayEquation: 'Flower Meets Leaf', autoplayRed: 'Maple Gathers', autoplayFinale: 'The Flag',
+    navTop: 'A Thought', navJourney: 'Flower & Leaf', navLedger: 'White & Red', navStory: 'The Flag', scroll: 'Begin',
     heroTitle: 'Spring becomes blossom<br><em>Autumn becomes leaf</em>', heroLead: 'Sakura spreads spring into white. Maple leaves gather autumn into red.<br>Two seasons complete one flag.',
     introOverlay: 'A FLAG OF TWO SEASONS', introKicker: '01 · CONCEPT · A SEASONAL FLAG',
     introTitle: 'White comes from blossom.<br>Red comes from leaf.', introBody: 'Sakura forms the field. Maple leaves gather toward the center. Follow both colors to the finished flag.',
@@ -601,13 +1149,14 @@ const en = {
     arrive: 'View the seasonal study', scrollHint: 'Keep scrolling · watch white spread and red gather',
     ledgerTitle: 'White and red,<br>one completed flag.', ledgerLead: 'These places are not a list, but evidence of color.', ledgerVerse: '<p class="verse-white"><span class="verse-mark">F</span>Through flower corridor, footpath, waterway, snowfield, mountain sea and ranges, blossom <em>spreads the white</em>.</p><p class="verse-red"><span class="verse-mark">L</span>Through snow peak, timber, lacquer, river valley, pagoda and tide, maple <em>gathers toward the center</em>.</p>', ledgerWhite: 'Sakura White', ledgerRed: 'Momiji Red',
     flagLabel: 'SAKURA WHITE · MOMIJI RED', equationSakura: 'Sakura white', equationMomiji: 'Momiji red', equationFlag: 'Japan\'s flag',
-    afterTitle: 'One flag.<br><em>Two living seasons.</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">W</span>White is the field <em>six sakura landscapes spread together</em>.</p><p class="verse-red"><span class="verse-mark">R</span>Red is the sun <em>six maple landscapes gather at the center</em>.</p>', afterCoda: 'The familiar flag of Japan thus gains place, time and life.', backTop: 'Back to top ↑'
+    afterTitle: 'One flag.<br><em>Two living seasons.</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">W</span>White is the field <em>six sakura landscapes spread together</em>.</p><p class="verse-red"><span class="verse-mark">R</span>Red is the sun <em>six maple landscapes gather at the center</em>.</p>', afterCoda: 'The familiar flag of Japan thus gains place, time and life.', finaleCoda: 'From one thought, flower and leaf enter the scene;<br><span>distilled into white and red, they become a flag.</span>', finaleCodaInline: 'One thought. Flower and leaf; <span class="footer-white">white</span> and <span class="footer-red">red</span>; one flag.', backTop: 'Back to top ↑'
 };
 
 const translations = { zh, ja, en };
 
 function setLanguage(language) {
     const dictionary = { ...zh, ...(translations[language] || {}) };
+    currentLanguage = language;
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : language;
     document.title = dictionary.siteTitle;
     document.querySelectorAll('[data-lang]').forEach(button => {
@@ -626,9 +1175,14 @@ function setLanguage(language) {
         element.setAttribute('aria-label', dictionary[element.dataset.copyAria]);
         element.setAttribute('title', dictionary[element.dataset.copyAria]);
     });
+    progressRoot.querySelectorAll('.progress-item').forEach((item, index) => {
+        item.setAttribute('aria-label', dictionary.sceneAria.replace('{n}', String(index + 1)));
+    });
+    updateAutoplayUI(dictionary);
     localStorage.setItem('hanami-language', language);
 }
 
 document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => setLanguage(button.dataset.lang)));
 setLanguage(localStorage.getItem('hanami-language') || 'zh');
+if (reducedMotion.matches) disableAutoplay();
 measure();

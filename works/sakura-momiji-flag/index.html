@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=14">
+    <link rel="stylesheet" href="styles.css?v=34">
 </head>
 <body>
 <header class="site-header">
@@ -22,12 +22,16 @@
         </a>
     </div>
     <nav aria-label="主导航">
-        <a href="#top" data-copy="navTop">序章</a>
-        <a href="#journey" data-copy="navJourney">白与红</a>
-        <a href="#season-ledger" data-copy="navLedger">花与叶</a>
+        <a href="#top" data-copy="navTop">一念</a>
+        <a href="#journey" data-copy="navJourney">花与叶</a>
+        <a href="#season-ledger" data-copy="navLedger">白与红</a>
         <a href="#afterglow" data-copy="navStory">旗成</a>
     </nav>
     <div class="header-actions">
+        <button class="header-autoplay" type="button" aria-controls="journey" data-autoplay-control data-copy-aria="autoplayHeaderAria">
+            <span class="transport-icon" aria-hidden="true"></span>
+            <span class="header-autoplay-label" data-copy="autoplayHeader">自动播放</span>
+        </button>
         <div class="languages" aria-label="语言切换">
             <button class="active" data-lang="zh">中</button>
             <button data-lang="ja">日</button>
@@ -47,7 +51,11 @@
         <div class="hero-copy">
             <p class="eyebrow">THE RED OF JAPAN · A TALE OF TWO SEASONS</p>
             <h1 id="hero-title" data-copy-html="heroTitle">春日成花<br><em>秋日成叶</em></h1>
-            <p data-copy-html="heroLead">樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。</p>
+            <p class="hero-lead" data-copy-html="heroLead">樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。</p>
+            <button class="autoplay-start" type="button" aria-controls="journey" data-autoplay-control data-copy-aria="autoplayStartAria">
+                <span class="transport-icon transport-icon--play" aria-hidden="true"></span>
+                <span data-copy="autoplayStart">自动播放</span>
+            </button>
         </div>
         <a class="scroll-cue" href="#journey"><span data-copy="scroll">向下启程</span><i></i></a>
         <div class="hero-stamp" aria-hidden="true">春<br>秋</div>
@@ -114,11 +122,29 @@
 
 </main>
 
+<div class="autoplay-dock" data-autoplay-control data-state="idle" aria-hidden="true">
+    <button class="autoplay-toggle" type="button" aria-controls="journey" aria-pressed="false" aria-label="暂停自动播放" title="暂停自动播放">
+        <span class="transport-icon" aria-hidden="true"></span>
+    </button>
+    <div class="autoplay-readout">
+        <strong class="autoplay-state-label" aria-live="polite" aria-atomic="true">自动播放</strong>
+        <span class="autoplay-position" aria-hidden="true">01 / 14</span>
+    </div>
+    <div class="autoplay-speed" role="group" aria-label="播放速度" data-copy-aria="autoplaySpeedAria">
+        <button type="button" data-autoplay-speed="1" aria-pressed="true" aria-label="1倍速" title="1倍速" data-copy-aria="autoplaySpeed1Aria">1×</button>
+        <button type="button" data-autoplay-speed="2" aria-pressed="false" aria-label="2倍速" title="2倍速" data-copy-aria="autoplaySpeed2Aria">2×</button>
+    </div>
+    <button class="autoplay-close" type="button" aria-label="关闭自动播放" title="关闭自动播放" data-copy-aria="autoplayCloseAria">
+        <span aria-hidden="true"></span>
+    </button>
+</div>
+
 <footer>
     <p data-copy="siteTitle">一面旗，两个季节</p>
+    <p class="finale-coda" data-copy-html="finaleCodaInline">一念初生，花叶入景，凝为<span class="footer-white">白</span><span class="footer-red">红</span>，最终成旗。</p>
     <a href="#top" data-copy="backTop">回到顶部 ↑</a>
 </footer>
 
-<script src="script.js?v=14"></script>
+<script src="script.js?v=34"></script>
 </body>
 </html>

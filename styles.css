@@ -313,9 +313,40 @@ main {
 }
 
 .work-cover {
+  position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
   background: #ece7dd;
+}
+
+.work-featured {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  min-height: 40px;
+  padding: 0 14px 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--red);
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 28%, var(--line));
+  border-radius: 6px;
+  box-shadow: 0 10px 26px rgba(28, 26, 23, .22);
+  backdrop-filter: blur(10px);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.work-featured svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  fill: currentColor;
 }
 
 .work-cover img {
@@ -431,5 +462,11 @@ footer button:hover {
   .section-head {
     flex-direction: column;
     gap: .6rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .work-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
