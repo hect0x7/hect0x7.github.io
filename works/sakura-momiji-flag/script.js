@@ -1087,7 +1087,7 @@ const zh = {
     arrive: '查看季节采样', scrollHint: '继续滚动 · 看白如何铺开，红如何聚拢',
     ledgerTitle: '白与红，<br>共同完成一面旗。', ledgerLead: '地点不是清单，而是颜色的证据。', ledgerVerse: '<p class="verse-white"><span class="verse-mark">花</span>樱花经过花廊、人行、水路、雪山田野、山海与群山，<em>铺开白</em>。</p><p class="verse-red"><span class="verse-mark">葉</span>红叶借雪峰、木构、漆影、河谷、塔影与海潮，<em>向中心聚拢</em>。</p>', ledgerWhite: '樱花之白', ledgerRed: '红叶之红',
     flagLabel: '樱花之白 · 红叶之红', equationSakura: '樱花之白', equationMomiji: '红叶之红', equationFlag: '日本之旗',
-    afterTitle: '一面旗<br><em>两种季节的美。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白，是六处樱花风景<em>共同铺开的底色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>红，是六处红叶风景<em>向中央汇成的太阳</em>。</p>', afterCoda: '熟悉的日本国旗，因此拥有了地点、时间与生命。', finaleCoda: '一念初生，花叶入景，<br><span>凝为白红，最终成旗。</span>', finaleCodaInline: '一念初生，花叶入景，凝为<span class="footer-white">白</span><span class="footer-red">红</span>，最终成旗。', backTop: '回到顶部 ↑'
+    afterTitle: '一面旗<br><em>两种季节的美。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白，是六处樱花风景<em>共同铺开的底色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>红，是六处红叶风景<em>向中央汇成的太阳</em>。</p>', afterCoda: '熟悉的日本国旗，因此拥有了地点、时间与生命。', finaleCoda: '一念初生，花叶入景，<br><span>凝为白红，聚作日章。</span>', finaleCodaInline: '一念初生，花叶入景，凝为<span class="footer-white">白</span><span class="footer-red">红</span>，聚作日章。', backTop: '回到顶部 ↑'
 };
 
 const ja = {
@@ -1118,7 +1118,7 @@ const ja = {
     arrive: '季節の標本を見る', scrollHint: 'スクロール · 白が広がり、赤が集まるまで',
     ledgerTitle: '白と赤。<br>一つの旗へ。', ledgerLead: '地名は一覧ではなく、色の証しである。', ledgerVerse: '<p class="verse-white"><span class="verse-mark">花</span>桜は花の回廊、人の道、水路、雪山の田野、山海、群山へ、<em>白を広げ</em>。</p><p class="verse-red"><span class="verse-mark">葉</span>紅葉は雪峰、木組み、漆の影、川谷、塔影、潮を借りて、<em>中心へ集う</em>。</p>', ledgerWhite: '桜の白', ledgerRed: '紅葉の赤',
     flagLabel: '桜の白 · 紅葉の赤', equationSakura: '桜の白', equationMomiji: '紅葉の赤', equationFlag: '日本の旗',
-    afterTitle: '一つの旗<br><em>二つの季節。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白は、六つの桜風景が<em>ともに広げた地色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>赤は、六つの紅葉風景が<em>中央へ集めた太陽</em>。</p>', afterCoda: '見慣れた日本の旗が、こうして地・時・生命を宿す。', finaleCoda: '一念より生まれ、花と葉は景となり、<br><span>白と赤に凝り、やがて旗となる。</span>', finaleCodaInline: '一念より生まれ、花と葉は景となり、<span class="footer-white">白</span>と<span class="footer-red">赤</span>に凝り、やがて旗となる。', backTop: 'トップへ ↑'
+    afterTitle: '一つの旗<br><em>二つの季節。</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">白</span>白は、六つの桜風景が<em>ともに広げた地色</em>。</p><p class="verse-red"><span class="verse-mark">紅</span>赤は、六つの紅葉風景が<em>中央へ集めた太陽</em>。</p>', afterCoda: '見慣れた日本の旗が、こうして地・時・生命を宿す。', finaleCoda: '一念より生まれ、花と葉は景となり、<br><span>白と赤に凝り、日章を結ぶ。</span>', finaleCodaInline: '一念より生まれ、花と葉は景となり、<span class="footer-white">白</span>と<span class="footer-red">赤</span>に凝り、日章を結ぶ。', backTop: 'トップへ ↑'
 };
 
 const en = {
@@ -1149,7 +1149,7 @@ const en = {
     arrive: 'View the seasonal study', scrollHint: 'Keep scrolling · watch white spread and red gather',
     ledgerTitle: 'White and red,<br>one completed flag.', ledgerLead: 'These places are not a list, but evidence of color.', ledgerVerse: '<p class="verse-white"><span class="verse-mark">F</span>Through flower corridor, footpath, waterway, snowfield, mountain sea and ranges, blossom <em>spreads the white</em>.</p><p class="verse-red"><span class="verse-mark">L</span>Through snow peak, timber, lacquer, river valley, pagoda and tide, maple <em>gathers toward the center</em>.</p>', ledgerWhite: 'Sakura White', ledgerRed: 'Momiji Red',
     flagLabel: 'SAKURA WHITE · MOMIJI RED', equationSakura: 'Sakura white', equationMomiji: 'Momiji red', equationFlag: 'Japan\'s flag',
-    afterTitle: 'One flag.<br><em>Two living seasons.</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">W</span>White is the field <em>six sakura landscapes spread together</em>.</p><p class="verse-red"><span class="verse-mark">R</span>Red is the sun <em>six maple landscapes gather at the center</em>.</p>', afterCoda: 'The familiar flag of Japan thus gains place, time and life.', finaleCoda: 'From one thought, flower and leaf enter the scene;<br><span>distilled into white and red, they become a flag.</span>', finaleCodaInline: 'One thought. Flower and leaf; <span class="footer-white">white</span> and <span class="footer-red">red</span>; one flag.', backTop: 'Back to top ↑'
+    afterTitle: 'One flag.<br><em>Two living seasons.</em>', afterVerse: '<p class="verse-white"><span class="verse-mark">W</span>White is the field <em>six sakura landscapes spread together</em>.</p><p class="verse-red"><span class="verse-mark">R</span>Red is the sun <em>six maple landscapes gather at the center</em>.</p>', afterCoda: 'The familiar flag of Japan thus gains place, time and life.', finaleCoda: 'From one thought, flower and leaf enter the scene;<br><span>distilled into white and red, they gather into the sun-disc.</span>', finaleCodaInline: 'One thought. Flower and leaf; <span class="footer-white">white</span> and <span class="footer-red">red</span>; gathered into the sun-disc.', backTop: 'Back to top ↑'
 };
 
 const translations = { zh, ja, en };
