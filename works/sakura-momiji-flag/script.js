@@ -71,7 +71,7 @@ const clamp = (value, min = 0, max = 1) => Math.min(Math.max(value, min), max);
 const easeOut = value => 1 - Math.pow(1 - value, 3);
 const easeInOut = value => value < .5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
 
-function createParticleScene(canvas, { count, mode, observe = true, maxDpr = 1.75, targetElement = null, avoidElements = [], clipStartElement = null, clipEndElement = null }) {
+function createParticleScene(canvas, { count, mode, observe = true, maxDpr = 1.75, targetElement = null, avoidElements = [], avoidRegions = [], clipStartElement = null, clipEndElement = null }) {
     const context = canvas?.getContext('2d');
     if (!context) return null;
 
@@ -267,7 +267,10 @@ function createParticleScene(canvas, { count, mode, observe = true, maxDpr = 1.7
             const edgeFade = clamp(Math.min(y / 70, (height - y) / 70));
             const overlapsCopy = avoidRects.some(rect => x > rect.left - particle.size && x < rect.right + particle.size &&
                 y > rect.top - particle.size && y < rect.bottom + particle.size);
-            const alpha = overlapsCopy ? 0 : clamp(.34 + particle.size / 42, .38, .82) * edgeFade * mergeAlpha;
+            const overlapsIntroSubject = season === 'concept' && avoidRegions.some(rect =>
+                x > rect.left * width - particle.size && x < rect.right * width + particle.size &&
+                y > rect.top * height - particle.size && y < rect.bottom * height + particle.size);
+            const alpha = overlapsCopy || overlapsIntroSubject ? 0 : clamp(.34 + particle.size / 42, .38, .82) * edgeFade * mergeAlpha;
             if (mode === 'continuation') {
                 const petalAmount = particle.finaleLeaf ? 0 : clamp((continuationMix - particle.typeBias * .42) / .58);
                 if (petalAmount < .99) drawLeaf(particle, x, y, particle.angle, alpha * (1 - petalAmount));
@@ -367,7 +370,12 @@ const heroParticles = createParticleScene(heroParticleCanvas, {
 });
 const journeyParticles = createParticleScene(journeyParticleCanvas, {
     count: () => desktop.matches ? 72 : 24,
-    mode: 'journey'
+    mode: 'journey',
+    avoidElements: [introOverlay],
+    avoidRegions: [
+        { left: .08, right: .39, top: .43, bottom: 1 },
+        { left: .63, right: .94, top: .43, bottom: 1 }
+    ]
 });
 const continuationParticles = createParticleScene(continuationParticleCanvas, {
     count: () => desktop.matches ? 72 : 24,

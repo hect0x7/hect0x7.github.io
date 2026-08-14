@@ -303,7 +303,7 @@ footer > a { justify-self: end; }
     .outline-button { height: 42px; margin-top: 18px; }
     .intro-copy { left: 5vw; top: 76%; width: 90vw; max-width: none; }
     .panel-intro .intro-copy { padding: 0; }
-    .intro-visual figcaption { padding: 20px; text-align: center; font-size: 31px; }
+    .intro-visual figcaption { place-items: start center; padding: 56px 16px 0; text-align: center; font-size: 24px; }
     .journey-progress { display: none; }
     .progress-items { width: 100%; gap: 4px; }
     .progress-item { min-width: 0; height: 44px; flex: 1 1 0; justify-content: center; }
