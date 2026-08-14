@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=34">
+    <link rel="stylesheet" href="styles.css?v=48">
 </head>
 <body>
 <header class="site-header">
@@ -28,7 +28,7 @@
         <a href="#afterglow" data-copy="navStory">旗成</a>
     </nav>
     <div class="header-actions">
-        <button class="header-autoplay" type="button" aria-controls="journey" data-autoplay-control data-copy-aria="autoplayHeaderAria">
+        <button class="header-autoplay is-hidden" type="button" aria-controls="journey" aria-hidden="true" inert data-autoplay-control data-copy-aria="autoplayHeaderAria">
             <span class="transport-icon" aria-hidden="true"></span>
             <span class="header-autoplay-label" data-copy="autoplayHeader">自动播放</span>
         </button>
@@ -122,7 +122,7 @@
 
 </main>
 
-<div class="autoplay-dock" data-autoplay-control data-state="idle" aria-hidden="true">
+<div class="autoplay-dock" data-autoplay-control data-state="idle" aria-hidden="true" aria-keyshortcuts="H G">
     <button class="autoplay-toggle" type="button" aria-controls="journey" aria-pressed="false" aria-label="暂停自动播放" title="暂停自动播放">
         <span class="transport-icon" aria-hidden="true"></span>
     </button>
@@ -134,9 +134,10 @@
         <button type="button" data-autoplay-speed="1" aria-pressed="true" aria-label="1倍速" title="1倍速" data-copy-aria="autoplaySpeed1Aria">1×</button>
         <button type="button" data-autoplay-speed="2" aria-pressed="false" aria-label="2倍速" title="2倍速" data-copy-aria="autoplaySpeed2Aria">2×</button>
     </div>
-    <button class="autoplay-close" type="button" aria-label="关闭自动播放" title="关闭自动播放" data-copy-aria="autoplayCloseAria">
-        <span aria-hidden="true"></span>
-    </button>
+    <div class="autoplay-shortcuts" aria-label="播放快捷键" data-copy-aria="autoplayShortcutsAria">
+        <span><kbd>H</kbd><span data-copy="autoplayHideHint">隐藏</span></span>
+        <span><kbd>G</kbd><span data-copy="autoplayCycleHint">变速 / 停止</span></span>
+    </div>
 </div>
 
 <footer>
@@ -145,6 +146,6 @@
     <a href="#top" data-copy="backTop">回到顶部 ↑</a>
 </footer>
 
-<script src="script.js?v=34"></script>
+<script src="script.js?v=48"></script>
 </body>
 </html>

@@ -28,7 +28,6 @@ const autoplayStart = document.querySelector('.autoplay-start');
 const headerAutoplay = document.querySelector('.header-autoplay');
 const autoplayDock = document.querySelector('.autoplay-dock');
 const autoplayToggle = document.querySelector('.autoplay-toggle');
-const autoplayClose = document.querySelector('.autoplay-close');
 const autoplayStateLabel = document.querySelector('.autoplay-state-label');
 const autoplayPosition = document.querySelector('.autoplay-position');
 const autoplaySpeedButtons = [...document.querySelectorAll('[data-autoplay-speed]')];
@@ -46,6 +45,7 @@ let layoutRefreshUserTakeover = false;
 let pointerGesture = null;
 let suppressAutoplayClick = false;
 let manualCodaReveal = false;
+let autoplayControlsHidden = false;
 
 const INTRO_PHASE = .17;
 const stableViewportUnit = CSS.supports('height', '100svh') ? 'svh' : 'vh';
@@ -526,6 +526,7 @@ function update() {
         else link.removeAttribute('aria-current');
     });
     autoplayDock?.classList.toggle('is-continuation', navIndex >= 2);
+    updateHeaderAutoplayVisibility();
     const heroProgress = clamp(currentScrollY / Math.max(innerHeight, 1), 0, 1.15);
     if (heroMedia && !reducedMotion.matches) {
         heroMedia.style.transform = `translate3d(0, ${heroProgress * 72}px, 0) scale(${1.04 + heroProgress * .04})`;
@@ -599,16 +600,16 @@ function requestUpdate() {
     )) measure();
 
     const currentScrollY = scrollY;
-    if (autoplay.state === 'idle') {
-        header.classList.remove('header-hidden');
-    } else if (metrics) {
-        const insideJourney = currentScrollY > metrics.start + 24 && currentScrollY < metrics.start + metrics.distance - 24;
+    if (metrics) {
+        const journeyExit = journey.offsetTop + journey.offsetHeight - header.offsetHeight;
+        const insideJourney = currentScrollY > 24 && currentScrollY < journeyExit;
         const delta = currentScrollY - headerScrollY;
         if (!insideJourney) header.classList.remove('header-hidden');
         else if (delta > 2) header.classList.add('header-hidden');
         else if (delta < -2) header.classList.remove('header-hidden');
     } else header.classList.remove('header-hidden');
     headerScrollY = currentScrollY;
+    updateHeaderAutoplayVisibility();
 
     if (!ticking) {
         ticking = true;
@@ -721,13 +722,28 @@ function autoplayDictionary() {
     return { ...zh, ...(translations[currentLanguage] || {}) };
 }
 
+function updateHeaderAutoplayVisibility() {
+    if (!headerAutoplay || !autoplayStart) return;
+    const bounds = autoplayStart.getBoundingClientRect();
+    const heroButtonVisible = !autoplayStart.hidden &&
+        bounds.bottom > header.offsetHeight &&
+        bounds.top < innerHeight;
+    const restoreInHeader = autoplayControlsHidden && !header.classList.contains('header-hidden');
+    const hidden = !restoreInHeader && (autoplay.state !== 'idle' || heroButtonVisible);
+    headerAutoplay.classList.toggle('is-hidden', hidden);
+    headerAutoplay.toggleAttribute('inert', hidden);
+    headerAutoplay.setAttribute('aria-hidden', String(hidden));
+}
+
 function updateAutoplayUI(dictionary = null) {
     if (!autoplayDock || !autoplayToggle) return;
     dictionary = dictionary || autoplayDictionary();
-    headerAutoplay.hidden = autoplay.state !== 'idle';
-    autoplayDock.hidden = autoplay.state === 'idle' || autoplay.state === 'disabled';
+    const dockUnavailable = autoplay.state === 'idle' || autoplay.state === 'disabled';
+    updateHeaderAutoplayVisibility();
+    autoplayDock.hidden = dockUnavailable;
+    autoplayDock.toggleAttribute('inert', dockUnavailable || autoplayControlsHidden);
     autoplayDock.dataset.state = autoplay.state;
-    autoplayDock.setAttribute('aria-hidden', String(autoplay.state === 'idle' || autoplay.state === 'disabled'));
+    autoplayDock.setAttribute('aria-hidden', String(dockUnavailable || autoplayControlsHidden));
     const playing = autoplay.state === 'playing';
     autoplayToggle.dataset.mode = playing ? 'pause' : 'play';
     autoplayToggle.setAttribute('aria-pressed', String(playing));
@@ -736,6 +752,7 @@ function updateAutoplayUI(dictionary = null) {
     autoplayToggle.setAttribute('title', actionLabel);
     const stateLabel = autoplay.state === 'ended'
         ? dictionary.autoplayEnded
+        : autoplay.state === 'stopped' ? dictionary.autoplayStopped
         : autoplay.state === 'paused' ? dictionary.autoplayPaused : dictionary.autoplayPlaying;
     if (autoplayStateLabel.textContent !== stateLabel) autoplayStateLabel.textContent = stateLabel;
 
@@ -754,6 +771,33 @@ function setAutoplaySpeed(rate) {
         button.setAttribute('aria-pressed', String(Number(button.dataset.autoplaySpeed) === autoplay.playbackRate));
     });
     localStorage.setItem('season-autoplay-speed', String(autoplay.playbackRate));
+}
+
+function setAutoplayControlsHidden(hidden) {
+    autoplayControlsHidden = Boolean(hidden);
+    document.documentElement.classList.toggle('autoplay-controls-hidden', autoplayControlsHidden);
+    updateAutoplayUI();
+}
+
+function toggleAutoplayControls() {
+    if (!['playing', 'paused', 'stopped', 'ended'].includes(autoplay.state)) return;
+    setAutoplayControlsHidden(!autoplayControlsHidden);
+}
+
+function cycleAutoplaySpeed() {
+    if (autoplay.state === 'disabled') return;
+    if (document.activeElement instanceof HTMLElement && document.activeElement.closest('.autoplay-speed')) {
+        document.activeElement.blur();
+    }
+    if (autoplay.state === 'idle' || autoplay.state === 'stopped' || autoplay.state === 'ended') {
+        setAutoplaySpeed(1);
+        startAutoplay({ replay: autoplay.state === 'ended' });
+    } else if (autoplay.playbackRate === 1) {
+        setAutoplaySpeed(2);
+        if (autoplay.state === 'paused') startAutoplay();
+    } else {
+        stopAutoplay();
+    }
 }
 
 function enterAutoplayWaypoint(index, fromCurrentPosition = true) {
@@ -816,6 +860,7 @@ function startAutoplay({ replay = false } = {}) {
     if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
     const generation = ++autoplay.runGeneration;
     const previousState = autoplay.state;
+    setAutoplayControlsHidden(false);
     manualCodaReveal = false;
     if (!autoplay.timeline.length || replay || previousState === 'ended') autoplay.timeline = buildAutoplayTimeline();
     autoplay.state = 'playing';
@@ -834,7 +879,7 @@ function startAutoplay({ replay = false } = {}) {
         document.body.style.scrollBehavior = previousBodyScrollBehavior;
         update();
         enterAutoplayWaypoint(0);
-    } else if (previousState === 'paused' && Math.abs(scrollY - autoplay.pauseY) <= 8) {
+    } else if (['paused', 'stopped'].includes(previousState) && Math.abs(scrollY - autoplay.pauseY) <= 8) {
         updateAutoplayUI();
     } else {
         enterAutoplayWaypoint(findForwardAutoplayWaypoint());
@@ -851,7 +896,18 @@ function pauseAutoplay() {
     if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
     autoplay.frame = 0;
     document.documentElement.classList.remove('autoplay-driving');
-    header.classList.remove('header-hidden');
+    updateAutoplayUI();
+}
+
+function stopAutoplay() {
+    if (!['playing', 'paused'].includes(autoplay.state)) return;
+    autoplay.runGeneration += 1;
+    autoplay.state = 'stopped';
+    autoplay.pauseY = scrollY;
+    autoplay.lastTimestamp = 0;
+    if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
+    autoplay.frame = 0;
+    document.documentElement.classList.remove('autoplay-driving');
     updateAutoplayUI();
 }
 
@@ -874,9 +930,10 @@ function closeAutoplay() {
     autoplay.lastTimestamp = 0;
     autoplay.pauseY = scrollY;
     manualCodaReveal = true;
+    autoplayStart.hidden = false;
+    setAutoplayControlsHidden(false);
     cancelPendingLayoutRebase();
     document.documentElement.classList.remove('autoplay-driving');
-    autoplayStart.hidden = false;
     header.classList.remove('header-hidden');
     updateAutoplayUI();
 }
@@ -886,6 +943,7 @@ function disableAutoplay() {
     if (autoplay.frame) cancelAnimationFrame(autoplay.frame);
     autoplay.frame = 0;
     autoplay.state = 'disabled';
+    setAutoplayControlsHidden(false);
     document.documentElement.classList.remove('autoplay-driving');
     autoplayStart.hidden = true;
     updateAutoplayUI();
@@ -914,7 +972,10 @@ function cancelPendingLayoutRebase() {
 }
 
 autoplayStart?.addEventListener('click', () => startAutoplay({ replay: true }));
-headerAutoplay?.addEventListener('click', () => startAutoplay());
+headerAutoplay?.addEventListener('click', () => {
+    if (autoplayControlsHidden) setAutoplayControlsHidden(false);
+    else startAutoplay();
+});
 autoplayToggle?.addEventListener('click', event => {
     if (suppressAutoplayClick) {
         suppressAutoplayClick = false;
@@ -923,7 +984,6 @@ autoplayToggle?.addEventListener('click', event => {
     }
     toggleAutoplay();
 });
-autoplayClose?.addEventListener('click', closeAutoplay);
 autoplaySpeedButtons.forEach(button => button.addEventListener('click', event => {
     if (suppressAutoplayClick) {
         suppressAutoplayClick = false;
@@ -974,6 +1034,24 @@ const endPointerGesture = event => {
 addEventListener('pointerup', endPointerGesture, { passive: true });
 addEventListener('pointercancel', endPointerGesture, { passive: true });
 addEventListener('keydown', event => {
+    const target = event.target;
+    const isTyping = target instanceof HTMLElement && (
+        target.isContentEditable ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+    );
+    if (!isTyping && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        const shortcut = event.key.toLowerCase();
+        if (shortcut === 'h') {
+            event.preventDefault();
+            toggleAutoplayControls();
+            return;
+        }
+        if (shortcut === 'g') {
+            event.preventDefault();
+            cycleAutoplaySpeed();
+            return;
+        }
+    }
     if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) return;
     if (event.key === ' ' && isAutoplayControl(event.target)) return;
     manualCodaReveal = true;
@@ -1063,9 +1141,10 @@ const zh = {
     siteTagline: '樱花的白，红叶的红',
     particleToggle: '切换季节粒子效果',
     autoplayStart: '自动播放', autoplayStartAria: '自动播放完整叙事', autoplayHeader: '自动播放', autoplayHeaderAria: '从当前位置自动播放', sceneAria: '第 {n} 幕',
-    autoplayPlaying: '正在自动播放', autoplayPaused: '自动播放已暂停', autoplayEnded: '播放完成',
-    autoplayPauseAria: '暂停自动播放', autoplayResumeAria: '继续自动播放', autoplayReplayAria: '重新播放完整叙事', autoplayCloseAria: '关闭自动播放',
+    autoplayPlaying: '正在自动播放', autoplayPaused: '自动播放已暂停', autoplayStopped: '自动播放已停止', autoplayEnded: '播放完成',
+    autoplayPauseAria: '暂停自动播放', autoplayResumeAria: '继续自动播放', autoplayReplayAria: '重新播放完整叙事',
     autoplaySpeedAria: '播放速度', autoplaySpeed1Aria: '1倍速', autoplaySpeed2Aria: '2倍速',
+    autoplayShortcutsAria: '播放快捷键：H隐藏控制条，G切换1倍速、2倍速和停止', autoplayHideHint: '隐藏', autoplayCycleHint: '变速 / 停止',
     autoplayLedger: '白与红', autoplayWhite: '樱花铺开', autoplayEquation: '花叶相逢', autoplayRed: '红叶聚拢', autoplayFinale: '旗成',
     navTop: '一念', navJourney: '花与叶', navLedger: '白与红', navStory: '旗成', scroll: '向下观赏',
     heroTitle: '春日成花<br><em>秋日成叶</em>',
@@ -1095,9 +1174,10 @@ const ja = {
     siteTagline: '桜の白、紅葉の赤',
     particleToggle: '季節の粒子効果を切り替える',
     autoplayStart: '自動再生', autoplayStartAria: '物語を最初から自動再生', autoplayHeader: '自動再生', autoplayHeaderAria: '現在位置から自動再生', sceneAria: '第 {n} 幕',
-    autoplayPlaying: '自動再生中', autoplayPaused: '一時停止中', autoplayEnded: '再生完了',
-    autoplayPauseAria: '自動再生を一時停止', autoplayResumeAria: '自動再生を続ける', autoplayReplayAria: '物語をもう一度再生', autoplayCloseAria: '自動再生を閉じる',
+    autoplayPlaying: '自動再生中', autoplayPaused: '一時停止中', autoplayStopped: '自動再生を停止', autoplayEnded: '再生完了',
+    autoplayPauseAria: '自動再生を一時停止', autoplayResumeAria: '自動再生を続ける', autoplayReplayAria: '物語をもう一度再生',
     autoplaySpeedAria: '再生速度', autoplaySpeed1Aria: '1倍速', autoplaySpeed2Aria: '2倍速',
+    autoplayShortcutsAria: '再生ショートカット：Hで非表示、Gで1倍速、2倍速、停止を切り替え', autoplayHideHint: '非表示', autoplayCycleHint: '速度 / 停止',
     autoplayLedger: '白と赤', autoplayWhite: '桜が広がる', autoplayEquation: '花と葉の出会い', autoplayRed: '紅葉が集う', autoplayFinale: '旗となる',
     navTop: '一念', navJourney: '花と葉', navLedger: '白と赤', navStory: '旗となる', scroll: '下へ',
     heroTitle: '春は花となり<br><em>秋は葉となる</em>', heroLead: '桜が春を白く広げ、紅葉が秋を一輪の赤へ集める。<br>二つの季節が、一つの旗を完成させる。',
@@ -1126,9 +1206,10 @@ const en = {
     siteTagline: 'White of Blossom, Red of Leaf',
     particleToggle: 'Toggle seasonal particle effects',
     autoplayStart: 'Play story', autoplayStartAria: 'Play the full story automatically', autoplayHeader: 'Play story', autoplayHeaderAria: 'Play automatically from here', sceneAria: 'Scene {n}',
-    autoplayPlaying: 'Story playing', autoplayPaused: 'Story paused', autoplayEnded: 'Story complete',
-    autoplayPauseAria: 'Pause automatic playback', autoplayResumeAria: 'Resume automatic playback', autoplayReplayAria: 'Replay the full story', autoplayCloseAria: 'Close automatic playback',
+    autoplayPlaying: 'Story playing', autoplayPaused: 'Story paused', autoplayStopped: 'Story stopped', autoplayEnded: 'Story complete',
+    autoplayPauseAria: 'Pause automatic playback', autoplayResumeAria: 'Resume automatic playback', autoplayReplayAria: 'Replay the full story',
     autoplaySpeedAria: 'Playback speed', autoplaySpeed1Aria: 'Normal speed', autoplaySpeed2Aria: 'Double speed',
+    autoplayShortcutsAria: 'Playback shortcuts: H hides controls; G cycles normal speed, double speed and stop', autoplayHideHint: 'Hide', autoplayCycleHint: 'Speed / stop',
     autoplayLedger: 'White & Red', autoplayWhite: 'Blossom Spreads', autoplayEquation: 'Flower Meets Leaf', autoplayRed: 'Maple Gathers', autoplayFinale: 'The Flag',
     navTop: 'A Thought', navJourney: 'Flower & Leaf', navLedger: 'White & Red', navStory: 'The Flag', scroll: 'Begin',
     heroTitle: 'Spring becomes blossom<br><em>Autumn becomes leaf</em>', heroLead: 'Sakura spreads spring into white. Maple leaves gather autumn into red.<br>Two seasons complete one flag.',
