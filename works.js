@@ -72,7 +72,7 @@ const I18N = {
     navWorks: "作品",
     navAbout: "关于",
     eyebrow: "PORTFOLIO / 作品集",
-    heroTitle: "我用代码<br>做了一些<em>小东西</em>。",
+    heroTitle: "我 Vibe 了<br>一些<em>小作品</em>。",
     heroLead: "从视觉实验到实用工具，这里收集我在闲暇时写下的作品。",
     scroll: "向下浏览",
     worksTitle: "作品",
@@ -80,14 +80,14 @@ const I18N = {
     featuredBadge: "推荐",
     aboutTitle: "关于",
     aboutBody:
-      '你好，我是 hect0x7。这个站点用来存放我做的一些实验性作品，大多是纯前端的小页面。欢迎在 <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> 上找到我。',
+      '你好，我是 hect0x7。这个站点用来存放我 Vibe 的一些小作品，大多是纯前端页面。欢迎在 <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> 上找到我。',
     toTop: "回到顶部 ↑",
   },
   ja: {
     navWorks: "作品",
     navAbout: "について",
     eyebrow: "PORTFOLIO / 作品集",
-    heroTitle: "コードで<br><em>小さなもの</em>を作っています。",
+    heroTitle: "Vibeして、<br><em>小さな作品</em>をいくつか作っています。",
     heroLead: "ビジュアル実験から実用ツールまで、暇なときに書いた作品を集めています。",
     scroll: "下へスクロール",
     worksTitle: "作品",
@@ -95,14 +95,14 @@ const I18N = {
     featuredBadge: "おすすめ",
     aboutTitle: "について",
     aboutBody:
-      'こんにちは、hect0x7 です。このサイトには実験的な作品を置いています。ほとんどがフロントエンドだけの小さなページです。<a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> でも見つけられます。',
+      'こんにちは、hect0x7 です。このサイトには Vibeして作った小さな作品をいくつか置いています。ほとんどがフロントエンドのページです。<a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> でも見つけられます。',
     toTop: "トップへ ↑",
   },
   en: {
     navWorks: "Works",
     navAbout: "About",
     eyebrow: "PORTFOLIO",
-    heroTitle: "I build <em>little things</em><br>with code.",
+    heroTitle: "I vibe-coded<br>a few <em>small works</em>.",
     heroLead: "From visual experiments to handy tools, a collection of things I make in my spare time.",
     scroll: "Scroll down",
     worksTitle: "Works",
@@ -110,7 +110,7 @@ const I18N = {
     featuredBadge: "Featured",
     aboutTitle: "About",
     aboutBody:
-      'Hi, I\'m hect0x7. This site holds some of my experimental works — mostly small front-end pages. You can also find me on <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a>.',
+      'Hi, I\'m hect0x7. This site holds a few small works I vibe-coded, mostly front-end pages. You can also find me on <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a>.',
     toTop: "Back to top ↑",
   },
 };
