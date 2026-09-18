@@ -5,6 +5,7 @@ const WORKS = [
   {
     slug: "sakura-momiji-flag",
     year: "2026",
+    featured: true,
     cover: "works/sakura-momiji-flag/assets/hero-two-seasons.webp",
     title: {
       zh: "花落为素，叶燃成日",
@@ -75,6 +76,8 @@ const I18N = {
     heroLead: "从视觉实验到实用工具，这里收集我在闲暇时写下的作品。",
     scroll: "向下浏览",
     worksTitle: "作品",
+    featuredWork: "推荐作品",
+    featuredBadge: "推荐",
     aboutTitle: "关于",
     aboutBody:
       '你好，我是 hect0x7。这个站点用来存放我做的一些实验性作品，大多是纯前端的小页面。欢迎在 <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> 上找到我。',
@@ -88,6 +91,8 @@ const I18N = {
     heroLead: "ビジュアル実験から実用ツールまで、暇なときに書いた作品を集めています。",
     scroll: "下へスクロール",
     worksTitle: "作品",
+    featuredWork: "おすすめ作品",
+    featuredBadge: "おすすめ",
     aboutTitle: "について",
     aboutBody:
       'こんにちは、hect0x7 です。このサイトには実験的な作品を置いています。ほとんどがフロントエンドだけの小さなページです。<a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> でも見つけられます。',
@@ -101,6 +106,8 @@ const I18N = {
     heroLead: "From visual experiments to handy tools, a collection of things I make in my spare time.",
     scroll: "Scroll down",
     worksTitle: "Works",
+    featuredWork: "Featured work",
+    featuredBadge: "Featured",
     aboutTitle: "About",
     aboutBody:
       'Hi, I\'m hect0x7. This site holds some of my experimental works — mostly small front-end pages. You can also find me on <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a>.',
@@ -117,6 +124,13 @@ function renderWorks(lang) {
     <a class="work-card" href="works/${w.slug}/" style="--i:${i}">
       <div class="work-cover">
         <img src="${w.cover}" alt="${w.title[lang]}" loading="lazy">
+        ${w.featured ? `
+          <span class="work-featured" role="img" aria-label="${I18N[lang].featuredWork}" title="${I18N[lang].featuredWork}">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 2.75l2.77 5.61 6.19.9-4.48 4.36 1.06 6.16L12 16.87l-5.54 2.91 1.06-6.16-4.48-4.36 6.19-.9L12 2.75z"/>
+            </svg>
+            <span>${I18N[lang].featuredBadge}</span>
+          </span>` : ""}
       </div>
       <div class="work-meta">
         <span class="work-year">${w.year}</span>
