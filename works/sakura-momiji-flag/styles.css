@@ -87,7 +87,7 @@ img { display: block; width: 100%; }
 .hero-media, .hero-shade { position: absolute; inset: var(--header-height) 0 0; }
 .hero-media { transform: scale(1.04); will-change: transform; }
 .hero-media img { height: 100%; object-fit: cover; object-position: center; }
-.hero-shade { background: linear-gradient(90deg, rgba(5, 6, 8, .76), rgba(5, 6, 8, .18) 55%, rgba(5, 6, 8, .46)), linear-gradient(0deg, rgba(5, 6, 8, .5), transparent 50%); }
+.hero-shade { background: linear-gradient(90deg, rgba(5, 6, 8, .76), rgba(5, 6, 8, .18) 55%, rgba(5, 6, 8, .46)), linear-gradient(0deg, rgba(5, 6, 8, .58), transparent 50%); }
 .season-particles { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .28)); }
 .season-particles--hero { z-index: 1; opacity: 1; }
 .hero-copy { position: relative; z-index: 2; width: min(1380px, calc(100% - 12vw)); margin-top: 3vh; }
@@ -135,6 +135,7 @@ img { display: block; width: 100%; }
 .panel-copy { max-width: 540px; opacity: .28; transform: translateY(30px); transition: opacity .65s ease, transform .75s var(--ease-out); }
 .panel.is-active .panel-copy { opacity: 1; transform: translateY(0); }
 .intro-copy { position: absolute; z-index: 2; left: 70vw; top: 50%; width: min(25vw, 430px); opacity: 0; transform: translateY(calc(-50% + 24px)); pointer-events: none; }
+.intro-copy h2 { max-width: 536px; text-wrap: balance; }
 .panel-intro.is-active .intro-copy { transform: translateY(-50%); }
 .panel-intro .intro-copy { transition: none; }
 .panel-transition .panel-visual { box-shadow: 0 28px 90px rgba(120, 33, 29, .22); }
@@ -421,24 +422,14 @@ footer > a { justify-self: end; }
 }
 
 /* Full-width image handoff into the first narrative panel. */
-.hero::after {
-    content: "";
-    position: absolute;
-    z-index: 4;
-    inset: auto 0 -1px;
-    height: clamp(56px, 13vh, 150px);
-    pointer-events: none;
-    background: linear-gradient(180deg, rgba(8, 9, 11, 0), #0b0c0e 92%);
-}
-.journey-sticky { --intro-morph: 0; }
-.journey-sticky::before {
-    content: "";
+.journey-sticky { --intro-morph: 0; --intro-seam-opacity: calc(1 - var(--intro-morph)); }
+.intro-seam {
     position: absolute;
     z-index: 4;
     inset: 0 0 auto;
     height: clamp(70px, 16vh, 180px);
     pointer-events: none;
-    opacity: calc(1 - var(--intro-morph));
+    opacity: var(--intro-seam-opacity);
     background: linear-gradient(180deg, rgba(11, 12, 14, .98), rgba(11, 12, 14, .58) 52%, rgba(11, 12, 14, 0));
     transition: opacity .2s linear;
 }
@@ -472,7 +463,7 @@ footer > a { justify-self: end; }
 .scroll-hint { z-index: 7; opacity: var(--intro-morph, 1); transition: opacity .24s ease; }
 
 /* Settle the image frame before revealing the adjacent text. */
-body[data-transition-variant="frame"] .journey-sticky::before {
+body[data-transition-variant="frame"] .intro-seam {
     background: linear-gradient(180deg, rgba(11, 12, 14, .98), rgba(11, 12, 14, .74) 60%, rgba(11, 12, 14, 0));
 }
 body[data-transition-variant="frame"] .intro-visual {
@@ -486,15 +477,16 @@ body[data-transition-variant="frame"] .intro-visual::before {
 body[data-transition-variant="frame"] .intro-copy {
     left: 68vw;
     width: min(29vw, 440px);
-    max-width: 540px;
+    max-width: 620px;
     padding: 0;
     border: 0;
     background: transparent;
     box-shadow: none;
 }
+body[data-transition-variant="frame"] .intro-copy > p:not(.panel-kicker) { max-width: 560px; }
 
 @media (max-width: 900px) {
-    .journey-sticky::before { height: 14vh; }
+    .intro-seam { height: 14vh; }
     .intro-copy,
     body[data-transition-variant="frame"] .intro-copy {
         left: 5vw;
@@ -526,4 +518,14 @@ body[data-transition-variant="frame"] .intro-copy {
 }
 
 /* Keep the desktop intro copy in the same reading plane as the settled frame. */
-@media (min-width: 901px) { .panel-intro .intro-copy { top: 50% !important; transform: translateY(-50%) !important; visibility: visible !important; color: #f5f2eb; } }
+@media (min-width: 901px) {
+    .panel-intro .intro-copy {
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        visibility: visible !important;
+        color: #f5f2eb;
+    }
+}

@@ -434,26 +434,68 @@ function introTargetMetrics() {
     const h = metrics.viewportHeight;
     const portrait = !desktop.matches && !compactLandscape.matches;
     const below = portrait;
-    const widthBase = w * (portrait ? .9 : compactLandscape.matches ? .51 : introLayout.width);
-    const left = w * (portrait ? .05 : compactLandscape.matches ? .04 : introLayout.left);
-    const copyLeft = w * (portrait ? .05 : compactLandscape.matches ? .61 : introLayout.copyLeft);
-    introCopy.style.width = `${w * (portrait ? .9 : compactLandscape.matches ? .34 : introLayout.copyWidth)}px`;
+    const settledVisual = document.querySelector('.panel:not(.panel-intro) .panel-visual');
+    const settledWidth = settledVisual?.offsetWidth || 0;
+    const settledHeight = settledVisual?.offsetHeight || 0;
+    const settledRect = settledVisual?.getBoundingClientRect();
+    const settledCenter = settledRect ? settledRect.top + settledRect.height / 2 : 0;
+    const settledCopy = document.querySelector('.panel:not(.panel-intro) .panel-copy');
+    const settledCopyRect = settledCopy?.getBoundingClientRect();
+    const settledCopyHeight = settledCopyRect?.height || settledCopy?.offsetHeight || 0;
+    const settledVisualWidth = settledWidth
+        ? settledWidth + (desktop.matches ? 40 : 0)
+        : 0;
+    const widthBase = settledVisualWidth || w * (portrait ? .9 : compactLandscape.matches ? .51 : introLayout.width);
+    const baseLeft = w * (portrait ? .05 : compactLandscape.matches ? .04 : introLayout.left);
+    const copyWidth = portrait
+        ? w * .9
+        : compactLandscape.matches
+            ? w * .34
+            : w * introLayout.copyWidth;
+    const gridGap = Math.min(76, Math.max(38, w * .04));
+    // Center the actual intro group. Using the fallback 620px text width here
+    // leaves an artificial empty rail on the right when the copy is narrower.
+    const centeredLeft = (w - widthBase - gridGap - copyWidth) / 2;
+    const left = portrait || compactLandscape.matches || !settledWidth
+        ? baseLeft
+        : Math.max(baseLeft, centeredLeft);
+    const copyLeft = portrait
+        ? w * .05
+        : compactLandscape.matches
+            ? w * .61
+            : settledWidth
+                ? left + widthBase + gridGap
+                : w * introLayout.copyLeft;
+    introCopy.style.width = `${copyWidth}px`;
+    introCopy.style.maxWidth = `${copyWidth}px`;
+    // The settled cards include a place-meta row below the body copy. Keep the
+    // intro copy column at that same visual height so its heading does not sit
+    // lower simply because the first card has no metadata row.
+    introCopy.style.minHeight = !below && settledCopyHeight
+        ? `${settledCopyHeight}px`
+        : '';
+    const introBody = introCopy.querySelector(':scope > p:not(.panel-kicker)');
+    if (introBody) introBody.style.maxWidth = `${Math.min(560, copyWidth)}px`;
     introCopy.style.left = `${copyLeft}px`;
     const copyHeight = introCopy.offsetHeight;
     const gap = portrait ? 26 : 32;
     const safeTop = portrait ? 76 : 70;
     const safeBottom = portrait ? 98 : 120;
     const available = Math.max(140, h - safeTop - safeBottom);
-    // Keep the source's 16:9 frame intact. If the viewport is short, reduce
-    // the frame width together with its height instead of cropping the scene.
+    // Keep the settled card height for a stable handoff, with a small desktop
+    // width bias that lets the first composition breathe into the left rail.
     const maxHeight = below ? Math.max(90, available - copyHeight - gap) : h * .72;
-    const width = Math.min(widthBase, maxHeight * 16 / 9);
-    const height = width * 9 / 16;
+    const width = settledVisualWidth || Math.min(widthBase, maxHeight * 16 / 9);
+    const height = settledHeight ? settledHeight : width * 9 / 16;
     const contentHeight = below ? height + gap + copyHeight : Math.max(height, copyHeight);
     const top = safeTop + Math.max(0, (available - contentHeight) / 2);
-    const center = below ? top + height / 2 : (h - safeBottom + safeTop) / 2;
+    const center = below
+        ? top + height / 2
+        : settledCenter || (h - safeBottom + safeTop) / 2;
     return { width, height, left, center, below, copyLeft, copyHeight,
-        copyTop: below ? top + height + gap : center - copyHeight / 2,
+        copyTop: below
+            ? top + height + gap
+            : center - copyHeight / 2,
         copyRight: copyLeft + introCopy.offsetWidth };
 }
 
@@ -461,8 +503,9 @@ function renderIntro(progress) {
     const target = introTargetMetrics();
     // Finish the image first, then let the last part of the scroll breathe for reading.
     const p = clamp(progress);
-    const morph = reducedMotion.matches ? (progress > .03 ? 1 : 0) : easeOut(p);
-    // Cover during the handoff, then switch to contain once the 16:9 frame has settled.
+    const morphValue = reducedMotion.matches ? (progress > .03 ? 1 : 0) : easeOut(clamp(p / .84));
+    const morph = morphValue > .98 ? 1 : morphValue;
+    // Cover during the handoff, then switch to contain once the card frame has settled.
     introVisual.classList.toggle('is-settled', morph > .72);
     const h = metrics.viewportHeight;
     const width = innerWidth + (target.width - innerWidth) * morph;
@@ -480,7 +523,9 @@ function renderIntro(progress) {
     else clearance = target.copyLeft - left - width;
     // Let the copy appear only after a real breathing gap opens beside the image.
     // This prevents the moving frame from ever painting over the headline.
-    const reveal = clamp((clearance - 32) / 18) * clamp((morph - .5) / .26);
+    // Reveal once the frame has a real reading gap, then finish the copy fade
+    // before the image reaches its settled card geometry.
+    const reveal = clamp((clearance + 24) / 60) * clamp((morph - .22) / .22);
     sticky.style.setProperty('--intro-morph', morph.toFixed(4));
     introOverlay.style.opacity = String(1 - clamp(morph * 2.6));
     introOverlay.style.transform = `translateY(${-morph * 22}px)`;
@@ -640,8 +685,12 @@ function update() {
         introCopy.style.opacity = '1';
         introCopy.style.setProperty('--intro-copy-reveal', '1');
         introCopy.style.setProperty('--intro-copy-clip', '0%');
-        introCopy.style.transform = 'none';
         translateProgress = clamp((raw - INTRO_PHASE) / (1 - INTRO_PHASE));
+        // Once the horizontal story advances, let the intro copy leave with
+        // its frame instead of leaving a sliver of text at the viewport edge.
+        const introTrackFade = clamp((translateProgress - .005) / .035);
+        introCopy.style.opacity = String(1 - introTrackFade);
+        introCopy.style.transform = 'none';
     }
 
     track.style.transform = `translate3d(${-metrics.maxTranslate * translateProgress}px, 0, 0)`;
@@ -1211,21 +1260,21 @@ const zh = {
     heroTitle: '春日成花<br><em>秋日成叶</em>',
     heroLead: '樱花把春天铺成一片白，红叶把秋天聚成一轮红。<br>两个季节，共同完成一面日本的旗。',
     introOverlay: '一面旗，两个季节', introKicker: '01 · 构想 / 从花与叶出发',
-    introTitle: '循着花与叶，<br>走进两种季节。',
+    introTitle: '循着花与叶，<br>走进两种季节',
     osakaMintKicker: '02 · 白色 / 大阪造币局', philosophyKicker: '03 · 白色 / 哲学之道', fushimiKicker: '04 · 白色 / 伏见', funakawaKicker: '05 · 白色 / 舟川', sumauraKicker: '06 · 白色 / 须磨浦', yoshinoKicker: '07 · 白色 / 吉野', turnKicker: '08 · 白到红 / 转场', fujiAutumnKicker: '09 · 红色 / 富士河口湖', kiyomizuKicker: '10 · 红色 / 清水寺', rurikoinKicker: '11 · 红色 / 琉璃光院', arashiyamaKicker: '12 · 红色 / 保津川', tojiKicker: '13 · 红色 / 东寺', miyajimaKicker: '14 · 红色 / 宫岛',
-    introBody: '樱花穿过水岸与山野，红叶漫过庭园与海边。十二处风景，让春与秋共同走向一面旗。',
-    osakaMintTitle: '花密成廊，<br>白色第一次有了方向。', osakaMintBody: '造币局的晚樱从两侧合拢，行人走进由花构成的白。花廊为旗面底色积下第一层密度。',
-    yoshinoTitle: '一整座山盛开，<br>白色抵达完整。', yoshinoBody: '吉野山从山脚延至云雾，樱花一层层铺开。一路累积的白，至此成为一整片可以远望的春天。',
-    philosophyTitle: '人在花下行走，<br>白色拥有了尺度。', philosophyBody: '水渠、低墙与行人的步幅收住漫天花枝。旗面的白由此成为一处可以进入、可以呼吸的空间。',
-    funakawaTitle: '雪山立于花后，<br>白色穿过整片田野。', funakawaBody: '残雪的朝日岳、舟川樱列、郁金香与油菜花在同一刻铺开。白色离开古寺，进入北陆开阔的春日地平线。',
-    sumauraTitle: '山海之间，<br>白色被风吹得辽阔。', sumauraBody: '须磨浦的樱花越过山坡，面向濑户内海。海蓝让花的白更清晰，也让春天拥有远景。',
-    fushimiTitle: '舟划过水纹，<br>花把白色送向远方。', fushimiBody: '十石舟从酒藏与花岸之间缓缓驶过，水面带走花瓣。白色第一次离开步道，开始顺着水流前行。',
-    turnTitle: '白走到尽头，<br>第一枚红叶落下。', turnBody: '春风留下完整的白。时间继续向前，叶片从画面边缘出现，开始寻找旗帜的中心。',
-    fujiAutumnTitle: '雪峰仍冷，<br>山脚的红已经燃起。', fujiAutumnBody: '河口湖的蓝与富士山的白托住第一层红叶。红从远景开始，向旗面中央靠近。',
-    kiyomizuTitle: '木构伸向山谷，<br>红色拥有了体量。', kiyomizuBody: '清水舞台悬在层层红叶之上，人与建筑给秋色以尺度。中央的红展开为一片可以俯瞰的季节。',
-    rurikoinTitle: '窗框收住庭园，<br>红色在漆面重现。', rurikoinBody: '书院把绯红、洋红、橙金与余绿切成几幅景，黑漆桌面接住交叠倒影。多种秋色由实入虚，向旗心汇成更深的红。',
-    arashiyamaTitle: '河流切开山谷，<br>红色沿两岸深入。', arashiyamaBody: '保津川在岚山群峰之间转弯，近处深红枫枝与远坡秋色夹住翡翠水面。小舟标出峡谷尺度，红由岸边一路进入远山。',
-    tojiTitle: '五重塔收住暮色，<br>红叶聚成最后一笔。', tojiBody: '塔影把散开的秋色收束成清晰轮廓。五种红叶风景向中央汇合，季节的太阳终于完整。', miyajimaTitle: '鸟居临海，<br>红色越过潮水。', miyajimaBody: '宫岛的枫叶从岸边向海上延展，潮水托起朱红的鸟居。季节的太阳至此越过山寺与庭园，抵达开阔的海。',
+    introBody: '樱花穿过水岸与山野，红叶漫过庭园与海边。十二处风景，<br>让春与秋共同走向一面旗。',
+    osakaMintTitle: '花密成廊，<br>白色第一次有了方向', osakaMintBody: '造币局的晚樱从两侧合拢，行人走进由花构成的白。花廊为旗面底色积下第一层密度。',
+    yoshinoTitle: '一整座山盛开，<br>白色抵达完整', yoshinoBody: '吉野山从山脚延至云雾，樱花一层层铺开。一路累积的白，至此成为一整片可以远望的春天。',
+    philosophyTitle: '人在花下行走，<br>白色拥有了尺度', philosophyBody: '水渠、低墙与行人的步幅收住漫天花枝。旗面的白由此成为一处可以进入、可以呼吸的空间。',
+    funakawaTitle: '雪山立于花后，<br>白色穿过整片田野', funakawaBody: '残雪的朝日岳、舟川樱列、郁金香与油菜花在同一刻铺开。白色离开古寺，进入北陆开阔的春日地平线。',
+    sumauraTitle: '山海之间，<br>白色被风吹得辽阔', sumauraBody: '须磨浦的樱花越过山坡，面向濑户内海。海蓝让花的白更清晰，也让春天拥有远景。',
+    fushimiTitle: '舟划过水纹，<br>花把白色送向远方', fushimiBody: '十石舟从酒藏与花岸之间缓缓驶过，水面带走花瓣。白色第一次离开步道，开始顺着水流前行。',
+    turnTitle: '白走到尽头，<br>第一枚红叶落下', turnBody: '春风留下完整的白。时间继续向前，叶片从画面边缘出现，开始寻找旗帜的中心。',
+    fujiAutumnTitle: '雪峰仍冷，<br>山脚的红已经燃起', fujiAutumnBody: '河口湖的蓝与富士山的白托住第一层红叶。红从远景开始，向旗面中央靠近。',
+    kiyomizuTitle: '木构伸向山谷，<br>红色拥有了体量', kiyomizuBody: '清水舞台悬在层层红叶之上，人与建筑给秋色以尺度。中央的红展开为一片可以俯瞰的季节。',
+    rurikoinTitle: '窗框收住庭园，<br>红色在漆面重现', rurikoinBody: '书院把绯红、洋红、橙金与余绿切成几幅景，黑漆桌面接住交叠倒影。多种秋色由实入虚，向旗心汇成更深的红。',
+    arashiyamaTitle: '河流切开山谷，<br>红色沿两岸深入', arashiyamaBody: '保津川在岚山群峰之间转弯，近处深红枫枝与远坡秋色夹住翡翠水面。小舟标出峡谷尺度，红由岸边一路进入远山。',
+    tojiTitle: '五重塔收住暮色，<br>红叶聚成最后一笔', tojiBody: '塔影把散开的秋色收束成清晰轮廓。五种红叶风景向中央汇合，季节的太阳终于完整。', miyajimaTitle: '鸟居临海，<br>红色越过潮水', miyajimaBody: '宫岛的枫叶从岸边向海上延展，潮水托起朱红的鸟居。季节的太阳至此越过山寺与庭园，抵达开阔的海。',
     arrive: '查看季节采样', scrollHint: '继续滚动 · 看春樱与秋叶沿途展开',
     ledgerTitle: '白与红，<br>共同完成一面旗。', ledgerLead: '花与叶穿过这些地点，留下白与红的证据。', ledgerVerse: '<p class="verse-white"><span class="verse-mark">花</span>樱花经过花廊、人行、水路、雪山田野、山海与群山，<em>铺开白</em>。</p><p class="verse-red"><span class="verse-mark">葉</span>红叶借雪峰、木构、漆影、河谷、塔影与海潮，<em>向中心聚拢</em>。</p>', ledgerWhite: '樱花之白', ledgerRed: '红叶之红',
     flagLabel: '樱花之白 · 红叶之红', equationSakura: '樱花之白', equationMomiji: '红叶之红', equationFlag: '日本之旗',
@@ -1245,21 +1294,21 @@ const ja = {
     navTop: '一念', navJourney: '花と葉', navLedger: '白と赤', navStory: '旗となる', scroll: '下へ',
     heroTitle: '春は花となり<br><em>秋は葉となる</em>', heroLead: '桜が春を白く広げ、紅葉が秋を一輪の赤へ集める。<br>二つの季節が、一つの旗を完成させる。',
     introOverlay: '二つの季節の旗', introKicker: '01 · 構想 / 花と葉から始まる',
-    introTitle: '花と葉をたどり、<br>二つの季節へ。',
+    introTitle: '花と葉をたどり、<br>二つの季節へ',
     osakaMintKicker: '02 · 白 / 大阪造幣局', philosophyKicker: '03 · 白 / 哲学の道', fushimiKicker: '04 · 白 / 伏見', funakawaKicker: '05 · 白 / 舟川', sumauraKicker: '06 · 白 / 須磨浦', yoshinoKicker: '07 · 白 / 吉野', turnKicker: '08 · 白から赤 / 転換', fujiAutumnKicker: '09 · 赤 / 富士河口湖', kiyomizuKicker: '10 · 赤 / 清水寺', rurikoinKicker: '11 · 赤 / 瑠璃光院', arashiyamaKicker: '12 · 赤 / 保津川', tojiKicker: '13 · 赤 / 東寺', miyajimaKicker: '14 · 赤 / 宮島',
     introBody: '桜は水辺と山野をめぐり、紅葉は庭と海辺を彩る。十二の風景から、春と秋が一つの旗へ向かう。',
-    osakaMintTitle: '花が回廊をつくり、<br>白に方向が生まれる。', osakaMintBody: '造幣局の遅咲きの桜が両側から重なり、人々を花の白へ迎え入れる。ここから旗の地色が密度を持ちはじめる。',
-    yoshinoTitle: '山ひとつが咲き、<br>白は満ちていく。', yoshinoBody: '吉野山は麓から霧の先まで、桜を幾重にも重ねる。積み重なった白は、遠くから望める春になる。',
-    philosophyTitle: '花の下を人が歩き、<br>白に尺度が生まれる。', philosophyBody: '水路、低い塀、人の歩幅が空を覆う枝を受け止める。旗の白は、歩いて入り、呼吸できる場所へと広がる。',
-    funakawaTitle: '雪山が花の向こうに立ち、<br>白は田野を横切る。', funakawaBody: '残雪の朝日岳、舟川の桜並木、チューリップ、菜の花が同時に広がる。白は古寺を離れ、北陸の大きな春の地平へ出る。',
-    sumauraTitle: '山と海のあいだで、<br>白は風に広がる。', sumauraBody: '須磨浦の桜は斜面を越え、瀬戸内海へひらく。海の青が花の白を際立たせ、春に遠景を与える。',
-    fushimiTitle: '舟が水紋をひらき、<br>花が白を遠くへ運ぶ。', fushimiBody: '十石舟は酒蔵と桜の岸のあいだを進み、水面が花びらを連れていく。白は初めて小径を離れ、水の流れに乗る。',
-    turnTitle: '白の終わりに、<br>最初の紅葉が落ちる。', turnBody: '春風は一面の白を残す。時間が進むと葉が画面の縁に現れ、旗の中心を探しはじめる。',
-    fujiAutumnTitle: '雪峰は冷たいまま、<br>麓の赤が燃えはじめる。', fujiAutumnBody: '河口湖の青と富士の白が、最初の紅葉を支える。赤は遠景から旗の中心へ近づいていく。',
-    kiyomizuTitle: '木の舞台が谷へ伸び、<br>赤に量感が生まれる。', kiyomizuBody: '清水の舞台が幾層もの紅葉の上に浮かび、人と建築が秋色の大きさを示す。中央の赤は、見渡せる季節として広がる。',
-    rurikoinTitle: '窓枠が庭を切り取り、<br>赤は漆面にもう一度現れる。', rurikoinBody: '書院は緋、紅紫、橙金、残る緑を幾つもの景へ分け、黒い漆の机が重なる反射を受け止める。多彩な秋色が実像から虚像へ移り、旗の赤を深める。',
-    arashiyamaTitle: '川が谷をひらき、<br>赤は両岸を奥へ進む。', arashiyamaBody: '保津川は嵐山の峰の間で曲がり、近くの深紅と遠い斜面の秋色が翡翠の水面を挟む。小舟が峡谷の尺度を示し、赤は岸から遠山へ続く。',
-    tojiTitle: '五重塔が夕景を留め、<br>紅葉が最後の一筆になる。', tojiBody: '塔の影が広がる秋色を明快な輪郭へ収束させる。五つの紅葉風景が中心に集まり、季節の太陽が完成する。', miyajimaTitle: '鳥居が海に立ち、<br>赤は潮を越えていく。', miyajimaBody: '宮島の紅葉は岸から海へと伸び、潮が朱の鳥居を支える。季節の太陽は山寺と庭を越え、ひらけた海へ至る。',
+    osakaMintTitle: '花が回廊をつくり、<br>白に方向が生まれる', osakaMintBody: '造幣局の遅咲きの桜が両側から重なり、人々を花の白へ迎え入れる。ここから旗の地色が密度を持ちはじめる。',
+    yoshinoTitle: '山ひとつが咲き、<br>白は満ちていく', yoshinoBody: '吉野山は麓から霧の先まで、桜を幾重にも重ねる。積み重なった白は、遠くから望める春になる。',
+    philosophyTitle: '花の下を人が歩き、<br>白に尺度が生まれる', philosophyBody: '水路、低い塀、人の歩幅が空を覆う枝を受け止める。旗の白は、歩いて入り、呼吸できる場所へと広がる。',
+    funakawaTitle: '雪山が花の向こうに立ち、<br>白は田野を横切る', funakawaBody: '残雪の朝日岳、舟川の桜並木、チューリップ、菜の花が同時に広がる。白は古寺を離れ、北陸の大きな春の地平へ出る。',
+    sumauraTitle: '山と海のあいだで、<br>白は風に広がる', sumauraBody: '須磨浦の桜は斜面を越え、瀬戸内海へひらく。海の青が花の白を際立たせ、春に遠景を与える。',
+    fushimiTitle: '舟が水紋をひらき、<br>花が白を遠くへ運ぶ', fushimiBody: '十石舟は酒蔵と桜の岸のあいだを進み、水面が花びらを連れていく。白は初めて小径を離れ、水の流れに乗る。',
+    turnTitle: '白の終わりに、<br>最初の紅葉が落ちる', turnBody: '春風は一面の白を残す。時間が進むと葉が画面の縁に現れ、旗の中心を探しはじめる。',
+    fujiAutumnTitle: '雪峰は冷たいまま、<br>麓の赤が燃えはじめる', fujiAutumnBody: '河口湖の青と富士の白が、最初の紅葉を支える。赤は遠景から旗の中心へ近づいていく。',
+    kiyomizuTitle: '木の舞台が谷へ伸び、<br>赤に量感が生まれる', kiyomizuBody: '清水の舞台が幾層もの紅葉の上に浮かび、人と建築が秋色の大きさを示す。中央の赤は、見渡せる季節として広がる。',
+    rurikoinTitle: '窓枠が庭を切り取り、<br>赤は漆面にもう一度現れる', rurikoinBody: '書院は緋、紅紫、橙金、残る緑を幾つもの景へ分け、黒い漆の机が重なる反射を受け止める。多彩な秋色が実像から虚像へ移り、旗の赤を深める。',
+    arashiyamaTitle: '川が谷をひらき、<br>赤は両岸を奥へ進む', arashiyamaBody: '保津川は嵐山の峰の間で曲がり、近くの深紅と遠い斜面の秋色が翡翠の水面を挟む。小舟が峡谷の尺度を示し、赤は岸から遠山へ続く。',
+    tojiTitle: '五重塔が夕景を留め、<br>紅葉が最後の一筆になる', tojiBody: '塔の影が広がる秋色を明快な輪郭へ収束させる。五つの紅葉風景が中心に集まり、季節の太陽が完成する。', miyajimaTitle: '鳥居が海に立ち、<br>赤は潮を越えていく', miyajimaBody: '宮島の紅葉は岸から海へと伸び、潮が朱の鳥居を支える。季節の太陽は山寺と庭を越え、ひらけた海へ至る。',
     arrive: '季節の標本を見る', scrollHint: 'スクロール · 春の桜から秋の葉へ',
     ledgerTitle: '白と赤。<br>一つの旗へ。', ledgerLead: '花と葉は各地をめぐり、白と赤の証しを残す。', ledgerVerse: '<p class="verse-white"><span class="verse-mark">花</span>桜は花の回廊、人の道、水路、雪山の田野、山海、群山へ、<em>白を広げ</em>。</p><p class="verse-red"><span class="verse-mark">葉</span>紅葉は雪峰、木組み、漆の影、川谷、塔影、潮を借りて、<em>中心へ集う</em>。</p>', ledgerWhite: '桜の白', ledgerRed: '紅葉の赤',
     flagLabel: '桜の白 · 紅葉の赤', equationSakura: '桜の白', equationMomiji: '紅葉の赤', equationFlag: '日本の旗',
@@ -1279,21 +1328,21 @@ const en = {
     navTop: 'A Thought', navJourney: 'Flower & Leaf', navLedger: 'White & Red', navStory: 'The Flag', scroll: 'Begin',
     heroTitle: 'Spring becomes blossom<br><em>Autumn becomes leaf</em>', heroLead: 'Sakura spreads spring into white. Maple leaves gather autumn into red.<br>Two seasons complete one flag.',
     introOverlay: 'A FLAG OF TWO SEASONS', introKicker: '01 · CONCEPT / BEGIN WITH BLOSSOM AND LEAF',
-    introTitle: 'Follow blossom and leaf.<br>Enter two seasons.',
+    introTitle: 'Follow blossom and leaf<br>Enter two seasons',
     osakaMintKicker: '02 · WHITE / OSAKA MINT', philosophyKicker: '03 · WHITE / PHILOSOPHER\'S PATH', fushimiKicker: '04 · WHITE / FUSHIMI', funakawaKicker: '05 · WHITE / FUNAKAWA', sumauraKicker: '06 · WHITE / SUMAURA', yoshinoKicker: '07 · WHITE / YOSHINO', turnKicker: '08 · WHITE TO RED / TRANSITION', fujiAutumnKicker: '09 · RED / MOUNT FUJI', kiyomizuKicker: '10 · RED / KIYOMIZU-DERA', rurikoinKicker: '11 · RED / RURIKOIN', arashiyamaKicker: '12 · RED / HOZUGAWA', tojiKicker: '13 · RED / TO-JI', miyajimaKicker: '14 · RED / MIYAJIMA',
     introBody: 'Sakura crosses watersides and mountain landscapes; maple leaves color gardens and shores. Across twelve scenes, spring and autumn move toward one flag.',
-    osakaMintTitle: 'Blossom closes into a passage.<br>White gains direction.', osakaMintBody: 'Late-blooming trees meet above the Mint walkway and people enter a field made from blossom. White gains its first layer of density here.',
-    yoshinoTitle: 'A whole mountain blooms.<br>White becomes complete.', yoshinoBody: 'From the foothills into the mist, Yoshino layers blossom upon blossom. The accumulated white becomes a spring that can be seen from afar.',
-    philosophyTitle: 'People walk beneath blossom.<br>White gains human scale.', philosophyBody: 'Canal, wall and footsteps hold the canopy in place. The flag\'s white opens into a space that can be entered and breathed.',
-    funakawaTitle: 'Snow peaks rise beyond blossom.<br>White crosses the fields.', funakawaBody: 'Snowbound Asahidake, Funakawa\'s cherry row, tulips and nanohana unfold at once. White leaves the temple and enters Hokuriku\'s open spring horizon.',
-    sumauraTitle: 'Between mountain and sea,<br>wind makes white expansive.', sumauraBody: 'Sumaura\'s blossom crosses the hillside and opens toward the Seto Inland Sea. Marine blue makes the spring white unmistakable.',
-    fushimiTitle: 'A boat opens the water.<br>Blossom carries white onward.', fushimiBody: 'The Jikkokubune passes between sake warehouses and flowering banks as the canal carries petals away. White leaves the path for the first time and follows the current.',
-    turnTitle: 'At the end of white,<br>the first red leaf falls.', turnBody: 'Spring leaves a completed white field. Time moves on; leaves enter from the edges and begin searching for the flag\'s center.',
-    fujiAutumnTitle: 'The snowy peak stays cool.<br>Red ignites below.', fujiAutumnBody: 'Lake blue and Fuji white hold the first layer of maple red. It begins in the distance and moves toward the center.',
-    kiyomizuTitle: 'Timber reaches into the valley.<br>Red gains volume.', kiyomizuBody: 'Kiyomizu\'s stage floats above layered foliage. People and architecture reveal that the central red is a season with measurable scale.',
-    rurikoinTitle: 'The window holds the garden.<br>Red returns in lacquer.', rurikoinBody: 'The shoin frames crimson, magenta, orange-gold and lingering green while black lacquer receives their layered reflections. Many autumn colors converge into a deeper red.',
-    arashiyamaTitle: 'The river opens the valley.<br>Red follows both banks.', arashiyamaBody: 'The Hozu River bends between Arashiyama\'s peaks as near crimson and distant autumn slopes hold its jade surface. A small boat gives the gorge scale.',
-    tojiTitle: 'The pagoda holds dusk.<br>Maple makes the final mark.', tojiBody: 'The tower gathers scattered autumn color into a clear silhouette. Five red landscapes converge and the seasonal sun becomes complete.', miyajimaTitle: 'The torii meets the sea.<br>Red crosses the tide.', miyajimaBody: 'Miyajima maple reaches from the shore toward the water, while the tide holds the vermilion torii. The seasonal sun moves beyond mountain temples and gardens into the open sea.',
+    osakaMintTitle: 'Blossom closes into a passage<br>White gains direction', osakaMintBody: 'Late-blooming trees meet above the Mint walkway and people enter a field made from blossom. White gains its first layer of density here.',
+    yoshinoTitle: 'A whole mountain blooms<br>White becomes complete', yoshinoBody: 'From the foothills into the mist, Yoshino layers blossom upon blossom. The accumulated white becomes a spring that can be seen from afar.',
+    philosophyTitle: 'People walk beneath blossom<br>White gains human scale', philosophyBody: 'Canal, wall and footsteps hold the canopy in place. The flag\'s white opens into a space that can be entered and breathed.',
+    funakawaTitle: 'Snow peaks rise beyond blossom<br>White crosses the fields', funakawaBody: 'Snowbound Asahidake, Funakawa\'s cherry row, tulips and nanohana unfold at once. White leaves the temple and enters Hokuriku\'s open spring horizon.',
+    sumauraTitle: 'Between mountain and sea<br>wind makes white expansive', sumauraBody: 'Sumaura\'s blossom crosses the hillside and opens toward the Seto Inland Sea. Marine blue makes the spring white unmistakable.',
+    fushimiTitle: 'A boat opens the water<br>Blossom carries white onward', fushimiBody: 'The Jikkokubune passes between sake warehouses and flowering banks as the canal carries petals away. White leaves the path for the first time and follows the current.',
+    turnTitle: 'At the end of white<br>the first red leaf falls', turnBody: 'Spring leaves a completed white field. Time moves on; leaves enter from the edges and begin searching for the flag\'s center.',
+    fujiAutumnTitle: 'The snowy peak stays cool<br>Red ignites below', fujiAutumnBody: 'Lake blue and Fuji white hold the first layer of maple red. It begins in the distance and moves toward the center.',
+    kiyomizuTitle: 'Timber reaches into the valley<br>Red gains volume', kiyomizuBody: 'Kiyomizu\'s stage floats above layered foliage. People and architecture reveal that the central red is a season with measurable scale.',
+    rurikoinTitle: 'The window holds the garden<br>Red returns in lacquer', rurikoinBody: 'The shoin frames crimson, magenta, orange-gold and lingering green while black lacquer receives their layered reflections. Many autumn colors converge into a deeper red.',
+    arashiyamaTitle: 'The river opens the valley<br>Red follows both banks', arashiyamaBody: 'The Hozu River bends between Arashiyama\'s peaks as near crimson and distant autumn slopes hold its jade surface. A small boat gives the gorge scale.',
+    tojiTitle: 'The pagoda holds dusk<br>Maple makes the final mark', tojiBody: 'The tower gathers scattered autumn color into a clear silhouette. Five red landscapes converge and the seasonal sun becomes complete.', miyajimaTitle: 'The torii meets the sea<br>Red crosses the tide', miyajimaBody: 'Miyajima maple reaches from the shore toward the water, while the tide holds the vermilion torii. The seasonal sun moves beyond mountain temples and gardens into the open sea.',
     arrive: 'View the seasonal study', scrollHint: 'Keep scrolling · from spring blossom to autumn leaves',
     ledgerTitle: 'White and red,<br>one completed flag.', ledgerLead: 'Blossom and leaf travel through these places, leaving evidence of white and red.', ledgerVerse: '<p class="verse-white"><span class="verse-mark">F</span>Through flower corridor, footpath, waterway, snowfield, mountain sea and ranges, blossom <em>spreads the white</em>.</p><p class="verse-red"><span class="verse-mark">L</span>Through snow peak, timber, lacquer, river valley, pagoda and tide, maple <em>gathers toward the center</em>.</p>', ledgerWhite: 'Sakura White', ledgerRed: 'Momiji Red',
     flagLabel: 'SAKURA WHITE · MOMIJI RED', equationSakura: 'Sakura white', equationMomiji: 'Momiji red', equationFlag: 'Japan\'s flag',
