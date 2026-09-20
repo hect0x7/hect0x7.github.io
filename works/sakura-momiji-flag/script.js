@@ -527,7 +527,7 @@ function renderIntro(progress) {
     // before the image reaches its settled card geometry.
     const reveal = clamp((clearance + 24) / 60) * clamp((morph - .22) / .22);
     sticky.style.setProperty('--intro-morph', morph.toFixed(4));
-    introOverlay.style.opacity = String(1 - clamp(morph * 2.6));
+    introVisual.style.setProperty('--intro-title-opacity', String(1 - clamp(morph * 2.6)));
     introOverlay.style.transform = `translateY(${-morph * 22}px)`;
     introCopy.style.setProperty('--intro-copy-reveal', reveal.toFixed(4));
     introCopy.style.setProperty('--intro-copy-clip', `${(1 - reveal) * 100}%`);
@@ -680,7 +680,7 @@ function update() {
         introVisual.classList.add('is-settled');
         introVisual.style.setProperty('--intro-morph', '1');
         sticky.style.setProperty('--intro-morph', '1');
-        introOverlay.style.opacity = '0';
+        introVisual.style.setProperty('--intro-title-opacity', '0');
         introOverlay.style.transform = 'none';
         introCopy.style.opacity = '1';
         introCopy.style.setProperty('--intro-copy-reveal', '1');
