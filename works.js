@@ -46,7 +46,7 @@ const WORKS = [
   {
     slug: "momiji-style-guide",
     year: "2026",
-    cover: "works/momiji-style-guide/assets/hero-v4.webp",
+    cover: "works/momiji-style-guide/assets/hero-v5.webp",
     title: {
       zh: "紅葉季の穿搭手帖",
       ja: "紅葉のスタイル手帖",
