@@ -171,8 +171,8 @@ nav .lang-switch button.active {
 .hero-bg {
   position: absolute; inset:0;
   background:
-    linear-gradient(180deg, rgba(26,20,16,0.1) 0%, rgba(26,20,16,0.5) 60%, rgba(26,20,16,0.8) 100%),
-    url("assets/hero-v4.webp") center / cover no-repeat;
+    linear-gradient(90deg, rgba(26,20,16,0.82) 0%, rgba(26,20,16,0.45) 45%, rgba(26,20,16,0.02) 75%),
+    url("assets/hero-v5.webp") 80% top / cover no-repeat;
   z-index: 0;
 }
 .hero-bg::before {
@@ -938,7 +938,11 @@ footer {
   nav .nav-links { display: none; }
   section { padding: 80px 20px; }
   .hero { padding: 0 20px 60px; }
-  .hero-bg { background-position: 72% center; }
+  .hero-bg {
+    background:
+      linear-gradient(180deg, rgba(26,20,16,0.2) 0%, rgba(26,20,16,0.55) 50%, rgba(26,20,16,0.85) 100%),
+      url("assets/hero-v5.webp") 80% top / cover no-repeat;
+  }
   .hero-content h1 { font-size: 48px; }
   .section-header { flex-direction: column; align-items: flex-start; }
   .region-grid { grid-template-columns: 1fr; }
