@@ -191,9 +191,10 @@ img { display: block; width: 100%; }
     .autoplay-position, .autoplay-speed button { color: CanvasText; }
     .autoplay-speed { border-color: ButtonBorder; box-shadow: none; forced-color-adjust: none; }
     .autoplay-speed button[aria-pressed="true"] { color: HighlightText; background: Highlight; }
+    .ledger-white header h3, .ledger-white header span { background: none; -webkit-text-fill-color: currentColor; color: CanvasText; }
 }
 
-.season-ledger { padding: clamp(110px, 12vw, 190px) 6vw; color: #1b1917; background: #f2eee7; }
+.season-ledger { padding: clamp(110px, 12vw, 190px) 6vw; color: #1b1917; background: #eae4db; }
 .ledger-head { max-width: 960px; margin: 0 auto clamp(70px, 8vw, 120px); text-align: center; }
 .ledger-head .eyebrow { color: #9e3035; }
 .ledger-head h2 { margin: 22px 0 0; font: 900 clamp(42px, 6vw, 88px)/1.08 "Noto Serif SC", serif; letter-spacing: 0; }
@@ -229,17 +230,20 @@ img { display: block; width: 100%; }
 .verse-red em { font-style: normal; font-weight: 700; color: #b7252d; }
 
 .ledger-pair { max-width: 1500px; margin: auto; }
-.ledger-band { display: grid; grid-template-columns: 190px 1fr; align-items: stretch; min-height: 380px; }
+.ledger-band { display: grid; grid-template-columns: 190px 1fr; align-items: stretch; min-height: 380px; box-shadow: 0 20px 48px rgba(32, 24, 19, .08), 0 2px 8px rgba(32, 24, 19, .04); }
 .ledger-band header { padding: 34px 26px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(30,26,23,.12); }
 .ledger-band header span { font-size: 11px; letter-spacing: .2em; color: #8d837a; }
 .ledger-band h3 { margin: 0; font: 700 clamp(26px, 2.7vw, 44px)/1.1 "Noto Serif SC", serif; writing-mode: vertical-rl; }
-.ledger-images { display: grid; grid-template-columns: repeat(var(--image-count, 5), 1fr); overflow: hidden; }
+.ledger-images { display: grid; grid-template-columns: repeat(var(--image-count, 5), 1fr); overflow: hidden; border: 1px solid rgba(30,26,23,.12); border-left: 0; }
 .ledger-images img { height: 100%; min-height: 380px; object-fit: cover; filter: saturate(.82); transition: flex .7s var(--ease-out), filter .5s, transform .8s var(--ease-out); }
 .ledger-images img:hover { filter: saturate(1.05); transform: scale(1.035); }
 .ledger-equation { min-height: 180px; display: flex; align-items: center; justify-content: center; gap: 22px; font: 700 28px/1 "Noto Serif SC", serif; }
 .ledger-equation i { width: min(13vw, 150px); height: 1px; background: linear-gradient(90deg, #e8cbd1, #c72e34); }
 .ledger-equation b { color: #a49b92; font-weight: 400; }
-.ledger-red header { color: #fff; background: #6e181d; border-color: #6e181d; }
+.ledger-white header { color-scheme: only light; forced-color-adjust: none; color: #1f1b19; background: url("data:image/webp;base64,UklGRnIBAABXRUJQVlA4IGYBAADwDACdASqAAMAAPikUiUOhoSEQNAAYAoS0t34+MPwj5Q3Xd4J7/U9YKMYMj/19u+4EHkv9+C/b/KzJdrve6/osawG91r55FHjrBJgTcR9+zE7+0RBttFSA5SgFVVcVXMb1T72pgdoHVWaGvBVYz5PwAP7+pokxNk8Fwb9H2mQMDn7w/YYaGeqP1GL9DOom5KXiipMkSk6oPITlboBu2sYHkEx4z/srg4400FNNHDjcJp7jkN4qBrsj0g8k6c7AQafZV6cBCs7zVv1A60p90rnzDLOcVAAyY6jhieqLL119+PNuUJZ3+/ORHdcRCpb3kM70Pneqy/MUbPOxQiy3WXY93JZaigQcUDBEgJ/tMYg7JqUmVFEpfHx8E8yk2B+BsVnOzT44ctk7qTu28Vl3dHD650S9thMKOISlv/j9QgXlJVZEzxhMncWZUFudxHkMgxtK2ADOFmrJQD8tivIUsKwZbQEppIQA") center / cover no-repeat, linear-gradient(158deg, #fffcfa 0%, #fbf0ed 52%, #f0d9d6 100%); border-color: rgba(30,26,23,.13); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .82); }
+.ledger-white header h3 { background: url("data:image/webp;base64,UklGRnIAAABXRUJQVlA4IGYAAACQBgCdASqAAIAAPhkMhUIhBBEABABhLS3boQn+L6Agc2IKjlRjnsRDsQor0xKLy1fS8NJKwQq357DHCnoAAP7+3l3/BltsFL3kARgUjzpNQ1AloplR9QUK/GCREBAY9JkEMdJgAAA=") center / cover no-repeat; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.ledger-white header span { background: url("data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAAAQCACdASqAAIAAPhkMhEGhBBFBBABhLSFC2Q86AtwzgCa/xfQFqs7ySlVYbYqssNx4GrUlEhOYSofpyUKCVIx9w3Awyl8YwykgAMj/XeLSjX+64x2ZBEIwAv3w5lRjXLa1Cn4HVBShUtgkVT9iJZQHsJqnZC4CB6ap2QuAgemqdkLgAAA=") center / cover no-repeat; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+.ledger-red header { color-scheme: only light; forced-color-adjust: none; color: #fff; background: url("data:image/webp;base64,UklGRkACAABXRUJQVlA4IDQCAADwDwCdASqAAMAAPikUiUOhoSEQNAAYAoS0t34+MIhAeggREhWi///dBbK+CsD2lVvXt/5Lv/+P/gA0P6Y+gFfViOsnsqykeXbfntWgGOuz0p89w48NG46y3GEMYBRwQCn6hAIWswd6Wb6iZqYsWoTyfpUpxEyDucfQst82W/nH//vN7NykSJoAAP76EOT3P/cfu/9gXj//xlT/+JC//xIX/iHpoGudi2R8CNK6rifdLc6KoklSBOYUiOiTU5hrZKIQSXnhYfWmN3vogVhnowPCVVhL9EulzXP/lZklZiI0hyrZWa/ycrPiqoZA8FNJZmfDWsXzRJ/VHvliW27owCbQTXqZaVGXPxAjIaNqy2+j5/XqQnbPxL1oKc8p3ZqDNFr/zI9LKOr8CuIeqPcWdIqxGwSDs/bBS3lVp2VCeWYHjNQ7M8vNbmL45w3JA5CTF3IvJzB5teOI/KU+OoMraYTulEt6hb2EfFNAhIXZ/aU2y2N2lBSM1DmBzvvMVT9vWH8yOtmgul4n72IFfMDo3ezsZWJEohFTdlnLXIdjhAKKT5TLjrYuuJUUt3D2ngWF2xSBbxXJIoLtL+I6j8Z2XBtwncn9Oe2X77f7SFmPI3dBCGpwlmE7ukGTOdccg6JZNA0WAHJaw12p1pSHO2TYO7CApgugXObrXmroJ2GbWSjnXOPg9rfxO0yrC2RcA9O0HRdDtTK6FoYDGztgy9sD+BgAp+nLOZ/HoVQ+qXoueqpeZPqysAA=") center / cover no-repeat, linear-gradient(158deg, #9c272c 0%, #70181d 52%, #440c10 100%); border-color: #5c1318; box-shadow: inset 0 1px 0 rgba(255, 214, 208, .15); }
 .ledger-red header span { color: #e7b7b7; }
 
 .afterglow { padding: clamp(110px, 13vw, 220px) 6vw; color: #171719; background: #f1eee7; }
@@ -328,7 +332,7 @@ footer > a { justify-self: end; }
     .ledger-band { grid-template-columns: 1fr; min-height: 0; }
     .ledger-band header { min-height: 110px; flex-direction: row; align-items: flex-end; }
     .ledger-band h3 { writing-mode: horizontal-tb; }
-    .ledger-images { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: visible; }
+    .ledger-images { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow: hidden; border-left: 1px solid rgba(30,26,23,.12); border-top: 0; }
     .ledger-images img { min-height: 0; aspect-ratio: 4 / 5; }
     .ledger-equation { min-height: 140px; gap: 12px; }
     .ledger-equation i { width: 46px; }
