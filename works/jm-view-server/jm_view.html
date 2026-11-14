@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>看本 · 预览</title>
+  <!-- PWA -->
+  <link rel="manifest" href="static/manifest.webmanifest">
+  <meta name="theme-color" content="#0b0c11">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="看本">
+  <link rel="icon" type="image/png" href="static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="static/icons/icon-192.png">
+  <script>
+    (function(){var s=localStorage.getItem('jmv-theme'),p=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', s||(p?'dark':'light'));})();
+    (function(){
+      var root=document.documentElement;
+      try {
+        root.classList.toggle('reader-header-prehidden', localStorage.getItem('jmv-head-hidden') !== '0');
+        root.classList.toggle('reader-progress-prehidden', localStorage.getItem('jmv-prog-hidden') === '1');
+      } catch(e) {
+        root.classList.add('reader-header-prehidden');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="static/css/app.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/reader-base.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/reader-modes.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/reader-toolbar.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/reader-contact-sheet.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/reader-extras.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/reader-image-actions.css?v=0.3.11">
+  <script src="static/js/vfs-seed.js?v=0.3.11"></script>
+  <script src="static/js/mock-backend.js?v=0.3.11"></script>
+</head>
+<body>
+
+<!-- common.js 第32行无条件读取 #Comic_Top_Nav 的 offsetHeight，此占位不可删 -->
+<div id="Comic_Top_Nav" style="display:none"></div>
+
+<!-- 顶部悬浮栏 -->
+<div class="reader-top">
+  <a href="./index.html?path=%2Fworks" class="r-btn" title="原路返回" id="backBtn"></a>
+  <div class="reader-title"><b title="/works">/works</b></div>
+  <span class="r-progress" id="topProg">-- / --</span>
+  <a class="portfolio-pill" href="../../" data-portfolio-home title="返回作品集主页" aria-label="返回作品集主页"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span><span class="portfolio-pill-full">返回</span>作品集</span></a>
+</div>
+
+<!-- 图片流 -->
+<div class="stream" id="stream"></div>
+
+<!-- 右侧阅读工具抽屉 -->
+<div class="r-tools" aria-label="阅读工具栏">
+  <button class="reader-tools-handle" id="toolsHandle" type="button" aria-label="展开阅读工具栏" aria-expanded="false" aria-pressed="false">
+    <span class="reader-tools-pin" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 3h12"></path><path d="M8 3v5a4 4 0 0 1-2 3v3h12v-3a4 4 0 0 1-2-3V3"></path><path d="M12 14v7"></path>
+      </svg>
+    </span>
+  </button>
+  <!-- 跳页浮窗 -->
+  <div class="jump-pop" id="jumpPop">
+    <select id="jumpSelect"></select>
+  </div>
+  <!-- 更多功能浮窗 -->
+  <div class="more-pop" id="morePop">
+    <div class="more-pop-head"><b>阅读设置</b><span>Reader controls</span></div>
+    <div class="reader-mode-control" aria-label="阅读模式">
+      <button id="modeScroll" type="button">下拉</button>
+      <button id="modeSingle" type="button">单页</button>
+      <button id="modeDouble" type="button">双页</button>
+    </div>
+    <button id="tHead" title="顶部栏开关" data-tip="顶部栏"></button>
+    <button id="tProg" title="进度条开关" data-tip="进度条"></button>
+    <button id="tEye" title="护眼滤镜" data-tip="护眼模式"></button>
+
+    <div class="reader-size-control" style="position:relative; width:42px; height:42px;">
+      <button id="tSize" title="图片大小" data-tip="图片大小" style="position:absolute; inset:0; margin:0;"></button>
+
+      <!-- 图片大小调节浮窗 -->
+      <div class="jump-pop reader-size-pop" id="sizePop" style="position:absolute; right:calc(100% + 12px); top:50%; transform:translateY(-50%) scale(0.96); transform-origin:right center;">
+        <span id="tSizeVal" class="reader-size-value">800px</span>
+        <div id="sizeRangeControl" class="reader-size-range-control">
+          <input type="range" id="tSizeRange" min="300" max="1600" step="50" value="800" title="拖动调节图片大小">
+        </div>
+        <label id="doubleWidthScaleControl" class="reader-double-scale-control" for="doubleWidthScaleRange" hidden>
+          <span>画面比例</span>
+          <input type="range" id="doubleWidthScaleRange" min="50" max="100" step="1" value="98">
+          <output id="doubleWidthScaleValue">98%</output>
+        </label>
+        <button id="tSizeReset" title="恢复默认" style="border:none; background:none; color:var(--text-secondary); cursor:pointer; display:grid; place-items:center; width:22px; height:22px; border-radius:4px; padding:0; transition:all 0.14s;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:13px; height:13px;"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 3h5v5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <button id="tAutoNext" title="自动连播下本" data-tip="自动连播"></button>
+    <button id="tFull" title="全屏阅读" data-tip="全屏阅读" aria-pressed="false"></button>
+    <button id="tHelp" title="快捷键帮助" data-tip="快捷键帮助" aria-label="快捷键帮助">?</button>
+  </div>
+  <div class="reader-tools-main">
+    <a id="gotop" href="javascript:void(0)" title="回到顶部" data-tip="回到顶部"></a>
+    <a id="gobottom" href="javascript:void(0)" title="跳到最后" data-tip="跳到最后"></a>
+    <a id="tJump" href="javascript:void(0)" title="跳转页码" data-tip="跳转页码"></a>
+    <button id="tGrid" type="button" title="缩略图总览" data-tip="缩略图总览" aria-label="打开缩略图总览" aria-haspopup="dialog" aria-controls="readerGridOverlay">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3.5" y="3.5" width="6.5" height="7" rx="1"/><rect x="14" y="3.5" width="6.5" height="7" rx="1"/>
+        <rect x="3.5" y="13.5" width="6.5" height="7" rx="1"/><rect x="14" y="13.5" width="6.5" height="7" rx="1"/>
+      </svg>
+    </button>
+    <span class="reader-tool-divider" aria-hidden="true"></span>
+    <a id="loadAll" href="javascript:void(0)" title="加载全部" data-tip="加载全部"></a>
+    <button id="tOpenFolder" type="button" title="打开当前文件夹" data-tip="打开当前文件夹" aria-label="打开当前文件夹"></button>
+    <a href="./index.html?path=%2Fworks" title="原路返回" data-tip="原路返回"></a>
+    <a href="../../" id="tPortfolio" title="返回作品集" data-tip="返回作品集" aria-label="返回作品集主页">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>
+      </svg>
+    </a>
+    <a href="https://18comic.vip/search/photos?main_tag=0&search_query=" title="搜原本" data-tip="搜原本" target="_blank" rel="noopener"></a>
+    <button id="tMore" title="更多功能" data-tip="阅读设置"></button>
+  </div>
+</div>
+
+<output class="reader-scroll-progress" id="readerScrollProgress" aria-hidden="true">0%</output>
+
+<div class="reader-grid-overlay" id="readerGridOverlay" role="dialog" aria-modal="true" aria-labelledby="readerGridTitle" aria-describedby="readerGridDescription" aria-hidden="true">
+  <section class="reader-grid-sheet" aria-label="漫画缩略图总览">
+    <header class="reader-grid-head">
+      <div class="reader-grid-heading">
+        <span class="reader-grid-kicker">Contact sheet</span>
+        <h2 id="readerGridTitle">缩略图总览</h2>
+        <p id="readerGridDescription">拖动卡片把手调整页面顺序，悬停或触屏操作可插入空白页对齐双页。</p>
+      </div>
+      <div class="reader-grid-toolbar">
+        <span class="reader-grid-stats" id="readerGridStats">共 0 页</span>
+        <div class="reader-grid-dir-control" id="readerGridDirControl" aria-label="双页排版方向" title="双页排版方向">
+          <button type="button" id="dirLtr" class="reader-grid-dir-btn active" title="常规排版（从左向右）">从左向右</button>
+          <button type="button" id="dirRtl" class="reader-grid-dir-btn" title="日漫标准排版（从右向左）">从右向左</button>
+        </div>
+        <button type="button" id="readerGridDoublePreview" class="reader-grid-toolbar-btn" title="切换缩略图双页对开排版预览" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;"><rect x="3" y="4" width="8" height="16" rx="1.5"/><rect x="13" y="4" width="8" height="16" rx="1.5"/></svg>
+          <span>双页预览</span>
+        </button>
+        <button type="button" id="readerGridReverse" class="reader-grid-toolbar-btn" title="反转整本页面排列顺序">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;"><path d="m7 16-4-4 4-4"/><path d="M3 12h18"/><path d="m17 8 4 4-4 4"/></svg>
+          <span>整本倒序</span>
+        </button>
+        <button type="button" id="readerGridReset" class="reader-grid-toolbar-btn" title="恢复原始相册顺序并清空插页">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M16 3h5v5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
+          <span>恢复默认</span>
+        </button>
+        <label class="reader-grid-persist-toggle" title="开启后将拖拽排序与插页保存至本地；默认关闭，刷新页面即重置">
+          <input type="checkbox" id="readerGridPersist">
+          <span class="reader-grid-persist-slider"></span>
+          <span class="reader-grid-persist-text">记住排序</span>
+        </label>
+        <button class="reader-grid-close" id="readerGridClose" type="button" aria-label="关闭缩略图总览">×</button>
+      </div>
+    </header>
+    <div class="reader-grid" id="readerGrid" role="group" aria-label="漫画页面缩略图"></div>
+  </section>
+</div>
+
+<div class="reader-help-overlay" id="readerHelp" role="dialog" aria-modal="true" aria-labelledby="readerHelpTitle">
+  <div class="reader-help-card">
+    <div class="reader-help-head">
+      <div><div style="font-size:11px;color:var(--brand);font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase">Reader field guide</div><h2 id="readerHelpTitle">阅读快捷键</h2></div>
+      <button class="reader-help-close" id="readerHelpClose" aria-label="关闭快捷键帮助">×</button>
+    </div>
+    <div class="reader-shortcut-list" id="readerShortcutList"></div>
+  </div>
+</div>
+
+<div class="image-actions-overlay" id="imageActions" role="dialog" aria-modal="true" aria-labelledby="imageActionTitle" aria-hidden="true" inert>
+  <section class="image-actions-panel">
+    <div class="image-actions-heading">
+      <img id="imageActionPreview" alt="操作目标图片预览">
+      <h2 id="imageActionTitle">图片操作</h2>
+      <button id="imageActionClose" class="image-actions-close" type="button" aria-label="关闭图片操作">×</button>
+    </div>
+    <button id="imageActionFavorite" class="image-actions-favorite" type="button">收藏图片</button>
+    <fieldset class="image-actions-rotation"><legend>旋转图片</legend><div>
+      <button type="button" data-rotate="0" aria-pressed="true">恢复</button>
+      <button type="button" data-rotate="90" aria-pressed="false">90°</button>
+      <button type="button" data-rotate="180" aria-pressed="false">180°</button>
+      <button type="button" data-rotate="270" aria-pressed="false">270°</button>
+    </div></fieldset>
+    <p id="imageActionStatus" class="image-actions-status" role="status" aria-live="polite"></p>
+  </section>
+</div>
+
+<!-- 底部进度区 -->
+<div class="r-bottom" id="rBottom">
+  <span class="r-count" id="curPage">第 1 页</span>
+  <div class="r-track" id="track"><div class="r-fill" id="fill"></div></div>
+  <select class="r-jump" id="pageselect"></select>
+</div>
+
+<script id="readerConfig" type="application/json">{}</script>
+<script src="static/js/page-bootstrap.js?v=0.3.11"></script>
+<script src="static/js/app.js?v=0.3.11"></script>
+<script src="static/js/sync.js?v=0.3.11"></script>
+<script src="static/js/reader-sync.js?v=0.3.11"></script>
+<script src="static/js/image-loader.js?v=0.3.11"></script>
+<script src="static/js/common.js?v=0.3.11"></script>
+<script src="static/js/reader-core.js?v=0.3.11"></script>
+<script src="static/js/reader-preferences.js?v=0.3.11"></script>
+<script src="static/js/reader-modes.js?v=0.3.11"></script>
+<script src="static/js/reader-contact-sheet.js?v=0.3.11"></script>
+<script src="static/js/reader-image-actions.js?v=0.3.11"></script>
+<script src="static/js/reader-controls.js?v=0.3.11"></script>
+<script src="static/js/reader-favorites.js?v=0.3.11"></script>
+</body>
+</html>

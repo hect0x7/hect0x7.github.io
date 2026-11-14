@@ -63,6 +63,26 @@ const WORKS = [
       en: ["Fashion", "Travel", "Multilingual"],
     },
   },
+  {
+    slug: "jm-view-server",
+    year: "2026",
+    cover: "works/jm-view-server/cover.webp",
+    title: {
+      zh: "JM View Server 在线预览",
+      ja: "JM View Server オンラインプレビュー",
+      en: "JM View Server Live Preview",
+    },
+    desc: {
+      zh: "远程文件管理与漫画阅读器的在线交互预览，收录作品集图集素材，支持列表/网格/分栏浏览、上传打包、双页阅读与底片重排。",
+      ja: "ファイル管理・マンガ閲覧ツールのインタラクティブプレビュー。作品集の画像素材を収録し、3種の表示切替、アップロード・ZIP保存、見開き読書やコンタクトシート並べ替えを体験できます。",
+      en: "An interactive live preview of the file manager and manga reader, loaded with portfolio image collections and supporting multi-view browsing, uploads, ZIP export, double-page reading, and contact-sheet reordering.",
+    },
+    tags: {
+      zh: ["文件管理", "阅读器", "交互原型"],
+      ja: ["ファイル管理", "ビューアー", "プロトタイプ"],
+      en: ["File Manager", "Reader", "Prototype"],
+    },
+  },
   // 下一个作品照这个格式往下加即可。
 ];
 

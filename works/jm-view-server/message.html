@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
+  <title>局域网消息 · JM Server</title>
+  <!-- PWA -->
+  <link rel="manifest" href="static/manifest.webmanifest">
+  <meta name="theme-color" content="#5b5bd6">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="看本">
+  <link rel="icon" type="image/png" href="static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="static/icons/icon-192.png">
+  <link rel="stylesheet" href="static/css/app.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/message-page.css?v=0.3.11">
+  <script src="static/js/vfs-seed.js?v=0.3.11"></script>
+  <script src="static/js/mock-backend.js?v=0.3.11"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar"></aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span style="font-weight:500">消息中心</span>
+      <div class="spacer"></div>
+      <div class="addr-pill" id="addrPill" title="点击复制服务器地址">
+        <span id="netIco"></span>
+        <span id="addrText">localhost</span>
+        <span id="copyIco" style="opacity:.5"></span>
+      </div>
+    </div>
+
+    <div class="content chat-content">
+      <div class="chat-wrap">
+        <div class="chat-main">
+          <!-- 标题 -->
+          <div class="chat-head">
+            <h1>局域网消息</h1>
+            <span class="badge badge-dot">实时同步</span>
+          </div>
+
+          <!-- 消息滚动区 -->
+          <div id="chatMessages">
+            <div class="empty-state">
+              <div class="empty-state-icon">💬</div>
+              <div class="empty-state-text">
+                还没有消息<br>发送第一条消息开始对话吧
+              </div>
+            </div>
+            <div id="newMsgHint">有新消息 ↓</div>
+          </div>
+
+          <!-- 输入区 -->
+          <div class="composer">
+            <div class="composer-inner">
+              <div class="nick-field">
+                <input class="input" type="text" id="nicknameInput"
+                       placeholder="昵称" maxlength="20" value="访客">
+              </div>
+              <div class="msg-field">
+                <textarea class="input" id="messageInput"
+                          rows="1" maxlength="5000"
+                          placeholder="输入消息…"></textarea>
+              </div>
+              <button class="btn btn-primary btn-icon" id="sendBtn" title="发送"></button>
+            </div>
+            <div class="input-hint">消息在局域网内所有设备间实时同步</div>
+          </div>
+        </div>
+
+        <!-- 右侧统计面板区域 -->
+        <div class="chat-sidebar">
+          <div class="side-card" id="sideCardTips" style="display: none;">
+            <h3 class="side-card-title" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--sp-2);">
+              <span style="display:inline-flex; align-items:center; gap:var(--sp-1);">💡 使用提示</span>
+              <button id="btnTipsClose" title="不再提示" style="padding:2px; border-radius:var(--r-sm); transition:opacity 0.2s, background 0.2s; opacity:0.6; display:flex; align-items:center; justify-content:center;">
+              </button>
+            </h3>
+            <div id="tipsContent" style="font-size:12px; color:var(--text-secondary); line-height:1.7; display:flex; flex-direction:column; gap:6px;">
+            </div>
+          </div>
+
+          <div class="side-card">
+            <h3 class="side-card-title">聊天室统计</h3>
+            <div class="stat-list">
+              <div class="stat-item">
+                <span class="stat-label">累计消息</span>
+                <span class="stat-value" id="statTotalMsgs">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">发言人数</span>
+                <span class="stat-value" id="statTotalUsers">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="side-card" id="sideCardRank" style="display: none;">
+            <h3 class="side-card-title">活跃成员排行</h3>
+            <div class="rank-list" id="statRankList"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mobile-bar"></nav>
+</div>
+
+<div id="toast"></div>
+
+<script id="messageConfig" type="application/json">{"isLocalHost":true}</script>
+<script src="static/js/page-bootstrap.js?v=0.3.11"></script>
+<script src="static/js/app.js?v=0.3.11"></script>
+<script src="static/js/app-shell.js?v=0.3.11"></script>
+<script src="static/js/common.js?v=0.3.11"></script>
+<script src="static/js/message.js?v=0.3.11"></script>
+<script src="static/js/message-page.js?v=0.3.11"></script>
+</body>
+</html>

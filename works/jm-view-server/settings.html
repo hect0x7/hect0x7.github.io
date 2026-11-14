@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="settings-page-root">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>设置 · jm-view-server</title>
+  <link rel="manifest" href="static/manifest.webmanifest">
+  <meta name="theme-color" content="#5b5bd6">
+  <link rel="icon" type="image/png" href="static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="static/icons/icon-192.png">
+  <script>
+    (function(){var s=localStorage.getItem('jmv-theme'),p=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',s||(p?'dark':'light'));})();
+  </script>
+  <link rel="stylesheet" href="static/css/app.css?v=0.3.11">
+  <link rel="stylesheet" href="static/css/sync-settings.css?v=0.3.11">
+  <script src="static/js/vfs-seed.js?v=0.3.11"></script>
+  <script src="static/js/mock-backend.js?v=0.3.11"></script>
+</head>
+<body class="settings-page">
+<div class="app">
+  <aside class="sidebar"></aside>
+  <div class="main">
+    <div class="topbar">
+      <span class="settings-top-title">设置</span>
+      <div class="spacer"></div>
+      <span class="settings-local-badge">设备设置 · 按需同步记忆</span>
+    </div>
+
+    <div class="content settings-content">
+      <div class="settings-layout">
+        <nav class="settings-rail" aria-label="设置分类">
+          <a href="#appearance"><span class="settings-icon" data-settings-icon="palette" aria-hidden="true"></span>外观</a>
+          <a href="#browser"><span class="settings-icon" data-settings-icon="folder" aria-hidden="true"></span>文件浏览</a>
+          <a href="#reader"><span class="settings-icon" data-settings-icon="book" aria-hidden="true"></span>阅读</a>
+          <a href="#message"><span class="settings-icon" data-settings-icon="chat" aria-hidden="true"></span>消息身份</a>
+          <a href="#shortcuts"><span class="settings-icon" data-settings-icon="keyboard" aria-hidden="true"></span>快捷键</a>
+          <a href="#data"><span class="settings-icon" data-settings-icon="database" aria-hidden="true"></span>本地数据</a>
+          <a href="#sync"><span class="settings-icon" data-settings-icon="database" aria-hidden="true"></span>跨设备同步</a>
+        </nav>
+
+        <main class="settings-main">
+          <header class="settings-hero">
+            <span class="settings-hero-icon" id="settingsHeroIcon"></span>
+            <div>
+              <p class="settings-eyebrow">Browser control room</p>
+              <h1>把常用习惯提前设好</h1>
+              <p>默认作用于当前浏览器；开启跨设备同步后，服务器允许的记忆和设置会共享。除标注需刷新生效的项目外，其余修改会立即应用。</p>
+            </div>
+          </header>
+
+          <section class="settings-section" id="appearance">
+            <div class="settings-section-head">
+              <div><span class="settings-icon settings-heading-icon" data-settings-icon="palette" aria-hidden="true"></span><h2>外观</h2></div>
+              <p>主题色和背景会立即应用到当前页面。</p>
+            </div>
+            <div class="settings-card-grid">
+              <div class="settings-card">
+                <label class="settings-label" for="themeSelect"><span class="settings-icon" data-settings-icon="sun" aria-hidden="true"></span>颜色模式</label>
+                <select id="themeSelect" class="settings-select">
+                  <option value="system">跟随系统</option>
+                  <option value="light">浅色</option>
+                  <option value="dark">深色</option>
+                </select>
+              </div>
+              <div class="settings-card settings-card-wide">
+                <div class="settings-label"><span class="settings-icon" data-settings-icon="palette" aria-hidden="true"></span>主题色</div>
+                <div class="settings-swatches" id="brandSwatches"></div>
+                <div class="settings-inline">
+                  <label class="settings-color-input">自定义 <input id="brandPicker" type="color" value="#5b5bd6"></label>
+                  <button class="btn btn-outline" id="brandReset"><span class="settings-icon" data-settings-icon="reset" aria-hidden="true"></span>恢复默认</button>
+                </div>
+              </div>
+              <div class="settings-card settings-card-wide">
+                <div class="settings-label"><span class="settings-icon" data-settings-icon="images" aria-hidden="true"></span>背景图片</div>
+                <div class="settings-inline">
+                  <label class="btn btn-outline settings-file-btn"><span class="settings-icon" data-settings-icon="images" aria-hidden="true"></span>选择图片<input id="backgroundFile" type="file" accept="image/*"></label>
+                  <button class="btn btn-outline" id="backgroundClear"><span class="settings-icon" data-settings-icon="trash" aria-hidden="true"></span>清除背景</button>
+                </div>
+                <label class="settings-range-row" for="backgroundOpacity">
+                  <span>背景淡化</span><output id="backgroundOpacityValue">0%</output>
+                </label>
+                <input id="backgroundOpacity" class="settings-range" type="range" min="0" max="100" step="5" value="0">
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-section" id="browser">
+            <div class="settings-section-head">
+              <div><span class="settings-icon settings-heading-icon" data-settings-icon="folder" aria-hidden="true"></span><h2>文件浏览</h2></div>
+              <p>决定首页默认布局，并管理侧栏和列表尺寸。</p>
+            </div>
+            <div class="settings-card-grid settings-browser-panel">
+              <div class="settings-card settings-card-wide settings-browser-view">
+                <div class="settings-browser-label"><b><span class="settings-icon" data-settings-icon="folder" aria-hidden="true"></span>默认视图</b><small>选择打开文件浏览时的布局</small></div>
+                <div class="settings-segment settings-segment-three" id="browserViewSegment" role="group" aria-label="默认文件视图">
+                  <button type="button" data-value="list"><span class="settings-icon" data-settings-icon="list" aria-hidden="true"></span>列表</button><button type="button" data-value="grid"><span class="settings-icon" data-settings-icon="grid" aria-hidden="true"></span>网格</button><button type="button" data-value="column"><span class="settings-icon" data-settings-icon="columns" aria-hidden="true"></span>分栏</button>
+                </div>
+              </div>
+              <div class="settings-card">
+                <button class="settings-switch-row settings-switch-button" id="sidebarCollapsed" type="button" role="switch" aria-checked="false">
+                  <span><b><span class="settings-icon" data-settings-icon="panelLeft" aria-hidden="true"></span>折叠侧栏</b><small>桌面端默认收起侧栏，留出更多浏览空间</small></span><i aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="settings-card">
+                <button class="settings-switch-row settings-switch-button" id="browserOperations" type="button" role="switch" aria-checked="true">
+                  <span><b><span class="settings-icon" data-settings-icon="more" aria-hidden="true"></span>显示分栏操作入口</b><small>在分栏条目旁显示更多操作按钮</small></span><i aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="settings-card">
+                <button class="settings-switch-row settings-switch-button" id="confirmRecycle" type="button" role="switch" aria-checked="false">
+                  <span><b><span class="settings-icon" data-settings-icon="trash" aria-hidden="true"></span>移入回收站前确认</b><small>开启后先确认；关闭时直接回收，可通过侧栏恢复初始内容</small></span><i aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="settings-card settings-action-card settings-browser-reset">
+                <div class="settings-browser-label"><b><span class="settings-icon" data-settings-icon="slider" aria-hidden="true"></span>恢复布局尺寸</b><small>将拖动调整过的宽度恢复到默认值</small></div>
+                <div class="settings-inline">
+                  <button class="btn btn-outline" id="sidebarWidthReset" title="恢复侧栏宽度" aria-label="恢复侧栏宽度"><span class="settings-icon" data-settings-icon="panelLeft" aria-hidden="true"></span>侧栏宽度</button>
+                  <button class="btn btn-outline" id="columnWidthReset" title="恢复列表列宽" aria-label="恢复列表列宽"><span class="settings-icon" data-settings-icon="columns" aria-hidden="true"></span>列表列宽</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-section" id="reader">
+            <div class="settings-section-head">
+              <div><span class="settings-icon settings-heading-icon" data-settings-icon="book" aria-hidden="true"></span><h2>阅读</h2></div>
+              <p>打开漫画前就确定默认阅读方式。</p>
+            </div>
+            <div class="settings-card-grid">
+              <div class="settings-card settings-card-wide">
+                <div class="settings-label"><span class="settings-icon" data-settings-icon="book" aria-hidden="true"></span>默认阅读模式</div>
+                <div class="settings-segment settings-segment-feature settings-segment-three" id="readerModeSegment" role="group" aria-label="默认阅读模式">
+                  <button type="button" data-value="scroll"><span class="settings-icon settings-mode-icon" data-settings-icon="scrollPages" aria-hidden="true"></span><b>下拉阅读</b><small>连续纵向浏览</small></button>
+                  <button type="button" data-value="single"><span class="settings-icon settings-mode-icon" data-settings-icon="singlePage" aria-hidden="true"></span><b>单页阅读</b><small>逐页沉浸阅读</small></button>
+                  <button type="button" data-value="double"><span class="settings-icon settings-mode-icon" data-settings-icon="doublePage" aria-hidden="true"></span><b>双页阅读</b><small>连续双页排列</small></button>
+                </div>
+                <div class="settings-reader-detail">
+                  <div class="settings-label" id="readerOptionsTitle">下拉阅读设置</div>
+                  <section class="settings-reader-panel" data-reader-panel="scroll" aria-label="下拉阅读设置" hidden>
+                    <div class="settings-reader-fields">
+                      <div class="settings-label"><span class="settings-icon" data-settings-icon="fit" aria-hidden="true"></span>图片适配</div>
+                      <div class="settings-segment" id="scrollFitSegment">
+                        <button type="button" data-value="window"><span class="settings-icon" data-settings-icon="fit" aria-hidden="true"></span>自动适配</button>
+                        <button type="button" data-value="custom"><span class="settings-icon" data-settings-icon="slider" aria-hidden="true"></span>自定义宽度</button>
+                      </div>
+                      <label class="settings-range-row" for="scrollImageSize">
+                        <span>图片宽度</span><output id="scrollImageSizeValue">800px</output>
+                      </label>
+                      <input id="scrollImageSize" class="settings-range" type="range" min="300" max="1600" step="50" value="800">
+                      <p class="settings-help">自动适配按窗口宽度显示；自定义宽度受窗口宽度限制。</p>
+                    </div>
+                  </section>
+                  <section class="settings-reader-panel" data-reader-panel="single" aria-label="单页阅读设置" hidden>
+                    <div class="settings-reader-fields">
+                      <div class="settings-label"><span class="settings-icon" data-settings-icon="fit" aria-hidden="true"></span>图片适配</div>
+                      <div class="settings-segment" id="singleFitSegment">
+                        <button type="button" data-value="contain"><span class="settings-icon" data-settings-icon="fit" aria-hidden="true"></span>自动适配</button><button type="button" data-value="custom"><span class="settings-icon" data-settings-icon="slider" aria-hidden="true"></span>自定义宽度</button>
+                      </div>
+                      <label class="settings-range-row" for="imageSize">
+                        <span>图片宽度</span><output id="imageSizeValue">800px</output>
+                      </label>
+                      <input id="imageSize" class="settings-range" type="range" min="300" max="1600" step="50" value="800">
+                      <p class="settings-help">自动适配同时适应窗口宽高；自定义宽度允许纵向滚动。</p>
+                    </div>
+                  </section>
+                  <section class="settings-reader-panel" data-reader-panel="double" aria-label="双页阅读设置" hidden>
+                    <div class="settings-reader-fields">
+                      <div class="settings-mode-option">
+                        <div class="settings-label"><span class="settings-icon" data-settings-icon="doublePage" aria-hidden="true"></span>双页排版方向</div>
+                        <div class="settings-segment" id="readingDirectionSegment">
+                          <button type="button" data-value="ltr"><span class="settings-icon" data-settings-icon="export" aria-hidden="true"></span>从左向右</button>
+                          <button type="button" data-value="rtl"><span class="settings-icon settings-direction-reverse" data-settings-icon="export" aria-hidden="true"></span>从右向左 (日漫)</button>
+                        </div>
+                        <p class="settings-help">选择双页的阅读顺序。</p>
+                      </div>
+                      <div class="settings-mode-option">
+                        <label id="doubleWidthScaleControl" class="settings-range-row" for="doubleWidthScale">
+                          <span>双页画面比例</span><output id="doubleWidthScaleValue">98%</output>
+                        </label>
+                        <input id="doubleWidthScale" class="settings-range" type="range" min="50" max="100" step="1" value="98">
+                        <p class="settings-help">默认 98%，100% 为满宽。</p>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+              <div class="settings-common-heading">通用阅读设置</div>
+              <div class="settings-card settings-toggles">
+                <button class="settings-switch-row settings-switch-button" id="eyeCare" type="button" role="switch" aria-checked="false"><span><b><span class="settings-icon" data-settings-icon="eyecare" aria-hidden="true"></span>护眼滤镜</b><small>阅读区使用暖色调</small></span><i aria-hidden="true"></i></button>
+                <button class="settings-switch-row settings-switch-button" id="headerVisible" type="button" role="switch" aria-checked="true"><span><b><span class="settings-icon" data-settings-icon="panelTop" aria-hidden="true"></span>显示顶部栏</b><small>标题与页码信息</small></span><i aria-hidden="true"></i></button>
+              </div>
+              <div class="settings-card settings-toggles">
+                <button class="settings-switch-row settings-switch-button" id="progressVisible" type="button" role="switch" aria-checked="true"><span><b><span class="settings-icon" data-settings-icon="panelBottom" aria-hidden="true"></span>显示底部进度</b><small>页码和跳转进度条</small></span><i aria-hidden="true"></i></button>
+                <button class="settings-switch-row settings-switch-button" id="autoNext" type="button" role="switch" aria-checked="false"><span><b><span class="settings-icon" data-settings-icon="autoNext" aria-hidden="true"></span>自动连播下一本</b><small>到末页后倒计时进入</small></span><i aria-hidden="true"></i></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-section" id="message">
+            <div class="settings-section-head">
+              <div><span class="settings-icon settings-heading-icon" data-settings-icon="chat" aria-hidden="true"></span><h2>消息身份</h2></div>
+              <p>进入局域网消息页时自动填入。</p>
+            </div>
+            <div class="settings-card">
+              <label class="settings-label" for="chatNickname"><span class="settings-icon" data-settings-icon="chat" aria-hidden="true"></span>默认昵称</label>
+              <input id="chatNickname" class="settings-input" maxlength="40" placeholder="留空时使用页面默认昵称">
+            </div>
+          </section>
+
+          <section class="settings-section" id="shortcuts">
+            <div class="settings-section-head">
+              <div><span class="settings-icon settings-heading-icon" data-settings-icon="keyboard" aria-hidden="true"></span><h2>阅读快捷键</h2></div>
+              <p>阅读页按 <kbd>?</kbd> 也能随时打开这份帮助。</p>
+            </div>
+            <div class="shortcut-grid" id="shortcutGrid"></div>
+          </section>
+
+          <section class="settings-section" id="data">
+            <div class="settings-section-head">
+              <div><span class="settings-icon settings-heading-icon" data-settings-icon="database" aria-hidden="true"></span><h2>本地数据</h2></div>
+              <p>最近访问保存在本机。收藏目录和阅读进度只有参与同步且服务器允许时才共享；图片收藏始终统一保存。</p>
+            </div>
+            <div class="settings-data-grid">
+              <div class="settings-data-card"><span id="bookmarkCount">0</span><b><span class="settings-icon" data-settings-icon="bookmark" aria-hidden="true"></span>收藏目录</b><button data-clear="bookmarks"><span class="settings-icon" data-settings-icon="trash" aria-hidden="true"></span>清空收藏</button></div>
+              <div class="settings-data-card"><span id="recentCount">0</span><b><span class="settings-icon" data-settings-icon="history" aria-hidden="true"></span>最近目录</b><button data-clear="recent"><span class="settings-icon" data-settings-icon="trash" aria-hidden="true"></span>清空记录</button></div>
+              <div class="settings-data-card"><span id="progressCount">0</span><b><span class="settings-icon" data-settings-icon="book" aria-hidden="true"></span>阅读进度</b><button data-clear="progress"><span class="settings-icon" data-settings-icon="trash" aria-hidden="true"></span>清空进度</button></div>
+            </div>
+            <div class="settings-footer-actions">
+              <button class="btn btn-outline" id="replayOnboarding"><span class="settings-icon" data-settings-icon="book" aria-hidden="true"></span>重新查看新手引导</button>
+              <button class="btn btn-outline settings-danger" id="resetPreferences"><span class="settings-icon" data-settings-icon="reset" aria-hidden="true"></span>恢复全部偏好默认值</button>
+            </div>
+          </section>
+          <section class="settings-section" id="sync">
+            <div class="settings-section-head"><div><span class="settings-icon settings-heading-icon" data-settings-icon="database" aria-hidden="true"></span><h2>跨设备同步</h2></div><p>在手机与电脑间接着阅读。</p></div>
+            <div id="syncSettings">
+              <div class="sync-panel settings-card sync-device-panel">
+                <div class="sync-panel-heading"><span class="settings-icon sync-panel-icon" data-settings-icon="network" aria-hidden="true"></span><div><h3>当前设备</h3><p class="sync-description">仅控制当前浏览器。</p></div><span class="sync-badge" id="syncDeviceBadge">正在连接</span></div>
+                <button id="syncParticipation" type="button" class="settings-switch-row settings-switch-button sync-toggle" role="switch" aria-checked="true" aria-label="此浏览器参与同步"><span><b>参与同步</b><small>使用服务器的同步范围</small></span><i aria-hidden="true"></i></button>
+                <div class="sync-status-box"><span class="sync-status-dot" aria-hidden="true"></span><div><p id="syncStatus" role="status">正在连接</p><p id="syncActiveRanges" class="sync-description"></p></div></div>
+                <div class="sync-actions"><button id="syncRetry" type="button" class="btn btn-outline"><span class="settings-icon" data-settings-icon="reset" aria-hidden="true"></span>重新同步</button><button id="syncMergeBookmarks" type="button" class="btn btn-outline"><span class="settings-icon" data-settings-icon="bookmark" aria-hidden="true"></span>合并收藏目录</button></div>
+                <p class="sync-footnote">关闭仅停止同步，不删除已有数据。</p>
+              </div>
+              <div id="syncPolicy" class="sync-panel settings-card" hidden>
+                <div class="sync-panel-heading"><span class="settings-icon sync-panel-icon" data-settings-icon="settings" aria-hidden="true"></span><div><h3>服务器规则</h3><p class="sync-description">所有设备共用此规则。</p></div><span class="sync-badge">本机管理</span></div>
+                <button id="syncServerEnabled" type="button" class="settings-switch-row settings-switch-button sync-toggle" role="switch" aria-checked="true" aria-label="服务器开启同步"><span><b>允许设备同步</b><small>默认开启，可调整同步范围</small></span><i aria-hidden="true"></i></button>
+                <div class="sync-ranges-heading"><h4>同步范围</h4><span id="syncRangeCount" class="sync-description"></span></div>
+                <div id="syncRanges" class="sync-ranges"></div>
+                <div class="sync-policy-footer"><p class="sync-footnote" id="syncPolicyHint">保存后对所有设备生效。</p><button id="syncSavePolicy" type="button" class="btn btn-primary" disabled><span class="settings-icon" data-settings-icon="check" aria-hidden="true"></span>保存设置</button></div>
+              </div>
+              <p id="syncRemote" class="sync-remote-note"><span class="settings-icon" data-settings-icon="lock" aria-hidden="true"></span>同步范围由服务器设置。</p>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </div>
+  <nav class="mobile-bar"></nav>
+</div>
+
+<script src="static/js/app.js?v=0.3.11"></script>
+<script src="static/js/sync.js?v=0.3.11"></script>
+<script src="static/js/reader-sync.js?v=0.3.11"></script>
+<script src="static/js/app-shell.js?v=0.3.11"></script>
+<script src="static/js/settings.js?v=0.3.11"></script>
+<script>renderShell('settings'); initSettingsPage();</script>
+<script src="static/js/sync-settings.js?v=0.3.11"></script>
+</body>
+</html>
