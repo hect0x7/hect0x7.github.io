@@ -507,4 +507,5 @@ function setImageRotation(img, deg) {
   img.dataset.rotate = String(deg);
   updateImageRotationFit(img);
   img.style.transform = 'rotate(' + deg + 'deg)' + (deg % 180 ? ' scale(var(--reader-rotation-fit, 1))' : '');
+  if (typeof updateImagePageType === 'function') updateImagePageType(img);
 }

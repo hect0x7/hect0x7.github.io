@@ -74,6 +74,8 @@ var doubleWidthScale = window.JmvPrefs ? JmvPrefs.get('doubleWidthScale') : (fun
   var saved = parseInt(localStorage.getItem('jmv-double-width-scale'), 10);
   return Math.max(50, Math.min(100, isNaN(saved) ? 98 : saved));
 })();
+var doubleWideLayout = window.JmvPrefs ? JmvPrefs.get('doubleWideLayout') : (localStorage.getItem('jmv-double-wide-layout') || 'spread');
+if (doubleWideLayout !== 'pair') doubleWideLayout = 'spread';
 var readingDirection = window.JmvPrefs ? JmvPrefs.get('readingDirection') : (localStorage.getItem('jmv-reading-direction') || 'ltr');
 if (readingDirection !== 'rtl') readingDirection = 'ltr';
 var activePageIndex = 0;

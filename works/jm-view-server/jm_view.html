@@ -26,15 +26,15 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="static/css/app.css?v=0.3.11">
-  <link rel="stylesheet" href="static/css/reader-base.css?v=0.3.11">
-  <link rel="stylesheet" href="static/css/reader-modes.css?v=0.3.11">
-  <link rel="stylesheet" href="static/css/reader-toolbar.css?v=0.3.11">
-  <link rel="stylesheet" href="static/css/reader-contact-sheet.css?v=0.3.11">
-  <link rel="stylesheet" href="static/css/reader-extras.css?v=0.3.11">
-  <link rel="stylesheet" href="static/css/reader-image-actions.css?v=0.3.11">
-  <script src="static/js/vfs-seed.js?v=0.3.11"></script>
-  <script src="static/js/mock-backend.js?v=0.3.11"></script>
+  <link rel="stylesheet" href="static/css/app.css?v=0.3.13">
+  <link rel="stylesheet" href="static/css/reader-base.css?v=0.3.13">
+  <link rel="stylesheet" href="static/css/reader-modes.css?v=0.3.13">
+  <link rel="stylesheet" href="static/css/reader-toolbar.css?v=0.3.13">
+  <link rel="stylesheet" href="static/css/reader-contact-sheet.css?v=0.3.13">
+  <link rel="stylesheet" href="static/css/reader-extras.css?v=0.3.13">
+  <link rel="stylesheet" href="static/css/reader-image-actions.css?v=0.3.13">
+  <script src="static/js/vfs-seed.js?v=0.3.13"></script>
+  <script src="static/js/mock-backend.js?v=0.3.13"></script>
 </head>
 <body>
 
@@ -43,10 +43,22 @@
 
 <!-- 顶部悬浮栏 -->
 <div class="reader-top">
-  <a href="./index.html?path=%2Fworks" class="r-btn" title="原路返回" id="backBtn"></a>
-  <div class="reader-title"><b title="/works">/works</b></div>
+  <a href="./index.html" class="r-btn" title="原路返回" id="backBtn"></a>
+  <div class="reader-title"><b title="/">/</b></div>
   <span class="r-progress" id="topProg">-- / --</span>
   <a class="portfolio-pill" href="../../" data-portfolio-home title="返回作品集主页" aria-label="返回作品集主页"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg><span><span class="portfolio-pill-full">返回</span>作品集</span></a>
+</div>
+
+<div class="reader-double-banner" id="doubleWideBanner" role="status" aria-live="polite" hidden>
+  <div class="reader-double-banner-body">
+    <span class="reader-double-banner-badge" id="doubleWideBannerBadge">双页宽幅提示</span>
+    <span class="reader-double-banner-text" id="doubleWideBannerText"></span>
+  </div>
+  <div class="reader-double-banner-actions">
+    <button type="button" class="reader-double-banner-btn is-primary" id="doubleWideToggleBtn">改为双栏并排</button>
+    <button type="button" class="reader-double-banner-btn" id="doubleWideSingleBtn">单页全屏观赏</button>
+    <button type="button" class="reader-double-banner-close" id="doubleWideDismissBtn" title="收起提示" aria-label="收起提示">✕</button>
+  </div>
 </div>
 
 <!-- 图片流 -->
@@ -72,6 +84,13 @@
       <button id="modeScroll" type="button">下拉</button>
       <button id="modeSingle" type="button">单页</button>
       <button id="modeDouble" type="button">双页</button>
+    </div>
+    <div class="reader-wide-layout-control" id="doubleWideControl" hidden aria-label="宽幅横图排版">
+      <span class="reader-wide-layout-label">宽幅横图</span>
+      <div class="reader-wide-layout-seg">
+        <button id="wideModeSpread" type="button" title="宽幅横图自动跨双栏通栏展示">自动跨页</button>
+        <button id="wideModePair" type="button" title="宽幅横图强制两张左右并排展示">双栏并排</button>
+      </div>
     </div>
     <button id="tHead" title="顶部栏开关" data-tip="顶部栏"></button>
     <button id="tProg" title="进度条开关" data-tip="进度条"></button>
@@ -114,7 +133,7 @@
     <span class="reader-tool-divider" aria-hidden="true"></span>
     <a id="loadAll" href="javascript:void(0)" title="加载全部" data-tip="加载全部"></a>
     <button id="tOpenFolder" type="button" title="打开当前文件夹" data-tip="打开当前文件夹" aria-label="打开当前文件夹"></button>
-    <a href="./index.html?path=%2Fworks" title="原路返回" data-tip="原路返回"></a>
+    <a href="./index.html" title="原路返回" data-tip="原路返回"></a>
     <a href="../../" id="tPortfolio" title="返回作品集" data-tip="返回作品集" aria-label="返回作品集主页">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
@@ -202,18 +221,18 @@
 </div>
 
 <script id="readerConfig" type="application/json">{}</script>
-<script src="static/js/page-bootstrap.js?v=0.3.11"></script>
-<script src="static/js/app.js?v=0.3.11"></script>
-<script src="static/js/sync.js?v=0.3.11"></script>
-<script src="static/js/reader-sync.js?v=0.3.11"></script>
-<script src="static/js/image-loader.js?v=0.3.11"></script>
-<script src="static/js/common.js?v=0.3.11"></script>
-<script src="static/js/reader-core.js?v=0.3.11"></script>
-<script src="static/js/reader-preferences.js?v=0.3.11"></script>
-<script src="static/js/reader-modes.js?v=0.3.11"></script>
-<script src="static/js/reader-contact-sheet.js?v=0.3.11"></script>
-<script src="static/js/reader-image-actions.js?v=0.3.11"></script>
-<script src="static/js/reader-controls.js?v=0.3.11"></script>
-<script src="static/js/reader-favorites.js?v=0.3.11"></script>
+<script src="static/js/page-bootstrap.js?v=0.3.13"></script>
+<script src="static/js/app.js?v=0.3.13"></script>
+<script src="static/js/sync.js?v=0.3.13"></script>
+<script src="static/js/reader-sync.js?v=0.3.13"></script>
+<script src="static/js/image-loader.js?v=0.3.13"></script>
+<script src="static/js/common.js?v=0.3.13"></script>
+<script src="static/js/reader-core.js?v=0.3.13"></script>
+<script src="static/js/reader-preferences.js?v=0.3.13"></script>
+<script src="static/js/reader-modes.js?v=0.3.13"></script>
+<script src="static/js/reader-contact-sheet.js?v=0.3.13"></script>
+<script src="static/js/reader-image-actions.js?v=0.3.13"></script>
+<script src="static/js/reader-controls.js?v=0.3.13"></script>
+<script src="static/js/reader-favorites.js?v=0.3.13"></script>
 </body>
 </html>

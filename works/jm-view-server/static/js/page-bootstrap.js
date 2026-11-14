@@ -6,10 +6,12 @@
   if (!mock) return;
 
   var FOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
+  var LINK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
   var FILE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
   var EYE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.1 12.35a1 1 0 0 1 0-.7C3.5 8.1 6.9 5.5 12 5.5s8.5 2.6 9.9 6.15a1 1 0 0 1 0 .7C20.5 15.9 17.1 18.5 12 18.5s-8.5-2.6-9.9-6.15Z"/><circle cx="12" cy="12" r="3"/></svg>';
   var MORE_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';
   var FOLDER_BADGE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>';
+  var LINK_BADGE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
 
   function escHtml(value) {
     return String(value == null ? '' : value)
@@ -45,11 +47,12 @@
   }
 
   function bootstrapIndex() {
+    var vfs = mock.loadVfs();
+    var defaultPath = vfs.defaultPath || '/';
     var params = new URLSearchParams(window.location.search);
-    var requestedPath = params.get('path') || '/works';
+    var requestedPath = params.get('path') || defaultPath;
     var listing = mock.listDirectory(requestedPath, false);
     var curPath = listing.path;
-    var defaultPath = '/works';
 
     var curText = document.getElementById('currentPathText');
     if (curText) {
@@ -93,28 +96,43 @@
     if (listBody) {
       listBody.innerHTML = listing.files.map(function (file, idx) {
         var isDir = file.type === 'dir';
+        var isLink = Boolean(file.is_link);
+        var isBrokenLink = Boolean(isLink && file.link_broken);
         var canRead = Boolean(file.jm_view && (isDir || mock.isImageName(file.name)));
         var hasPreview = Boolean(file.first_img_url && (file.first_img_url.data_thumb || file.first_img_url.data_original));
         var qPath = encodeQuoted(file.path);
-        var mqPath = encodeQuoted(file.path);
+        var mqPath = encodeQuoted(isLink && file.link_path ? file.link_path : file.path);
         var thumbUrl = hasPreview ? (file.first_img_url.data_thumb || file.first_img_url.data_original) : '';
         var previewAttr = idx < 4 ? 'src' : 'data-thumb-src';
+        var iconMode = isLink ? 'link' : (isDir ? 'folder' : 'auto');
+        var iconSvg = isLink ? LINK_SVG : (isDir ? FOLDER_SVG : FILE_SVG);
+        var linkTargetHtml = '';
+        if (isLink) {
+          if (isBrokenLink) {
+            linkTargetHtml = '<span class="link-target is-broken" title="目标路径不存在: ' + escAttr(file.target_path || '') + '"><b>失效快捷方式</b> → ' + escHtml(file.target_path || '未知目标') + '</span>';
+          } else if (isDir) {
+            linkTargetHtml = '<a href="./index.html?path=' + qPath + '" class="link-target" title="进入目标目录: ' + escAttr(file.target_path || '') + '" onclick="event.stopPropagation();event.preventDefault();changeDir(decodeURIComponent(\'' + escJsArg(qPath) + '\'))"><b>快捷方式</b> → ' + escHtml(file.target_path || '') + '</a>';
+          } else {
+            linkTargetHtml = '<span class="link-target" title="目标路径: ' + escAttr(file.target_path || '') + '"><b>快捷方式</b> → ' + escHtml(file.target_path || '') + '</span>';
+          }
+        }
 
         return '' +
-          '<div class="file-item' + (hasPreview ? ' has-preview' : '') + '"' +
-          ' data-type="' + (isDir ? 'dir' : 'file') + '"' +
+          '<div class="file-item' + (hasPreview ? ' has-preview' : '') + (isLink ? ' is-link' : '') + (isBrokenLink ? ' is-broken-link' : '') + '"' +
+          ' data-type="' + (isDir ? 'dir' : (isLink ? 'link' : 'file')) + '"' +
           ' type="' + (file.jm_view ? 'True' : 'False') + '"' +
-          ' onclick="handleFileItemClick(event, this)">' +
+          (isBrokenLink ? '' : ' onclick="handleFileItemClick(event, this)"') + '>' +
             '<div class="file-name-col ' + escAttr(file.type) + '">' +
               '<input type="checkbox" class="row-select" style="display:none" data-path="' + escAttr(mqPath) + '" data-name="' + escAttr(file.name) + '">' +
-              '<div class="file-icon" id="fileIcon' + (idx + 1) + '" data-browser-icon="' + (isDir ? 'folder' : 'auto') + '" data-file-name="' + escAttr(file.name) + '">' +
-                (isDir ? FOLDER_SVG : FILE_SVG) +
+              '<div class="file-icon" id="fileIcon' + (idx + 1) + '" data-browser-icon="' + iconMode + '" data-file-name="' + escAttr(file.name) + '">' +
+                iconSvg +
               '</div>' +
               '<div class="file-entry-text">' +
-                '<a href="' + escAttr(file.href) + '" class="file-link" dirname="' + escAttr(file.name) + '" path="' + escAttr(qPath) + '">' + escHtml(file.name) + '</a>' +
+                '<a href="' + escAttr(file.href) + '" class="file-link" dirname="' + escAttr(file.name) + '" path="' + escAttr(qPath) + '"' + (isBrokenLink ? ' onclick="event.preventDefault()"' : '') + '>' + escHtml(file.name) + '</a>' +
+                linkTargetHtml +
               '</div>' +
             '</div>' +
-            '<div class="text-sm size-col"><a href="javascript:" class="size-text" onclick="openDir(\'' + escJsArg(qPath) + '\')">' + escHtml(file.size) + '</a></div>' +
+            '<div class="text-sm size-col"><a href="javascript:" class="size-text"' + (isBrokenLink ? '' : ' onclick="openDir(\'' + escJsArg(qPath) + '\')"') + '>' + escHtml(file.size) + '</a></div>' +
             '<div class="text-sm date-col">' + escHtml(file.ctime) + '</div>' +
             '<div class="file-action-col">' +
               (canRead ? '<a href="javascript:" class="action-btn" onclick="openJmView(\'' + escJsArg(qPath) + '\', \'' + escJsArg(file.type) + '\')"><span class="eye-ico">' + EYE_SVG + '</span> 看本</a>' : '') +
@@ -124,7 +142,7 @@
                   (canRead && isDir ? '<a href="javascript:" class="more-item" onclick="downloadZip(\'' + escJsArg(qPath) + '\')">打包下载</a>' : '') +
                   '<a href="javascript:" class="more-item" onclick="renameItem(\'' + escJsArg(mqPath) + '\', \'' + escJsArg(file.name) + '\')">重命名</a>' +
                   '<a href="javascript:" class="more-item" onclick="moveItem(\'' + escJsArg(mqPath) + '\', \'' + escJsArg(file.name) + '\')">移动到…</a>' +
-                  '<a href="javascript:" class="more-item" onclick="openDir(\'' + escJsArg(qPath) + '\')">在文件管理器中显示</a>' +
+                  (isBrokenLink ? '' : '<a href="javascript:" class="more-item" onclick="openDir(\'' + escJsArg(qPath) + '\')">在文件管理器中显示</a>') +
                   '<a href="javascript:" class="more-item more-item-danger" onclick="deleteItem(event, \'' + escJsArg(mqPath) + '\', \'' + escJsArg(file.name) + '\')">移入回收站</a>' +
                 '</div>' +
               '</div>' +
@@ -140,20 +158,28 @@
     if (gridView) {
       var cardsHtml = listing.files.map(function (file, idx) {
         var isDir = file.type === 'dir';
+        var isLink = Boolean(file.is_link);
+        var isBrokenLink = Boolean(isLink && file.link_broken);
         var canRead = Boolean(file.jm_view && (isDir || mock.isImageName(file.name)));
         var hasPreview = Boolean(file.first_img_url && (file.first_img_url.data_thumb || file.first_img_url.data_original));
         var qPath = encodeQuoted(file.path);
-        var mqPath = encodeQuoted(file.path);
+        var mqPath = encodeQuoted(isLink && file.link_path ? file.link_path : file.path);
         var thumbUrl = hasPreview ? (file.first_img_url.data_thumb || file.first_img_url.data_original) : '';
+        var iconMode = isLink ? 'link' : (isDir ? 'folder' : 'auto');
+        var badgeHtml = '';
+        if (isLink) {
+          badgeHtml = '<div class="card-type-badge link-badge" id="cardLinkBadge' + (idx + 1) + '" data-browser-icon="link" title="快捷方式">' + LINK_BADGE_SVG + '</div>';
+        } else if (isDir) {
+          badgeHtml = '<div class="card-type-badge folder-badge" title="文件夹">' + FOLDER_BADGE_SVG + '</div>';
+        }
 
         return '' +
-          '<div class="card-item file-item rise" data-type="' + (isDir ? 'dir' : 'file') + '" type="' + (file.jm_view ? 'True' : 'False') + '" style="animation-delay:' + (idx * 0.03).toFixed(2) + 's; cursor:pointer;" onclick="handleFileItemClick(event, this)">' +
+          '<div class="card-item file-item rise' + (isLink ? ' is-link' : '') + (isBrokenLink ? ' is-broken-link' : '') + '" data-type="' + (isDir ? 'dir' : (isLink ? 'link' : 'file')) + '" type="' + (file.jm_view ? 'True' : 'False') + '" style="animation-delay:' + (idx * 0.03).toFixed(2) + 's; cursor:' + (isBrokenLink ? 'default' : 'pointer') + ';"' + (isBrokenLink ? '' : ' onclick="handleFileItemClick(event, this)"') + '>' +
             '<div class="card-cover">' +
               '<input type="checkbox" class="row-select" style="display:none; position:absolute; top:8px; left:8px; z-index:10; width:18px; height:18px; cursor:pointer; accent-color:var(--brand);" data-path="' + escAttr(mqPath) + '" data-name="' + escAttr(file.name) + '" onclick="event.stopPropagation()">' +
               (hasPreview
-                ? '<img data-thumb-src="' + escAttr(thumbUrl) + '" alt="" loading="lazy" decoding="async">' +
-                  (isDir ? '<div class="card-type-badge folder-badge" title="文件夹">' + FOLDER_BADGE_SVG + '</div>' : '')
-                : '<span class="folder-ico" id="cardFolderIco' + (idx + 1) + '" data-browser-icon="' + (isDir ? 'folder' : 'auto') + '" data-file-name="' + escAttr(file.name) + '"></span>') +
+                ? '<img data-thumb-src="' + escAttr(thumbUrl) + '" alt="" loading="lazy" decoding="async">' + badgeHtml
+                : '<span class="folder-ico" id="cardFolderIco' + (idx + 1) + '" data-browser-icon="' + iconMode + '" data-file-name="' + escAttr(file.name) + '"></span>') +
               '<button class="card-delete-btn delete-btn" title="移入回收站" onclick="deleteItem(event, \'' + escJsArg(mqPath) + '\', \'' + escJsArg(file.name) + '\')"></button>' +
             '</div>' +
             '<div class="card-meta">' +
@@ -162,12 +188,17 @@
                   '<a href="' + escAttr(file.href) + '" class="file-link" dirname="' + escAttr(file.name) + '" path="' + escAttr(qPath) + '">' + escHtml(file.name) + '</a>' +
                 '</div>' +
                 '<a href="' + escAttr(file.href) + '" class="card-name-link" title="' + escAttr(file.name) + '" ' +
-                  (isDir ? 'onclick="event.preventDefault();changeDir(decodeURIComponent(\'' + escJsArg(qPath) + '\'))"' : '') +
+                  (isBrokenLink
+                    ? 'onclick="event.preventDefault()"'
+                    : (isDir ? 'onclick="event.preventDefault();changeDir(decodeURIComponent(\'' + escJsArg(qPath) + '\'))"' : '')) +
                   ' path="' + escAttr(qPath) + '" dirname="' + escAttr(file.name) + '">' +
-                  '<span class="grid-icon" id="gridIcon' + (idx + 1) + '" data-browser-icon="' + (isDir ? 'folder' : 'auto') + '" data-file-name="' + escAttr(file.name) + '" style="display: inline-flex; align-items: center; vertical-align: middle; margin-right: 4px; color: var(--text-secondary); opacity: 0.85;"></span>' +
+                  '<span class="grid-icon" id="gridIcon' + (idx + 1) + '" data-browser-icon="' + iconMode + '" data-file-name="' + escAttr(file.name) + '" style="display: inline-flex; align-items: center; vertical-align: middle; margin-right: 4px; color: var(--text-secondary); opacity: 0.85;"></span>' +
                   '<span style="vertical-align: middle;">' + escHtml(file.name) + '</span>' +
                 '</a>' +
               '</div>' +
+              (isLink
+                ? '<div class="grid-link-target" title="' + escAttr(file.target_path || '') + '">' + (isBrokenLink ? '目标失效' : '→ ' + escHtml(file.target_path || '')) + '</div>'
+                : '') +
               '<div class="info">' +
                 '<span class="size-col" style="display:none">' + escHtml(file.size) + '</span>' +
                 '<span class="date-col" style="display:none">' + escHtml(file.ctime) + '</span>' +
@@ -203,11 +234,15 @@
   }
 
   function bootstrapReader() {
+    var defaultPath = mock.loadVfs().defaultPath || '/';
     var params = new URLSearchParams(window.location.search);
     var isFav = params.get('favorites') === '1';
-    var reqPath = params.get('path') || '/works/sakura-outfit-guide/assets/men-youth';
+    var reqPath = params.get('path') || '/works/春樱穿搭指南/男士特辑';
     var album = mock.getAlbumPayload(reqPath, { favorites: isFav });
-    var openFrom = params.get('openFromDir') || (isFav ? '/works' : mock.parentPath(album.full_path));
+    var rawOpenFrom = params.get('openFromDir');
+    var openFrom = rawOpenFrom
+      ? (mock.resolveLegacyPath ? mock.resolveLegacyPath(rawOpenFrom) : mock.normalizePath(rawOpenFrom))
+      : (isFav ? defaultPath : (mock.parentPath(album.full_path) || defaultPath));
     var backHref = isFav ? './favorites.html' : './index.html?path=' + encodeURIComponent(openFrom);
 
     document.title = '看本 · ' + album.title;
@@ -300,7 +335,7 @@
     var grid = document.querySelector('.favorites-grid');
     if (grid) {
       grid.innerHTML = favs.map(function (item) {
-        var fPath = mock.normalizePath(item.path);
+        var fPath = mock.resolveLegacyPath ? mock.resolveLegacyPath(item.path) : mock.normalizePath(item.path);
         var node = vfs.nodes[fPath];
         var available = Boolean(node && node.type === 'file');
         if (available) availableCount++;
@@ -347,11 +382,13 @@
   }
 
   function bootstrapUpload() {
-    var params = new URLSearchParams(window.location.search);
-    var target = mock.normalizePath(params.get('path') || '/works');
     var vfs = mock.loadVfs();
+    var defaultPath = vfs.defaultPath || '/';
+    var params = new URLSearchParams(window.location.search);
+    var rawTarget = params.get('path') || defaultPath;
+    var target = mock.resolveLegacyPath ? mock.resolveLegacyPath(rawTarget) : mock.normalizePath(rawTarget);
     if (!vfs.nodes[target] || vfs.nodes[target].type !== 'dir') {
-      target = '/works';
+      target = defaultPath;
     }
     var targetEl = document.getElementById('uploadTarget');
     if (targetEl) targetEl.textContent = target;
@@ -380,7 +417,7 @@
       form.addEventListener('submit', function (event) {
         event.preventDefault();
         try { localStorage.setItem(mock.AUTH_KEY, '1'); } catch (e) {}
-        window.location.href = './index.html?path=%2Fworks';
+        window.location.href = './index.html';
       });
     }
   }

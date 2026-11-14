@@ -269,7 +269,8 @@ function rebuildReaderGrid() {
       var badgeEl = spreadRow.querySelector('.reader-grid-spread-badge') || document.createElement('span');
       badgeEl.className = 'reader-grid-spread-badge';
       var spreadLabel = (gIdx === 0 && group.kind === 'cover') ? '封面 Cover' : ('折页 ' + (gIdx + 1));
-      badgeEl.innerHTML = spreadLabel + ' <b>[' + (readingDirection === 'rtl' ? '右←左' : '左→右') + ']</b>';
+      var spreadTag = group.kind === 'wide' ? '宽幅跨页' : (readingDirection === 'rtl' ? '右←左' : '左→右');
+      badgeEl.innerHTML = spreadLabel + ' <b>[' + spreadTag + ']</b>';
       spreadChildren.push(badgeEl);
 
       if (group.kind === 'wide') {

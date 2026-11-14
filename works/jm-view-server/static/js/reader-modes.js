@@ -46,13 +46,35 @@ function isPagedMode() {
   return readerMode === 'single';
 }
 
-function isWidePage(idx) {
+var doubleWideBannerDismissed = false;
+
+function computeImageWideFlag(img, loadedImage) {
+  loadedImage = loadedImage || img;
+  if (!img || !loadedImage || !loadedImage.naturalHeight) return '';
+  var rot = Math.abs(parseInt(img.dataset.rotate || '0', 10) || 0) % 180;
+  var w = rot !== 0 ? loadedImage.naturalHeight : loadedImage.naturalWidth;
+  var h = rot !== 0 ? loadedImage.naturalWidth : loadedImage.naturalHeight;
+  return w / h >= 1.2 ? '1' : '0';
+}
+
+function isNaturalWidePage(idx) {
   if (idx < 0 || idx >= pages.length) return false;
   var img = pages[idx].querySelector('.page-img');
   if (!img) return false;
-  if (img.dataset.readerWide === '1') return true;
-  if (img.dataset.readerWide === '0') return false;
-  return !!(img.complete && img.naturalHeight && img.naturalWidth / img.naturalHeight >= 1.2);
+  var rot = Math.abs(parseInt(img.dataset.rotate || '0', 10) || 0) % 180;
+  if (rot === 0) {
+    if (img.dataset.readerWide === '1') return true;
+    if (img.dataset.readerWide === '0') return false;
+  }
+  if (img.complete && img.naturalHeight && (!img.currentSrc || img.currentSrc.indexOf('data:image/') !== 0)) {
+    return computeImageWideFlag(img, img) === '1';
+  }
+  return img.dataset.readerWide === '1';
+}
+
+function isWidePage(idx) {
+  if (typeof doubleWideLayout !== 'undefined' && doubleWideLayout === 'pair') return false;
+  return isNaturalWidePage(idx);
 }
 
 function getAlbumRangesForGrouping() {
@@ -88,7 +110,7 @@ function buildDoubleGroups() {
 
   // 封面判定：第一项若为常规非宽图单页（且第一项不是空白插页），作为单页封面
   var firstItem = seq[cursor];
-  if (firstItem.type === 'page' && !isWidePage(firstItem.pageIndex)) {
+  if (firstItem.type === 'page' && !isNaturalWidePage(firstItem.pageIndex)) {
     groups.push({
       pages: [firstItem.pageIndex],
       slots: readingDirection === 'rtl' ? [firstItem.pageIndex, null] : [null, firstItem.pageIndex],
@@ -168,9 +190,10 @@ function findDoubleGroupIndex(pageIdx) {
 }
 
 function clearDoublePageState(page) {
-  page.classList.remove('is-double-active', 'is-double-current', 'is-double-left', 'is-double-right', 'is-double-wide', 'is-double-cover', 'is-wide-page');
+  page.classList.remove('is-double-active', 'is-double-current', 'is-double-left', 'is-double-right', 'is-double-wide', 'is-double-wide-spread', 'is-double-cover', 'is-wide-page');
   page.removeAttribute('data-double-slot');
   page.removeAttribute('data-double-group');
+  page.removeAttribute('data-wide-badge');
   page.style.removeProperty('--reader-double-column');
   page.style.removeProperty('--reader-double-row');
   page.style.removeProperty('grid-column');
@@ -310,7 +333,8 @@ function renderDoubleGroups() {
       page.style.setProperty('--reader-double-row', String(groupIndex + 1));
       page.style.gridRow = String(groupIndex + 1);
       if (group.kind === 'wide') {
-        page.classList.add('is-double-wide', 'is-wide-page');
+        page.classList.add('is-double-wide', 'is-wide-page', 'is-double-wide-spread');
+        page.dataset.wideBadge = '宽幅跨页';
         page.style.gridColumn = '1 / -1';
         return;
       }
@@ -395,6 +419,105 @@ function updateDoubleGroupFromScroll() {
   }
 }
 
+function getWidePageStats() {
+  var total = pages.length;
+  var loadedCount = 0;
+  var wideCount = 0;
+  for (var i = 0; i < total; i++) {
+    var img = pages[i] && pages[i].querySelector('.page-img');
+    if (!img) continue;
+    var rot = Math.abs(parseInt(img.dataset.rotate || '0', 10) || 0) % 180;
+    var flag = rot === 0 ? img.dataset.readerWide : '';
+    if (flag !== '1' && flag !== '0') {
+      if (img.complete && img.naturalHeight && (!img.currentSrc || img.currentSrc.indexOf('data:image/') !== 0)) {
+        flag = computeImageWideFlag(img, img);
+      }
+    }
+    if (flag === '1' || flag === '0') {
+      loadedCount++;
+      if (flag === '1') wideCount++;
+    }
+  }
+  return { total: total, loadedCount: loadedCount, wideCount: wideCount };
+}
+
+function syncDoubleWideUI() {
+  var layout = typeof doubleWideLayout !== 'undefined' && doubleWideLayout === 'pair' ? 'pair' : 'spread';
+  if (stream) stream.dataset.doubleWideLayout = layout;
+
+  var ctrl = document.getElementById('doubleWideControl');
+  if (ctrl) ctrl.hidden = readerMode !== 'double';
+  var spreadBtn = document.getElementById('wideModeSpread');
+  var pairBtn = document.getElementById('wideModePair');
+  if (spreadBtn) spreadBtn.classList.toggle('active', layout === 'spread');
+  if (pairBtn) pairBtn.classList.toggle('active', layout === 'pair');
+
+  var banner = document.getElementById('doubleWideBanner');
+  if (!banner) return;
+
+  var stats = getWidePageStats();
+  if (readerMode !== 'double' || doubleWideBannerDismissed || (stats.wideCount === 0 && (layout === 'spread' || stats.loadedCount === 0))) {
+    banner.hidden = true;
+    return;
+  }
+
+  var badgeEl = document.getElementById('doubleWideBannerBadge');
+  var textEl = document.getElementById('doubleWideBannerText');
+  var toggleBtn = document.getElementById('doubleWideToggleBtn');
+  var singleBtn = document.getElementById('doubleWideSingleBtn');
+  var isAllWide = stats.loadedCount > 0 && stats.wideCount === stats.loadedCount;
+
+  if (isAllWide) {
+    if (layout === 'spread') {
+      if (badgeEl) badgeEl.textContent = '宽幅跨页模式';
+      if (textEl) {
+        textEl.textContent = stats.loadedCount === stats.total
+          ? ('本画册共 ' + stats.total + ' 页均为宽幅横图，双页模式下默认自动跨双栏通栏展示（每行 1 张）。')
+          : '当前画册页面均为宽幅横图，双页模式下默认自动跨双栏通栏展示（每行 1 张）。';
+      }
+      if (toggleBtn) toggleBtn.textContent = '改为双栏并排';
+    } else {
+      if (badgeEl) badgeEl.textContent = '双栏并排模式';
+      if (textEl) textEl.textContent = '已切换为「双栏并排」：宽幅横图按每行 2 张左右并排展示，可按 D 键切换翻阅方向。';
+      if (toggleBtn) toggleBtn.textContent = '恢复自动跨页';
+    }
+    if (singleBtn) singleBtn.hidden = false;
+  } else if (stats.wideCount > 0) {
+    if (layout === 'spread') {
+      if (badgeEl) badgeEl.textContent = '含宽幅跨页';
+      if (textEl) textEl.textContent = '画册内含宽幅横图，双页模式下横图自动跨双栏通栏展示，竖图保持左右并排。';
+      if (toggleBtn) toggleBtn.textContent = '强制双栏并排';
+    } else {
+      if (badgeEl) badgeEl.textContent = '双栏并排模式';
+      if (textEl) textEl.textContent = '已开启「强制双栏并排」：宽幅横图与竖图均按双栏并排展示。';
+      if (toggleBtn) toggleBtn.textContent = '恢复自动跨页';
+    }
+    if (singleBtn) singleBtn.hidden = true;
+  } else {
+    if (badgeEl) badgeEl.textContent = '双栏并排模式';
+    if (textEl) textEl.textContent = '已开启「双栏并排」：若画册含宽幅横图也将按双栏并排展示。';
+    if (toggleBtn) toggleBtn.textContent = '恢复自动跨页';
+    if (singleBtn) singleBtn.hidden = true;
+  }
+
+  banner.dataset.wideLayout = layout;
+  banner.hidden = false;
+}
+
+function applyDoubleWideLayout(layout, persist) {
+  doubleWideLayout = layout === 'pair' ? 'pair' : 'spread';
+  if (persist !== false) doubleWideBannerDismissed = false;
+  if (readerMode === 'double') rebuildDoubleGroups(activePageIndex, { scroll: false });
+  if (typeof readerGridOverlay !== 'undefined' && readerGridOverlay && readerGridOverlay.classList.contains('show')) {
+    rebuildReaderGrid();
+  }
+  syncDoubleWideUI();
+  if (persist) {
+    if (window.JmvPrefs) JmvPrefs.set('doubleWideLayout', doubleWideLayout);
+    else try { localStorage.setItem('jmv-double-wide-layout', doubleWideLayout); } catch (e) {}
+  }
+}
+
 function rebuildDoubleGroups(preferredPageIdx, options) {
   options = options || {};
   var keepIndex = typeof preferredPageIdx === 'number' ? preferredPageIdx : activePageIndex;
@@ -402,6 +525,7 @@ function rebuildDoubleGroups(preferredPageIdx, options) {
   var anchorTop = anchorElement ? anchorElement.getBoundingClientRect().top : null;
   doubleGroups = buildDoubleGroups();
   activeDoubleGroupIndex = findDoubleGroupIndex(keepIndex);
+  syncDoubleWideUI();
   if (readerMode !== 'double') return;
   setDoubleContinuousLayout(true);
   renderDoubleGroups();
@@ -446,11 +570,17 @@ function scheduleDoubleGroupRebuild() {
 function updateImagePageType(img, loadedImage) {
   loadedImage = loadedImage || img;
   if (!img || !loadedImage || !loadedImage.naturalHeight) return;
-  var wide = loadedImage.naturalWidth / loadedImage.naturalHeight >= 1.2 ? '1' : '0';
-  if (img.dataset.readerWide === wide) return;
+  if (loadedImage.currentSrc && loadedImage.currentSrc.indexOf('data:image/') === 0) return;
+  var wide = computeImageWideFlag(img, loadedImage);
+  if (!wide) return;
+  if (img.dataset.readerWide === wide) {
+    syncDoubleWideUI();
+    return;
+  }
   var wasWide = img.dataset.readerWide === '1';
   img.dataset.readerWide = wide;
   scheduleDoubleGroupRebuild();
+  syncDoubleWideUI();
   if (wasWide !== (wide === '1') && typeof requestReaderGridTypeRefresh === 'function') {
     requestReaderGridTypeRefresh();
   }
@@ -541,6 +671,13 @@ function setReaderMode(mode, options) {
   }
   updateInsertPageButtonState();
   updateDocumentScrollProgress(false);
+  syncDoubleWideUI();
+  if (previousMode !== 'double' && readerMode === 'double' && !options.initial && doubleWideLayout === 'spread' && window.scrollY > 160) {
+    var wideStats = getWidePageStats();
+    if (wideStats.loadedCount > 0 && wideStats.wideCount === wideStats.loadedCount && window.toast) {
+      toast('宽幅横图默认跨双栏单张通栏展示，可在顶部或更多菜单切换「双栏并排」');
+    }
+  }
 }
 
 function gotoPage(idx) {
@@ -602,3 +739,35 @@ function applyReadingDirection(direction, persist) {
     else try { localStorage.setItem('jmv-reading-direction', readingDirection); } catch (e) {}
   }
 }
+
+(function bindDoubleWideControls() {
+  var toggleBtn = document.getElementById('doubleWideToggleBtn');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function() {
+      var nextLayout = doubleWideLayout === 'pair' ? 'spread' : 'pair';
+      applyDoubleWideLayout(nextLayout, true);
+      if (window.toast) toast(nextLayout === 'pair' ? '已切换为双栏并排' : '已恢复宽幅自动跨页');
+    });
+  }
+  var singleBtn = document.getElementById('doubleWideSingleBtn');
+  if (singleBtn) {
+    singleBtn.addEventListener('click', function() {
+      setReaderMode('single');
+    });
+  }
+  var dismissBtn = document.getElementById('doubleWideDismissBtn');
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function() {
+      doubleWideBannerDismissed = true;
+      syncDoubleWideUI();
+    });
+  }
+  [['wideModeSpread', 'spread'], ['wideModePair', 'pair']].forEach(function(item) {
+    var btn = document.getElementById(item[0]);
+    if (!btn) return;
+    btn.addEventListener('click', function() {
+      applyDoubleWideLayout(item[1], true);
+      if (window.toast) toast(item[1] === 'pair' ? '宽幅横图：双栏并排' : '宽幅横图：自动跨页');
+    });
+  });
+})();

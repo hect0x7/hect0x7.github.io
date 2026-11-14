@@ -6,10 +6,31 @@
   var FAV_KEY = 'jmv-mock-favorites-v1';
   var MSG_KEY = 'jmv-mock-messages-v1';
   var SYNC_KEY = 'jmv-mock-sync-v1';
+  var SYNC_CLIENT_KEY = 'jmv-sync:jmv-mock-preview';
   var AUTH_KEY = 'jmv-mock-auth-v1';
   var BG_ID_KEY = 'jmv-mock-bg-blob-v1';
+  var BOOKMARKS_KEY = 'plugin_jm_bookmarks';
+  var RECENT_DIRS_KEY = 'jmv-recent';
+  var RECENT_PATHS_KEY = 'jmv_recent_paths';
   var IDB_NAME = 'jmv_mock_db';
   var IDB_STORE = 'blobs';
+
+  var LEGACY_PATH_MAP = [
+    ['/works/sakura-outfit-guide/assets/men-youth', '/works/春樱穿搭指南/男士特辑'],
+    ['/works/sakura-outfit-guide/assets/women', '/works/春樱穿搭指南/女士特辑'],
+    ['/works/sakura-outfit-guide/assets', '/works/春樱穿搭指南'],
+    ['/works/sakura-outfit-guide', '/works/春樱穿搭指南'],
+    ['/works/樱花季穿搭指南/少年篇', '/works/春樱穿搭指南/男士特辑'],
+    ['/works/樱花季穿搭指南/女子篇', '/works/春樱穿搭指南/女士特辑'],
+    ['/works/樱花季穿搭指南', '/works/春樱穿搭指南'],
+    ['/樱花季穿搭 · 少年篇', '/春樱穿搭 · 男士特辑'],
+    ['/樱花季穿搭 · 女子篇', '/春樱穿搭 · 女士特辑'],
+    ['/works/momiji-style-guide/assets', '/works/红叶季穿搭指南'],
+    ['/works/momiji-style-guide', '/works/红叶季穿搭指南'],
+    ['/works/sakura-momiji-flag/assets', '/works/花落为素，叶燃成日'],
+    ['/works/sakura-momiji-flag', '/works/花落为素，叶燃成日'],
+    ['/works/jm-view-server', '/']
+  ];
 
   var IMAGE_EXT_RE = /\.(avif|bmp|gif|jpe?g|png|webp)$/i;
   var MIME_MAP = {
@@ -49,7 +70,16 @@
   var syncBlobUrlMap = new Map();
 
   function getSeed() {
-    return window.JMV_VFS_SEED || { version: 1, defaultPath: '/works', drivers: ['/', '/works'], nodes: { '/': { type: 'dir', name: '', ctime: '2026-01-01 00:00:00', mtime: '2026-01-01 00:00:00' }, '/works': { type: 'dir', name: 'works', ctime: '2026-01-01 00:00:00', mtime: '2026-01-01 00:00:00' } } };
+    return window.JMV_VFS_SEED || {
+      version: 3,
+      defaultPath: '/',
+      drivers: ['/', '/works'],
+      defaultBookmarks: [],
+      nodes: {
+        '/': { type: 'dir', name: '', ctime: '2026-01-01 00:00:00', mtime: '2026-01-01 00:00:00' },
+        '/works': { type: 'dir', name: 'works', ctime: '2026-01-01 00:00:00', mtime: '2026-01-01 00:00:00' }
+      }
+    };
   }
 
   function cloneJson(value) {
@@ -80,6 +110,20 @@
       stack.push(part);
     }
     return '/' + stack.join('/');
+  }
+
+  function resolveLegacyPath(raw) {
+    var norm = normalizePath(raw);
+    for (var i = 0; i < LEGACY_PATH_MAP.length; i++) {
+      var oldPrefix = LEGACY_PATH_MAP[i][0];
+      var newPrefix = LEGACY_PATH_MAP[i][1];
+      if (norm === oldPrefix) return newPrefix;
+      if (norm.indexOf(oldPrefix + '/') === 0) {
+        var rest = norm.slice(oldPrefix.length);
+        return newPrefix === '/' ? normalizePath(rest) : newPrefix + rest;
+      }
+    }
+    return norm;
   }
 
   function parentPath(vpath) {
@@ -140,18 +184,199 @@
       pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
   }
 
+  function migrateUserStateToV2(vfs, seed) {
+    try {
+      var rawFav = localStorage.getItem(FAV_KEY);
+      if (rawFav) {
+        var favData = JSON.parse(rawFav);
+        if (favData && Array.isArray(favData.images)) {
+          var seenFav = {};
+          var mappedFavs = [];
+          favData.images.forEach(function (item) {
+            if (!item || !item.path) return;
+            var mapped = resolveLegacyPath(item.path);
+            if (!vfs.nodes[mapped] || seenFav[mapped]) return;
+            seenFav[mapped] = true;
+            mappedFavs.push({ path: mapped, created_at: item.created_at || Math.floor(Date.now() / 1000) });
+          });
+          localStorage.setItem(FAV_KEY, JSON.stringify({ images: mappedFavs }));
+        }
+      }
+    } catch (e) {}
+
+    [RECENT_DIRS_KEY, RECENT_PATHS_KEY].forEach(function (key) {
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return;
+        var list = JSON.parse(raw);
+        if (!Array.isArray(list)) return;
+        var seenRecent = {};
+        var mapped = [];
+        list.forEach(function (entry) {
+          var p = typeof entry === 'string' ? entry : (entry && entry.path);
+          if (!p) return;
+          var nextP = resolveLegacyPath(p);
+          var node = vfs.nodes[nextP];
+          if (!node || (node.type !== 'dir' && node.type !== 'link') || seenRecent[nextP]) return;
+          seenRecent[nextP] = true;
+          mapped.push(typeof entry === 'string' ? nextP : Object.assign({}, entry, { path: nextP }));
+        });
+        localStorage.setItem(key, JSON.stringify(mapped));
+      } catch (e) {}
+    });
+
+    ensureBookmarksInitialized(vfs, seed, true);
+
+    try { localStorage.removeItem(SYNC_CLIENT_KEY); } catch (e) {}
+    try {
+      var rawSync = localStorage.getItem(SYNC_KEY);
+      if (rawSync) {
+        var syncStore = JSON.parse(rawSync);
+        if (syncStore && typeof syncStore === 'object' && syncStore.scopes) {
+          var nextEntries = {};
+          var nextRev = (Number(syncStore.revision) || 1) + 1;
+          var oldEntries = syncStore.entries || {};
+          Object.keys(oldEntries).forEach(function (k) {
+            if (k.indexOf('bookmark:') === 0) return;
+            var rec = oldEntries[k];
+            if (k.indexOf('progress:') === 0 || k.indexOf('sequence:') === 0) {
+              var colonIdx = k.indexOf(':');
+              var prefix = k.slice(0, colonIdx + 1);
+              var mappedKeyPath = resolveLegacyPath(k.slice(colonIdx + 1));
+              var nextRec = cloneJson(rec);
+              if (nextRec && nextRec.value && typeof nextRec.value === 'object') {
+                if (nextRec.value.path) nextRec.value.path = resolveLegacyPath(nextRec.value.path);
+                if (nextRec.value.image) nextRec.value.image = resolveLegacyPath(nextRec.value.image);
+              }
+              nextEntries[prefix + mappedKeyPath] = nextRec;
+              return;
+            }
+            nextEntries[k] = rec;
+          });
+          readCurrentOrDefaultBookmarks().forEach(function (bm) {
+            nextEntries['bookmark:' + bm.path] = { value: bm, revision: nextRev };
+          });
+          syncStore.entries = nextEntries;
+          syncStore.revision = nextRev;
+          localStorage.setItem(SYNC_KEY, JSON.stringify(syncStore));
+        }
+      }
+    } catch (e) {}
+  }
+
+  function readCurrentOrDefaultBookmarks() {
+    var list = [];
+    try {
+      var raw = localStorage.getItem(BOOKMARKS_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) list = parsed;
+      }
+    } catch (e) {}
+    if (!list.length) {
+      var defList = getSeed().defaultBookmarks;
+      list = Array.isArray(defList) ? defList : [];
+    }
+    var seen = {};
+    var out = [];
+    list.forEach(function (item) {
+      var p = typeof item === 'string' ? item : (item && item.path);
+      if (!p) return;
+      var mapped = resolveLegacyPath(p);
+      if (seen[mapped]) return;
+      seen[mapped] = true;
+      out.push({
+        path: mapped,
+        timestamp: (item && item.timestamp) ? item.timestamp : '2026-11-14T20:00:00.000Z'
+      });
+    });
+    return out;
+  }
+
+  function ensureBookmarksInitialized(vfs, seed, forceMigrate) {
+    var defaults = Array.isArray(seed.defaultBookmarks) ? seed.defaultBookmarks : [];
+    try {
+      var raw = localStorage.getItem(BOOKMARKS_KEY);
+      if (!raw) {
+        if (defaults.length) {
+          localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(cloneJson(defaults)));
+        }
+        return;
+      }
+      if (!forceMigrate) return;
+      var list = JSON.parse(raw);
+      if (!Array.isArray(list)) {
+        if (defaults.length) {
+          localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(cloneJson(defaults)));
+        }
+        return;
+      }
+      var seen = {};
+      var nextList = [];
+      list.forEach(function (item) {
+        var p = typeof item === 'string' ? item : (item && item.path);
+        if (!p) return;
+        var mapped = resolveLegacyPath(p);
+        var node = vfs.nodes[mapped];
+        if (!node || (node.type !== 'dir' && node.type !== 'link') || seen[mapped]) return;
+        seen[mapped] = true;
+        nextList.push({
+          path: mapped,
+          timestamp: (item && item.timestamp) ? item.timestamp : '2026-11-14T20:00:00.000Z'
+        });
+      });
+      if (!nextList.length && defaults.length) {
+        nextList = cloneJson(defaults);
+      }
+      localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(nextList));
+    } catch (e) {
+      if (defaults.length) {
+        try { localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(cloneJson(defaults))); } catch (err) {}
+      }
+    }
+  }
+
   function loadVfs() {
     var seed = getSeed();
+    var targetVersion = Number(seed.version) || 3;
+    var targetDefaultPath = seed.defaultPath || '/';
     var targetDrivers = Array.isArray(seed.drivers) ? seed.drivers.slice() : ['/', '/works'];
     try {
       var raw = localStorage.getItem(VFS_KEY);
       if (raw) {
         var parsed = JSON.parse(raw);
         if (parsed && parsed.nodes && parsed.nodes['/']) {
+          if (Number(parsed.version) !== targetVersion) {
+            var upgraded = {
+              version: targetVersion,
+              defaultPath: targetDefaultPath,
+              drivers: targetDrivers,
+              nodes: cloneJson(seed.nodes || {})
+            };
+            Object.keys(parsed.nodes).forEach(function (oldKey) {
+              var oldNode = parsed.nodes[oldKey];
+              if (!oldNode || !oldNode.blobId) return;
+              var mappedPath = resolveLegacyPath(oldKey);
+              var parentDir = parentPath(mappedPath);
+              if (ensureDirPath(upgraded, parentDir) && !upgraded.nodes[mappedPath]) {
+                upgraded.nodes[mappedPath] = cloneJson(oldNode);
+              }
+            });
+            saveVfs(upgraded);
+            migrateUserStateToV2(upgraded, seed);
+            return upgraded;
+          }
+          var dirty = false;
           if (JSON.stringify(parsed.drivers) !== JSON.stringify(targetDrivers)) {
             parsed.drivers = targetDrivers;
-            saveVfs(parsed);
+            dirty = true;
           }
+          if (parsed.defaultPath !== targetDefaultPath) {
+            parsed.defaultPath = targetDefaultPath;
+            dirty = true;
+          }
+          if (dirty) saveVfs(parsed);
+          ensureBookmarksInitialized(parsed, seed, false);
           return parsed;
         }
       }
@@ -159,12 +384,13 @@
       /* ignore corrupt storage and reseed below */
     }
     var fresh = {
-      version: seed.version || 1,
-      defaultPath: seed.defaultPath || '/works',
+      version: targetVersion,
+      defaultPath: targetDefaultPath,
       drivers: targetDrivers,
       nodes: cloneJson(seed.nodes || {})
     };
     saveVfs(fresh);
+    ensureBookmarksInitialized(fresh, seed, false);
     return fresh;
   }
 
@@ -212,35 +438,119 @@
     return './__jmv_missing__?path=' + encodeURIComponent(vpath);
   }
 
-  function buildFileItem(vfs, vpath, node) {
-    var quoted = encodeURIComponent(vpath);
-    var isDir = node.type === 'dir';
-    var isImgFile = !isDir && isImageName(node.name);
+  function resolveLinkNode(vfs, vpath) {
+    var visited = {};
+    var curPath = normalizePath(vpath);
+    var curNode = vfs.nodes[curPath];
+    visited[curPath] = true;
+    var depth = 0;
+    while (curNode && curNode.type === 'link' && depth < 16) {
+      depth++;
+      var nextPath = curNode.targetPath ? resolveLegacyPath(curNode.targetPath) : '';
+      if (!nextPath || visited[nextPath]) {
+        return { broken: true, linkPath: vpath, targetPath: nextPath, targetNode: null };
+      }
+      visited[nextPath] = true;
+      var nextNode = vfs.nodes[nextPath];
+      if (!nextNode) {
+        return { broken: true, linkPath: vpath, targetPath: nextPath, targetNode: null };
+      }
+      if (nextNode.type !== 'link') {
+        return { broken: false, linkPath: vpath, targetPath: nextPath, targetNode: nextNode };
+      }
+      curPath = nextPath;
+      curNode = nextNode;
+    }
+    return { broken: true, linkPath: vpath, targetPath: '', targetNode: null };
+  }
+
+  function buildFirstImageInfo(vfs, vpath, node, isDir, isImgFile) {
     var directImages = isDir ? getDirectImageEntries(vfs, vpath) : [];
-    var hasImages = directImages.length > 0;
-    var firstImg = '';
-    if (hasImages) {
+    if (directImages.length > 0) {
       var firstEntry = directImages[0];
-      firstImg = {
-        filename: firstEntry.node.name,
-        data_original: buildOriginalUrl(firstEntry.path, firstEntry.node),
-        data_thumb: buildThumbUrl(firstEntry.path, firstEntry.node)
-      };
-    } else if (isImgFile) {
-      firstImg = {
-        filename: node.name,
-        data_original: buildOriginalUrl(vpath, node),
-        data_thumb: buildThumbUrl(vpath, node)
+      return {
+        hasImages: true,
+        firstImg: {
+          filename: firstEntry.node.name,
+          data_original: buildOriginalUrl(firstEntry.path, firstEntry.node),
+          data_thumb: buildThumbUrl(firstEntry.path, firstEntry.node)
+        }
       };
     }
+    if (isImgFile) {
+      return {
+        hasImages: false,
+        firstImg: {
+          filename: node.name,
+          data_original: buildOriginalUrl(vpath, node),
+          data_thumb: buildThumbUrl(vpath, node)
+        }
+      };
+    }
+    return { hasImages: false, firstImg: '' };
+  }
+
+  function buildFileItem(vfs, vpath, node) {
+    var manageQuoted = encodeURIComponent(vpath);
+    if (node.type === 'link') {
+      var linkInfo = resolveLinkNode(vfs, vpath);
+      if (linkInfo.broken) {
+        return {
+          name: node.name,
+          path: vpath,
+          quoted_path: manageQuoted,
+          manage_quoted_path: manageQuoted,
+          href: '#',
+          size: 'Link',
+          ctime: node.ctime || nowTimestamp(),
+          mtime: node.mtime || nowTimestamp(),
+          type: 'link',
+          target_type: 'broken',
+          is_link: true,
+          link_broken: true,
+          link_path: vpath,
+          target_path: linkInfo.targetPath,
+          jm_view: false,
+          first_img_url: ''
+        };
+      }
+      var tPath = linkInfo.targetPath;
+      var tNode = linkInfo.targetNode;
+      var tQuoted = encodeURIComponent(tPath);
+      var tIsDir = tNode.type === 'dir';
+      var tIsImg = !tIsDir && isImageName(tNode.name);
+      var tImgInfo = buildFirstImageInfo(vfs, tPath, tNode, tIsDir, tIsImg);
+      return {
+        name: node.name,
+        path: tPath,
+        quoted_path: tQuoted,
+        manage_quoted_path: manageQuoted,
+        href: tIsDir ? './index.html?path=' + tQuoted : buildThumbUrl(tPath, tNode),
+        size: 'Link',
+        ctime: node.ctime || nowTimestamp(),
+        mtime: node.mtime || nowTimestamp(),
+        type: tIsDir ? 'dir' : tNode.type,
+        target_type: tNode.type,
+        is_link: true,
+        link_broken: false,
+        link_path: vpath,
+        target_path: tPath,
+        jm_view: tImgInfo.hasImages || tIsImg,
+        first_img_url: tImgInfo.firstImg
+      };
+    }
+
+    var isDir = node.type === 'dir';
+    var isImgFile = !isDir && isImageName(node.name);
+    var imgInfo = buildFirstImageInfo(vfs, vpath, node, isDir, isImgFile);
     var href = isDir
-      ? './index.html?path=' + quoted
+      ? './index.html?path=' + manageQuoted
       : buildThumbUrl(vpath, node);
     return {
       name: node.name,
       path: vpath,
-      quoted_path: quoted,
-      manage_quoted_path: quoted,
+      quoted_path: manageQuoted,
+      manage_quoted_path: manageQuoted,
       href: href,
       size: isDir ? '<DIR>' : formatBytes(node.size),
       ctime: node.ctime || nowTimestamp(),
@@ -251,13 +561,22 @@
       link_broken: false,
       link_path: '',
       target_path: '',
-      jm_view: hasImages || isImgFile,
-      first_img_url: firstImg
+      jm_view: imgInfo.hasImages || isImgFile,
+      first_img_url: imgInfo.firstImg
     };
   }
 
   function resolveExistingDir(vfs, requestedPath) {
-    var target = normalizePath(requestedPath || vfs.defaultPath || '/works');
+    var defaultDir = vfs.defaultPath || '/';
+    var target = resolveLegacyPath(requestedPath || defaultDir);
+    var node = vfs.nodes[target];
+    if (node && node.type === 'link') {
+      var linkInfo = resolveLinkNode(vfs, target);
+      if (!linkInfo.broken && linkInfo.targetNode && linkInfo.targetNode.type === 'dir') {
+        return linkInfo.targetPath;
+      }
+      target = parentPath(target);
+    }
     while (target !== '/' && (!vfs.nodes[target] || vfs.nodes[target].type !== 'dir')) {
       target = parentPath(target);
     }
@@ -266,24 +585,35 @@
 
   function listDirectory(rawPath, strict) {
     var vfs = loadVfs();
-    var target = normalizePath(rawPath || vfs.defaultPath || '/works');
-    if (!vfs.nodes[target] || vfs.nodes[target].type !== 'dir') {
+    var defaultDir = vfs.defaultPath || '/';
+    var target = resolveLegacyPath(rawPath || defaultDir);
+    var node = vfs.nodes[target];
+    if (node && node.type === 'link') {
+      var linkInfo = resolveLinkNode(vfs, target);
+      if (!linkInfo.broken && linkInfo.targetNode && linkInfo.targetNode.type === 'dir') {
+        target = linkInfo.targetPath;
+        node = linkInfo.targetNode;
+      }
+    }
+    if (!node || node.type !== 'dir') {
       if (strict) return null;
       target = resolveExistingDir(vfs, target);
     }
     var entries = getDirectChildren(vfs, target);
-    entries.sort(function (a, b) {
-      if (a.node.type !== b.node.type) return a.node.type === 'dir' ? -1 : 1;
-      var mtimeCmp = String(b.node.mtime || '').localeCompare(String(a.node.mtime || ''));
-      if (mtimeCmp !== 0) return mtimeCmp;
-      return naturalCompare(a.node.name, b.node.name);
-    });
     var files = entries.map(function (entry) {
       return buildFileItem(vfs, entry.path, entry.node);
     });
+    files.sort(function (a, b) {
+      var aDir = a.type === 'dir';
+      var bDir = b.type === 'dir';
+      if (aDir !== bDir) return aDir ? -1 : 1;
+      var mtimeCmp = String(b.mtime || '').localeCompare(String(a.mtime || ''));
+      if (mtimeCmp !== 0) return mtimeCmp;
+      return naturalCompare(a.name, b.name);
+    });
     var activeDrivers = (vfs.drivers || ['/', '/works']).filter(function (d) {
-      var node = vfs.nodes[d];
-      return node && node.type === 'dir';
+      var dNode = vfs.nodes[d];
+      return dNode && dNode.type === 'dir';
     });
     return {
       path: target,
@@ -316,7 +646,7 @@
     if (options && options.favorites) {
       var favImages = [];
       loadFavorites().images.forEach(function (item) {
-        var fPath = normalizePath(item.path);
+        var fPath = resolveLegacyPath(item.path);
         var fNode = vfs.nodes[fPath];
         if (!fNode || fNode.type !== 'file') return;
         favImages.push({
@@ -337,8 +667,15 @@
       };
     }
 
-    var norm = normalizePath(rawPath || vfs.defaultPath || '/works');
+    var norm = resolveLegacyPath(rawPath || vfs.defaultPath || '/');
     var pickedNode = vfs.nodes[norm];
+    if (pickedNode && pickedNode.type === 'link') {
+      var linkInfo = resolveLinkNode(vfs, norm);
+      if (!linkInfo.broken && linkInfo.targetNode) {
+        norm = linkInfo.targetPath;
+        pickedNode = linkInfo.targetNode;
+      }
+    }
     var targetFile = (pickedNode && pickedNode.type === 'file') ? norm : '';
     var dirPath = targetFile ? parentPath(targetFile) : resolveExistingDir(vfs, norm);
     var imgEntries = getDirectImageEntries(vfs, dirPath);
@@ -615,7 +952,7 @@
 
   function mutateMkdir(rawParent, rawName) {
     var vfs = loadVfs();
-    var pDir = normalizePath(rawParent || '/works');
+    var pDir = resolveLegacyPath(rawParent || vfs.defaultPath || '/');
     var name = String(rawName || '').trim();
     if (!vfs.nodes[pDir] || vfs.nodes[pDir].type !== 'dir') {
       return { code: 404, body: { status: 'error', error: '目标父目录不存在' } };
@@ -850,8 +1187,17 @@
 
   function buildZipResponse(rawPath, originalFetch) {
     var vfs = loadVfs();
-    var target = normalizePath(safeDecode(rawPath));
+    var target = resolveLegacyPath(safeDecode(rawPath));
     var node = vfs.nodes[target];
+    if (node && node.type === 'link') {
+      var linkInfo = resolveLinkNode(vfs, target);
+      if (!linkInfo.broken && linkInfo.targetNode) {
+        target = linkInfo.targetPath;
+        node = linkInfo.targetNode;
+      } else {
+        node = null;
+      }
+    }
     if (!node) {
       return Promise.resolve(jsonResponse({ status: 'error', error: '目标不存在' }, 404));
     }
@@ -950,14 +1296,19 @@
     } catch (e) {
       /* seed below */
     }
+    var initialEntries = {};
+    var bmList = readCurrentOrDefaultBookmarks();
+    bmList.forEach(function (bm, idx) {
+      initialEntries['bookmark:' + bm.path] = { value: bm, revision: idx + 1 };
+    });
     var seeded = {
       version: 1,
       server_id: 'jmv-mock-preview',
-      revision: 1,
+      revision: Math.max(1, bmList.length),
       config_revision: 1,
       enabled: true,
       scopes: cloneJson(DEFAULT_SCOPES),
-      entries: {}
+      entries: initialEntries
     };
     localStorage.setItem(SYNC_KEY, JSON.stringify(seeded));
     return seeded;
@@ -1074,9 +1425,9 @@
   }
 
   function handleFavoritesCopy(bodyData) {
-    var destination = normalizePath(bodyData.destination || '/works');
-    var mode = bodyData.mode || 'copy';
     var vfs = loadVfs();
+    var destination = resolveLegacyPath(bodyData.destination || vfs.defaultPath || '/');
+    var mode = bodyData.mode || 'copy';
     if (!ensureDirPath(vfs, destination)) {
       return jsonResponse({ status: 'error', error: '目标路径是已存在的文件，无法作为导出目录' }, 400);
     }
@@ -1093,7 +1444,7 @@
     var ts = nowTimestamp();
 
     favs.images.forEach(function (item) {
-      var srcPath = normalizePath(item.path);
+      var srcPath = resolveLegacyPath(item.path);
       var srcNode = vfs.nodes[srcPath];
       if (!srcNode || srcNode.type !== 'file') {
         failed++;
@@ -1247,8 +1598,8 @@
   }
 
   function handleUploadFiles(formData) {
-    var rawDir = formData.get('path') || '/works';
     var vfs = loadVfs();
+    var rawDir = formData.get('path') || vfs.defaultPath || '/';
     var targetDir = resolveExistingDir(vfs, rawDir);
     var files = formData.getAll('file').filter(function (item) {
       return item && typeof item.arrayBuffer === 'function' && item.name;
@@ -1351,9 +1702,15 @@
     }
 
     if (path === '/view_file') {
-      var reqPath = normalizePath(safeDecode(url.searchParams.get('path') || ''));
+      var reqPath = resolveLegacyPath(safeDecode(url.searchParams.get('path') || ''));
       var vfs = loadVfs();
       var node = vfs.nodes[reqPath];
+      if (node && node.type === 'link') {
+        var linkInfo = resolveLinkNode(vfs, reqPath);
+        if (!linkInfo.broken && linkInfo.targetNode) {
+          node = linkInfo.targetNode;
+        }
+      }
       if (!node || node.type !== 'file') return Promise.resolve(new Response('', { status: 404 }));
       if (node.blobId) {
         return handleBlobFetch(new URL('/__jmv_blob__?id=' + encodeURIComponent(node.blobId), window.location.origin));
@@ -1409,8 +1766,8 @@
           return jsonResponse({ status: 'ok', images: favs.images }, 200);
         }
         if (method === 'PUT') {
-          var addPath = normalizePath(parsed.data.path || '');
-          if (addPath && addPath !== '/' && !favs.images.some(function (i) { return normalizePath(i.path) === addPath; })) {
+          var addPath = resolveLegacyPath(parsed.data.path || '');
+          if (addPath && addPath !== '/' && !favs.images.some(function (i) { return resolveLegacyPath(i.path) === addPath; })) {
             favs.images.unshift({ path: addPath, created_at: Math.floor(Date.now() / 1000) });
             saveFavorites(favs);
           }
@@ -1418,8 +1775,8 @@
         }
         if (method === 'DELETE') {
           if (parsed.data && parsed.data.path) {
-            var rmPath = normalizePath(parsed.data.path);
-            favs.images = favs.images.filter(function (i) { return normalizePath(i.path) !== rmPath; });
+            var rmPath = resolveLegacyPath(parsed.data.path);
+            favs.images = favs.images.filter(function (i) { return resolveLegacyPath(i.path) !== rmPath; });
             saveFavorites(favs);
             return jsonResponse({ status: 'ok', favorite: false }, 200);
           }
@@ -1667,8 +2024,8 @@
 
   function resetDemo() {
     [
-      VFS_KEY, FAV_KEY, MSG_KEY, SYNC_KEY, AUTH_KEY, BG_ID_KEY,
-      'plugin_jm_bookmarks', 'jmv_folder_sort_prefs', 'jmv_recent_paths'
+      VFS_KEY, FAV_KEY, MSG_KEY, SYNC_KEY, SYNC_CLIENT_KEY, AUTH_KEY, BG_ID_KEY,
+      BOOKMARKS_KEY, 'jmv_folder_sort_prefs', RECENT_DIRS_KEY, RECENT_PATHS_KEY
     ].forEach(function (k) {
       try { localStorage.removeItem(k); } catch (e) {}
     });
@@ -1684,7 +2041,7 @@
       }
     } catch (e) {}
     clearAllBlobs().then(function () {
-      window.location.href = './index.html?path=%2Fworks';
+      window.location.href = './index.html';
     });
   }
 
@@ -1698,6 +2055,7 @@
     PLACEHOLDER_GIF: PLACEHOLDER_GIF,
     ready: readyPromise,
     normalizePath: normalizePath,
+    resolveLegacyPath: resolveLegacyPath,
     parentPath: parentPath,
     baseName: baseName,
     joinPath: joinPath,

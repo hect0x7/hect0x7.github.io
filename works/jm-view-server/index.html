@@ -17,21 +17,21 @@
     <meta name="apple-mobile-web-app-title" content="看本">
     <link rel="icon" type="image/png" href="static/icons/icon-192.png">
     <link rel="apple-touch-icon" href="static/icons/icon-192.png">
-    <link rel="stylesheet" href="static/css/app.css?v=0.3.11">
-    <link rel="stylesheet" href="static/css/column-view.css?v=0.3.11">
-    <link rel="stylesheet" href="static/css/index-page.css?v=0.3.11">
-    <link rel="stylesheet" href="static/css/favorites-export.css?v=0.3.11">
-    <script src="static/js/vfs-seed.js?v=0.3.11"></script>
-    <script src="static/js/mock-backend.js?v=0.3.11"></script>
-    <script defer src="static/js/page-bootstrap.js?v=0.3.11"></script>
-    <script defer src="static/js/app.js?v=0.3.11"></script>
-    <script defer src="static/js/sync.js?v=0.3.11"></script>
-    <script defer src="static/js/app-shell.js?v=0.3.11"></script>
-    <script defer src="static/js/index.js?v=0.3.11"></script>
-    <script defer src="static/js/column-view.js?v=0.3.11"></script>
-    <script defer src="static/js/common.js?v=0.3.11"></script>
-    <script defer src="static/js/index-page.js?v=0.3.11"></script>
-    <script defer src="static/js/favorites-export.js?v=0.3.11"></script>
+    <link rel="stylesheet" href="static/css/app.css?v=0.3.13">
+    <link rel="stylesheet" href="static/css/column-view.css?v=0.3.13">
+    <link rel="stylesheet" href="static/css/index-page.css?v=0.3.13">
+    <link rel="stylesheet" href="static/css/favorites-export.css?v=0.3.13">
+    <script src="static/js/vfs-seed.js?v=0.3.13"></script>
+    <script src="static/js/mock-backend.js?v=0.3.13"></script>
+    <script defer src="static/js/page-bootstrap.js?v=0.3.13"></script>
+    <script defer src="static/js/app.js?v=0.3.13"></script>
+    <script defer src="static/js/sync.js?v=0.3.13"></script>
+    <script defer src="static/js/app-shell.js?v=0.3.13"></script>
+    <script defer src="static/js/index.js?v=0.3.13"></script>
+    <script defer src="static/js/column-view.js?v=0.3.13"></script>
+    <script defer src="static/js/common.js?v=0.3.13"></script>
+    <script defer src="static/js/index-page.js?v=0.3.13"></script>
+    <script defer src="static/js/favorites-export.js?v=0.3.13"></script>
 </head>
 
 <body>
@@ -46,13 +46,13 @@
             <!-- 面包屑（承载 #currentPathText，支持点击手输路径） -->
             <div class="crumbs-container" style="flex: 1; min-width: 0; display: flex; align-items: center;">
                 <nav class="crumbs" id="crumbsView" onclick="enablePathEdit()" style="cursor: pointer;" title="点击可手动输入路径跳转">
-                    <a href="javascript:" onclick="changeDir('/works'); event.stopPropagation();" id="crumbs-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
+                    <a href="javascript:" onclick="changeDir('/'); event.stopPropagation();" id="crumbs-home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></a>
                     <span class="sep">/</span>
                     <span class="cur">
-                        <span id="currentPathText" data-path="/works">works</span>
+                        <span id="currentPathText" data-path="/"></span>
                     </span>
                 </nav>
-                <input type="text" id="crumbsInput" class="crumbs-input" style="display: none; max-width: 600px;" placeholder="输入路径（如 /works），按回车跳转..." onkeydown="handleCrumbsKey(event)" onblur="disablePathEdit()">
+                <input type="text" id="crumbsInput" class="crumbs-input" style="display: none; max-width: 600px;" placeholder="输入路径（如 / 或 /works），按回车跳转..." onkeydown="handleCrumbsKey(event)" onblur="disablePathEdit()">
             </div>
             <div class="spacer"></div>
             <!-- 可复制地址 pill -->
@@ -69,7 +69,7 @@
                 <button class="btn btn-outline btn-icon" onclick="goBack()" id="btn-back" title="上级目录" aria-label="上级目录">
                     <span id="backIco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>
                 </button>
-                <button class="btn btn-outline btn-icon" title="回到共享目录" aria-label="回到共享目录" onclick="changeDir('/works')">
+                <button class="btn btn-outline btn-icon" title="回到共享目录" aria-label="回到共享目录" onclick="changeDir('/')">
                     <span id="homeIco"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg></span>
                 </button>
                 <button class="btn btn-outline btn-icon" onclick="openDir(encodeURIComponent(getCurPath()), false)" title="打开当前文件夹" aria-label="打开当前文件夹">
@@ -106,7 +106,7 @@
             <button class="btn btn-outline btn-icon" onclick="toggleBookmarks()" title="收藏目录" aria-label="收藏目录">
                 <span id="starIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10H3z"/><path d="M13 10h5v7l-2.5-1.7L13 17z"/></svg></span>
             </button>
-            <a href="./upload.html?path=%2Fworks" class="btn btn-primary btn-icon" id="uploadLink" title="上传到当前目录" aria-label="上传到当前目录" data-jmv-upload-link>
+            <a href="./upload.html?path=%2F" class="btn btn-primary btn-icon" id="uploadLink" title="上传到当前目录" aria-label="上传到当前目录" data-jmv-upload-link>
                 <span id="uploadIco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></span>
             </a>
             </div>
@@ -162,8 +162,8 @@
 
                 <!-- Finder 风格分栏视图 -->
                 <section class="column-view" id="columnView"
-                         data-initial-path="/works"
-                         data-root-path="/works"
+                         data-initial-path="/"
+                         data-root-path="/"
                          aria-label="文件分栏浏览" hidden>
                     <div class="column-view-toolbar">
                         <button type="button" class="column-back" id="columnBack" aria-label="返回上一层">
@@ -258,7 +258,7 @@
     <input type="submit">
 </form>
 
-<script id="browserConfig" type="application/json">{"defaultPath":"/works"}</script>
+<script id="browserConfig" type="application/json">{"defaultPath":"/"}</script>
 
 <dialog class="favorites-export-dialog" id="favoritesExportDialog" aria-labelledby="favoritesExportTitle">
   <form id="copyFavoritesForm" class="favorites-export-panel">
@@ -280,7 +280,7 @@
     <section class="favorites-export-destination" aria-label="目标与结果">
     <div class="favorites-export-fields">
     <label for="copyDestination">目标文件夹</label>
-    <div class="favorites-destination-input"><span data-favorite-icon="folder" aria-hidden="true"></span><input id="copyDestination" name="destination" type="text" required placeholder="输入完整文件夹路径（如 /works/精选）" aria-describedby="copyDestinationHint" autocomplete="off"><button class="btn btn-ghost btn-icon" type="button" id="useCurrentExportDirectory" title="恢复当前浏览目录" aria-label="恢复当前浏览目录"><span data-favorite-icon="arrowLeft" aria-hidden="true"></span></button></div>
+    <div class="favorites-destination-input"><span data-favorite-icon="folder" aria-hidden="true"></span><input id="copyDestination" name="destination" type="text" required placeholder="输入完整文件夹路径（如 /精选画册）" aria-describedby="copyDestinationHint" autocomplete="off"><button class="btn btn-ghost btn-icon" type="button" id="useCurrentExportDirectory" title="恢复当前浏览目录" aria-label="恢复当前浏览目录"><span data-favorite-icon="arrowLeft" aria-hidden="true"></span></button></div>
     <p id="copyDestinationHint" class="favorites-export-hint">填写目标文件夹路径，文件夹不存在时自动创建。</p>
     <div class="favorites-export-placeholder"><span data-favorite-icon="export" aria-hidden="true"></span><b>原始文件，直接导出</b><p>无需打包，同名自动避让。完成后在这里查看结果。</p></div>
     </div>

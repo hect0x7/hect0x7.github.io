@@ -92,6 +92,7 @@ var JMV_PREF_DEFS = {
   readerMode: { key: 'jmv-reader-mode', type: 'enum', values: ['scroll', 'single', 'double'], fallback: 'scroll' },
   readingDirection: { key: 'jmv-reading-direction', type: 'enum', values: ['ltr', 'rtl'], fallback: 'ltr' },
   doubleWidthScale: { key: 'jmv-double-width-scale', type: 'number', min: 50, max: 100, fallback: 98 },
+  doubleWideLayout: { key: 'jmv-double-wide-layout', type: 'enum', values: ['spread', 'pair'], fallback: 'spread' },
   singleFit: { key: 'jmv-single-fit', type: 'enum', values: ['contain', 'custom'], fallback: 'contain' },
   imageSize: { key: 'jmv-img-custom-size', type: 'number', min: 300, max: 1600, fallback: 800 },
   scrollFit: { key: 'jmv-scroll-fit', type: 'enum', values: ['window', 'custom'], fallback: 'window' },

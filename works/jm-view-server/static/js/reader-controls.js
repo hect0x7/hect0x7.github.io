@@ -16,15 +16,27 @@ document.getElementById('modeSingle').addEventListener('click', function() { set
 var modeDoubleButton = document.getElementById('modeDouble');
 if (modeDoubleButton) modeDoubleButton.addEventListener('click', function() { setReaderMode('double'); });
 
+function notifyReadingDirectionChange(nextDir) {
+  if (!window.toast) return;
+  if (readerMode === 'double' && doubleWideLayout === 'spread' && typeof getWidePageStats === 'function') {
+    var ws = getWidePageStats();
+    if (ws.loadedCount > 0 && ws.wideCount === ws.loadedCount) {
+      toast('当前宽幅横图均跨双栏通栏展示，切换「双栏并排」后可查看左右翻向差异');
+      return;
+    }
+  }
+  toast(nextDir === 'rtl' ? '双页排版：从右向左 (日漫)' : '双页排版：从左向右');
+}
+
 var dirLtrBtn = document.getElementById('dirLtr');
 var dirRtlBtn = document.getElementById('dirRtl');
 if (dirLtrBtn) dirLtrBtn.addEventListener('click', function() {
   applyReadingDirection('ltr', true);
-  if (window.toast) toast('双页排版：从左向右');
+  notifyReadingDirectionChange('ltr');
 });
 if (dirRtlBtn) dirRtlBtn.addEventListener('click', function() {
   applyReadingDirection('rtl', true);
-  if (window.toast) toast('双页排版：从右向左 (日漫)');
+  notifyReadingDirectionChange('rtl');
 });
 
 var pageClickTimer = null;
@@ -98,7 +110,7 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
         var nextDir = readingDirection === 'ltr' ? 'rtl' : 'ltr';
         applyReadingDirection(nextDir, true);
-        if (window.toast) toast(nextDir === 'rtl' ? '双页排版：从右向左 (日漫)' : '双页排版：从左向右');
+        notifyReadingDirectionChange(nextDir);
       }
       break;
     case 'm': case 'M':
@@ -249,8 +261,10 @@ function initializeReader() {
     readerMode = JmvPrefs.get('readerMode');
     readingDirection = JmvPrefs.get('readingDirection');
     doubleWidthScale = JmvPrefs.get('doubleWidthScale');
+    doubleWideLayout = JmvPrefs.get('doubleWideLayout');
   }
   readerInitialized = true;
+  applyDoubleWideLayout(doubleWideLayout, false);
   applyReadingDirection(readingDirection, false);
   setReaderMode(readerMode, { persist: false, initial: true });
   updateDocumentScrollProgress(false);
