@@ -6,16 +6,11 @@ var readerShortcutList = document.getElementById('readerShortcutList');
   row.innerHTML = '<span>' + item.keys.map(function(key) { return '<kbd>' + key + '</kbd>'; }).join('<i>或</i>') + '</span><b>' + item.label + '</b>';
   readerShortcutList.appendChild(row);
 });
-function openReaderHelp() { readerHelp.classList.add('show'); document.getElementById('readerHelpClose').focus(); }
+function openReaderHelp() { closeReaderModePop(); readerHelp.classList.add('show'); document.getElementById('readerHelpClose').focus(); }
 function closeReaderHelp() { readerHelp.classList.remove('show'); }
 document.getElementById('tHelp').addEventListener('click', openReaderHelp);
 document.getElementById('readerHelpClose').addEventListener('click', closeReaderHelp);
 readerHelp.addEventListener('click', function(e) { if (e.target === readerHelp) closeReaderHelp(); });
-document.getElementById('modeScroll').addEventListener('click', function() { setReaderMode('scroll'); });
-document.getElementById('modeSingle').addEventListener('click', function() { setReaderMode('single'); });
-var modeDoubleButton = document.getElementById('modeDouble');
-if (modeDoubleButton) modeDoubleButton.addEventListener('click', function() { setReaderMode('double'); });
-
 function notifyReadingDirectionChange(nextDir) {
   if (!window.toast) return;
   if (readerMode === 'double' && doubleWideLayout === 'spread' && typeof getWidePageStats === 'function') {
@@ -28,15 +23,28 @@ function notifyReadingDirectionChange(nextDir) {
   toast(nextDir === 'rtl' ? '双页排版：从右向左 (日漫)' : '双页排版：从左向右');
 }
 
-var dirLtrBtn = document.getElementById('dirLtr');
-var dirRtlBtn = document.getElementById('dirRtl');
-if (dirLtrBtn) dirLtrBtn.addEventListener('click', function() {
-  applyReadingDirection('ltr', true);
-  notifyReadingDirectionChange('ltr');
+readerModePop.querySelectorAll('[data-reader-mode]').forEach(function(button) {
+  button.addEventListener('click', function() {
+    var mode = button.dataset.readerMode;
+    if (mode !== readerMode) setReaderMode(mode);
+    if (mode === 'double') setReaderDirectionOpen(readerDirectionControl.hidden);
+  });
 });
-if (dirRtlBtn) dirRtlBtn.addEventListener('click', function() {
-  applyReadingDirection('rtl', true);
-  notifyReadingDirectionChange('rtl');
+
+function changeReaderDirection(direction) {
+  applyReadingDirection(direction, true);
+  notifyReadingDirectionChange(direction);
+}
+document.querySelectorAll('[data-reader-direction]').forEach(function(button) {
+  button.addEventListener('click', function() {
+    var direction = button.dataset.readerDirection;
+    if (readerDirectionControl.contains(button)) {
+      applyReadingDirection(direction, true);
+      setReaderDirectionOpen(false, true);
+    } else {
+      changeReaderDirection(direction);
+    }
+  });
 });
 
 var pageClickTimer = null;
@@ -61,6 +69,12 @@ stream.addEventListener('dblclick', function(e) {
 
 document.addEventListener('keydown', function(e) {
   if (imageActions && imageActions.classList.contains('show')) return;
+  if ((e.key === 'Escape' || e.key === 'Esc') && !readerModePop.hidden) {
+    e.preventDefault();
+    if (readerDirectionControl.hidden) closeReaderModePop(true);
+    else setReaderDirectionOpen(false, true);
+    return;
+  }
   if (inEditable(e.target) || e.ctrlKey || e.metaKey || e.altKey) return;
   var cur = currentPageIdx();
   switch (e.key) {
@@ -87,7 +101,7 @@ document.addEventListener('keydown', function(e) {
       if (readerMode === 'double') break;
       e.preventDefault(); if (!scrollActiveSinglePage(1)) gotoPage(cur + 1); break;
     case ' ':
-      if (readerMode === 'double') break;
+      if (readerMode === 'double' || (e.target.tagName === 'BUTTON' && readerModeTool.contains(e.target))) break;
       e.preventDefault(); if (!scrollActiveSinglePage(1)) gotoPage(cur + 1); break;
     case 'Home':
       if (readerMode === 'double') break;
@@ -108,9 +122,7 @@ document.addEventListener('keydown', function(e) {
     case 'd': case 'D':
       if (readerMode === 'double') {
         e.preventDefault();
-        var nextDir = readingDirection === 'ltr' ? 'rtl' : 'ltr';
-        applyReadingDirection(nextDir, true);
-        notifyReadingDirectionChange(nextDir);
+        changeReaderDirection(readingDirection === 'ltr' ? 'rtl' : 'ltr');
       }
       break;
     case 'm': case 'M':
@@ -127,7 +139,7 @@ document.addEventListener('keydown', function(e) {
     case 'Esc':
       closeImageActions();
       closeReaderGrid();
-      closeReaderHelp(); closeJump(); closeSize(); closeMore();
+      closeReaderHelp(); closeJump(); closeMore();
       if (!desktopToolbarQuery.matches) {
         setToolbarPinned(false, false);
         closeToolbar(true);
