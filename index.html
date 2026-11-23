@@ -2,72 +2,161 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#faf8f3">
   <title>hect0x7 · 作品集</title>
   <meta name="description" content="hect0x7 的个人作品集 —— 我 Vibe 了一些小作品。">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    // 首帧前确定主题与版式，避免闪烁与布局跳变。
+    (function () {
+      var d = document.documentElement, t, gl = false;
+      try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "dark" && t !== "light") t = "auto";
+      d.setAttribute("data-theme", t);
+      var rm = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (!/[?&]nogl(=|&|$)/.test(location.search)) {
+        try {
+          var g = document.createElement("canvas").getContext("webgl2");
+          gl = !!g;
+          var lose = g && g.getExtension("WEBGL_lose_context");
+          if (lose) lose.loseContext();
+        } catch (e) { gl = false; }
+      }
+      d.classList.add("js");
+      if (rm) d.classList.add("reduced-motion");
+      if (!gl) d.classList.add("no-gl");
+      if (rm || !gl) d.classList.add("layout-static");
+    })();
+  </script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c3272b'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
-  <div class="grain"></div>
+  <a class="skip-link" href="#works" data-i18n="skip">跳到作品</a>
+
+  <!-- 背景宇宙：WebGL 画布 + CSS 静态赤日（加载中 / 降级时显示） -->
+  <div class="cosmos" data-depth="0" aria-hidden="true">
+    <div class="cosmos-fallback">
+      <i class="fb-glow"></i>
+      <i class="fb-ring"></i>
+      <i class="fb-sun"></i>
+    </div>
+    <canvas id="cosmos" data-depth="3"></canvas>
+  </div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- 全局 HUD 边框：刻度与区段进度 -->
+  <div class="frame" aria-hidden="true">
+    <i class="frame-corner tl"></i><i class="frame-corner tr"></i><i class="frame-corner bl"></i><i class="frame-corner br"></i>
+    <div class="frame-progress">
+      <span class="fp-label" data-sec="0">00</span>
+      <span class="fp-track"><i class="fp-fill"></i></span>
+      <span class="fp-label" data-sec="2">02</span>
+    </div>
+  </div>
 
   <header class="site-header">
-    <a class="brand" href="/">hect0x7</a>
-    <nav>
+    <a class="brand" href="#top"><i class="brand-sun" aria-hidden="true"></i>hect0x7</a>
+    <nav aria-label="Primary">
       <a href="#works" data-i18n="navWorks">作品</a>
       <a href="#about" data-i18n="navAbout">关于</a>
-      <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a>
+      <a class="nav-gh" href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a>
     </nav>
     <div class="header-actions">
       <div class="languages" role="group" aria-label="Language">
-        <button data-lang="zh" class="active">中</button>
-        <button data-lang="ja">日</button>
-        <button data-lang="en">EN</button>
+        <button type="button" data-lang="zh" class="active" aria-pressed="true">中</button>
+        <button type="button" data-lang="ja" aria-pressed="false">日</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
       </div>
-      <button class="theme-toggle" aria-label="Toggle theme" aria-pressed="false">
-        <span class="theme-icon" aria-hidden="true"></span>
-      </button>
+      <div class="theme-options" role="group" aria-label="外观" data-i18n-label="themeLabel">
+        <button type="button" data-theme-choice="auto" aria-pressed="true" data-i18n="themeAuto">自动</button>
+        <button type="button" data-theme-choice="dark" aria-pressed="false" data-i18n="themeDark">夜间</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false" data-i18n="themeLight">浅色</button>
+      </div>
     </div>
   </header>
 
   <main>
-    <section class="hero">
-      <p class="eyebrow" data-i18n="eyebrow">PORTFOLIO / 作品集</p>
-      <h1 data-i18n-html="heroTitle">我 Vibe 了<br>一些<em>小作品</em>。</h1>
-      <p class="lead" data-i18n="heroLead">从视觉实验到实用工具，这里收集我在闲暇时写下的作品。</p>
-      <a class="scroll-cue" href="#works"><span data-i18n="scroll">向下浏览</span><i></i></a>
+    <section class="hero" id="top" aria-labelledby="heroTitle">
+      <div class="hero-pin">
+        <div class="eclipse-chart" aria-hidden="true" data-depth="2">
+          <i class="chart-axis"></i>
+          <i class="chart-ring"></i>
+          <i class="chart-ticks"></i>
+          <span class="chart-label"><i></i><span data-i18n="sunLabel">赤日奇点</span></span>
+        </div>
+
+        <div class="hero-copy" data-depth="4">
+          <p class="eyebrow"><i></i><span data-i18n="eyebrow">PORTFOLIO / 作品集</span></p>
+          <h1 class="hero-title" id="heroTitle" data-i18n-html="heroTitle" data-split>我 Vibe 了<br>一些<em>小作品</em>。</h1>
+          <div class="hero-side">
+            <p class="lead" data-i18n="heroLead">从视觉实验到实用工具，这里收集我在闲暇时写下的作品。</p>
+            <div class="hero-actions">
+              <a class="scroll-cue" href="#works"><span data-i18n="scroll">探索作品</span><span aria-hidden="true">↓</span></a>
+              <button class="eclipse-pulse" type="button"><i aria-hidden="true"></i><span data-i18n="pulse">触发日耀</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="hero-foot" aria-hidden="true">
+          <span class="hero-foot-scale"></span>
+          <span><b data-works-count>00</b> <span data-i18n="metaWorks">收录作品</span></span>
+        </div>
+      </div>
     </section>
 
-    <section class="works" id="works">
-      <div class="section-head">
-        <span class="section-index">01 <i></i> WORKS</span>
-        <h2 data-i18n="worksTitle">作品</h2>
+    <section class="works" id="works" aria-labelledby="worksTitle">
+      <div class="works-pin">
+        <div class="works-head">
+          <span class="section-index">01 <i></i> WORKS</span>
+          <h2 id="worksTitle" data-i18n="worksTitle">作品</h2>
+          <p class="works-hint" data-i18n="worksHint">滚动浏览作品，或用方向键切换。</p>
+        </div>
+        <div class="orbit" id="orbit">
+          <ul class="orbit-track" id="workGrid"><!-- 由 works.js 渲染 --></ul>
+        </div>
+        <div class="orbit-counter" aria-hidden="true">
+          <b id="orbitNow">01</b><span>/ <i data-works-count>00</i></span>
+        </div>
+        <nav class="orbit-rail" id="orbitRail" aria-label="作品导航"></nav>
       </div>
-      <div class="work-grid" id="workGrid"><!-- 由 works.js 渲染 --></div>
+      <div class="orbit-snaps" id="orbitSnaps" aria-hidden="true"></div>
     </section>
 
-    <section class="about" id="about">
-      <div class="section-head">
-        <span class="section-index">02 <i></i> ABOUT</span>
-        <h2 data-i18n="aboutTitle">关于</h2>
+    <section class="about" id="about" aria-labelledby="aboutTitle">
+      <div class="about-inner">
+        <div class="about-head">
+          <span class="section-index">02 <i></i> ABOUT</span>
+          <h2 id="aboutTitle" data-i18n="aboutTitle">关于</h2>
+        </div>
+        <div class="about-main">
+          <p class="about-body" data-i18n-html="aboutBody">
+            你好，我是 hect0x7。这个站点用来存放我 Vibe 的一些小作品，大多是纯前端页面。欢迎在 <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> 上找到我。
+          </p>
+        </div>
       </div>
-      <p class="about-body" data-i18n-html="aboutBody">
-        你好，我是 hect0x7。这个站点用来存放我做的一些实验性作品，
-        大多是纯前端的小页面。欢迎在 <a href="https://github.com/hect0x7" target="_blank" rel="noopener">GitHub</a> 上找到我。
-      </p>
+      <div class="about-foot">
+        <dl class="about-meta">
+          <div><dt>GitHub</dt><dd><a href="https://github.com/hect0x7" target="_blank" rel="noopener">@hect0x7 <i aria-hidden="true">↗</i></a></dd></div>
+          <div><dt data-i18n="metaWorks">收录作品</dt><dd data-works-count>00</dd></div>
+          <div><dt data-i18n="metaLangs">语言</dt><dd>中 · 日 · EN</dd></div>
+        </dl>
+        <div class="horizon" aria-hidden="true"><i></i><span>HORIZON · 0°00′</span></div>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <span>hect0x7</span>
-    <span>© <span id="year"></span></span>
-    <button class="to-top" type="button" data-i18n="toTop">回到顶部 ↑</button>
+  <footer class="site-footer">
+    <p class="footer-mark" aria-hidden="true">hect0x7</p>
+    <div class="footer-row">
+      <span>© <span id="year"></span> hect0x7</span>
+      <span class="footer-note" data-i18n="footerNote">赤日奇点 · 原生 WebGL 与 CSS 3D 绘制</span>
+      <button class="to-top" type="button" data-i18n="toTop">回到顶部 ↑</button>
+    </div>
   </footer>
 
-  <script src="works.js?v=8"></script>
+  <script src="works.js?v=11"></script>
+  <script type="module" src="home.js?v=5"></script>
 </body>
 </html>
