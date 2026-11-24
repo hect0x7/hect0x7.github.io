@@ -197,7 +197,7 @@ Tgt motifT(int m, int id, ivec2 tc, float t){
     p = q;
     b = c > 0.7 ? 1.44 : 1.14;
   }
-  return Tgt(uMotifCenter + p*uMotifScale, c, b, 5.4);
+  return Tgt(uMotifCenter + p*uMotifScale, c, b, 6.6);
 }
 
 Tgt ambientT(int id, float t){
@@ -226,9 +226,9 @@ Tgt computeTargetM(int id, ivec2 tc, float t, float morphVal){
     } else if (morphVal >= 1.0) {
       m = motifT(uMotifB, id, tc, t);
     } else {
-      float mi = stag(morphVal, rnd(id,15), 0.58);
+      float mi = stag(morphVal, rnd(id,15), 0.42);
       m = mixT(motifT(uMotifA, id, tc, t), motifT(uMotifB, id, tc, t), mi);
-      m.k = mix(2.8, 5.4, smoothstep(0.32, 1.0, morphVal));
+      m.k = mix(4.2, 6.6, smoothstep(0.25, 1.0, morphVal));
     }
     r = mixT(r, m, wi);
   }
@@ -421,11 +421,16 @@ void main(){
   float dop = dot(v, -rd)/max(speed, 0.25);
   float dopBoost = 1.0 + 0.5*clamp(dop, -1.0, 1.0)*smoothstep(0.15, 0.9, speed);
   float horMask = mix(1.0, smoothstep(-0.003, 0.018, rd.y), uHorizon);
-  float leftSpace = smoothstep(-0.48, 0.18, clip.x/clip.w);
-  vec2 toSun = ((clip.xy/clip.w + 1.0)*0.5 - uSunScr.xy)*vec2(uAspect, 1.0);
+  vec2 ndcP = clip.xy/clip.w;
+  float leftSpace = smoothstep(-0.48, 0.18, ndcP.x);
+  vec2 toSun = ((ndcP + 1.0)*0.5 - uSunScr.xy)*vec2(uAspect, 1.0);
   float discDistance = length(toSun)/max(uSunScr.z, 0.001);
   float discMask = mix(0.09, 1.0, smoothstep(0.86, 1.16, discDistance));
-  float readability = mix(mix(0.25, 1.0, leftSpace)*discMask, 1.0, max(uWorksW, uStarW));
+  // 作品区左上角标题避让区：亮色水墨模式下更明显，避免高密度粒子直穿文字
+  float worksCorner = smoothstep(-0.20, -0.60, ndcP.x)*smoothstep(0.16, 0.56, ndcP.y);
+  float worksReadability = 1.0 - worksCorner*mix(0.58, 0.88, uTheme);
+  float readability = mix(mix(0.25, 1.0, leftSpace)*discMask, worksReadability, uWorksW);
+  readability = mix(readability, 1.0, uStarW);
   float wBoostD = mix(1.0, 1.08, uWorksW);
   float wBoostL = mix(0.85, 2.15, uWorksW);
 
@@ -686,7 +691,7 @@ void main(){
     vec3 inkRim = mix(vec3(0.61, 0.14, 0.18), vec3(0.88, 0.28, 0.18), crescent);
     vec3 seal = mix(inkShadow, inkRim, limb*(0.47 + 0.53*crescent));
     float crescentEdge = length(q + keyLight*0.115) + 0.017*(fibres.r - 0.5);
-    float printCrescent = smoothstep(0.995 - aa, 1.016 + aa, crescentEdge);
+    float printCrescent = smoothstep(0.985 - aa, 1.028 + aa, crescentEdge);
     seal = mix(seal, mix(vec3(0.68, 0.11, 0.14), vec3(0.93, 0.36, 0.22), scatter), printCrescent*0.93);
     float pores = smoothstep(0.63, 0.92, fibres.a - ink.g*0.12);
     seal = mix(seal, vec3(0.94, 0.86, 0.80), pores*0.27);

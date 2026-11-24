@@ -68,6 +68,10 @@ html:not(.layout-static) {
   scroll-snap-type: y proximity;
 }
 
+html.is-jumping {
+  scroll-snap-type: none;
+}
+
 body {
   background: var(--bg);
   color: var(--ink);
@@ -267,6 +271,7 @@ a {
 .brand {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   gap: .55rem;
   font-family: var(--serif);
   font-weight: 900;
@@ -274,6 +279,7 @@ a {
   color: var(--ink);
   text-decoration: none;
   letter-spacing: .02em;
+  white-space: nowrap;
 }
 
 .brand-sun {
@@ -286,6 +292,7 @@ a {
 
 .site-header nav {
   display: flex;
+  flex-shrink: 0;
   gap: clamp(1rem, 2.6vw, 2.2rem);
   margin-left: auto;
 }
@@ -296,6 +303,7 @@ a {
   text-decoration: none;
   font-size: .9rem;
   letter-spacing: .04em;
+  white-space: nowrap;
   transition: color .25s;
 }
 
@@ -389,6 +397,7 @@ a {
 main {
   position: relative;
   z-index: 1;
+  overflow-x: clip;
 }
 
 /* ---------- 通用小字 ---------- */
@@ -570,7 +579,7 @@ main {
 }
 
 :lang(en) .hero-title {
-  font-size: clamp(2.65rem, min(5.4vw, 10.6svh), 6.65rem);
+  font-size: clamp(2.25rem, min(4.15vw, 9.2svh), 5.15rem);
   letter-spacing: -.03em;
 }
 
@@ -706,6 +715,7 @@ main {
   --n: 4;
   position: relative;
   height: calc(100svh * (1.5 + (var(--n) - 1) * .7));
+  overflow-x: clip;
 }
 
 .works-pin {
@@ -728,10 +738,20 @@ main {
 
 .works-head {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   left: calc(var(--pad) + 1rem);
   top: calc(var(--header-h) + 1.6rem);
   max-width: 22ch;
+  text-shadow: 0 1px 18px color-mix(in srgb, var(--bg) 90%, transparent), 0 0 32px color-mix(in srgb, var(--bg) 78%, transparent);
+}
+
+.works-head::before {
+  content: "";
+  position: absolute;
+  inset: -1.6rem -2.4rem -1.8rem -1.8rem;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 78% at 28% 36%, color-mix(in srgb, var(--bg) 78%, transparent) 0%, color-mix(in srgb, var(--bg) 38%, transparent) 52%, transparent 82%);
 }
 
 .works-head h2,
@@ -745,7 +765,7 @@ main {
 
 .works-hint {
   margin-top: .8rem;
-  color: var(--muted);
+  color: var(--ink-soft);
   letter-spacing: .14em;
   line-height: 1.7;
 }
@@ -753,6 +773,9 @@ main {
 .orbit {
   position: absolute;
   inset: 0;
+  z-index: 2;
+  isolation: isolate;
+  overflow: clip;
   pointer-events: none;
 }
 
@@ -1034,7 +1057,7 @@ main {
 /* 轨道计数与导航 */
 .orbit-counter {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   left: calc(var(--pad) + 1rem);
   bottom: clamp(1.8rem, 6vh, 3.4rem);
   display: flex;
@@ -1066,7 +1089,7 @@ main {
 
 .orbit-rail {
   position: absolute;
-  z-index: 3;
+  z-index: 4;
   right: calc(var(--pad) + 1rem);
   bottom: clamp(1.8rem, 6vh, 3.4rem);
   display: flex;
@@ -1105,8 +1128,13 @@ main {
 .rail-title {
   position: absolute;
   right: 0;
-  bottom: 100%;
+  bottom: calc(100% + .25rem);
   max-width: 22ch;
+  padding: .22rem .55rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1234,14 +1262,16 @@ main {
 }
 
 .about-meta dt {
-  color: var(--muted);
+  color: var(--ink-soft);
   margin-bottom: .3rem;
+  text-shadow: 0 1px 12px color-mix(in srgb, var(--bg) 85%, transparent);
 }
 
 .about-meta dd {
   font-size: .98rem;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 12px color-mix(in srgb, var(--bg) 85%, transparent);
 }
 
 .about-meta a i {
@@ -1463,8 +1493,38 @@ main {
 }
 
 /* ==========================================================================
-   窄屏
+   中屏 / 分屏与窄屏
    ========================================================================== */
+@media (max-width: 1120px) {
+  .frame-progress {
+    display: none;
+  }
+
+  .works-pin {
+    --card-w: clamp(236px, min(31vw, 41svh), 320px);
+  }
+
+  .works-head {
+    max-width: 18ch;
+  }
+
+  .orbit-track {
+    top: 58%;
+  }
+
+  .orbit-counter {
+    bottom: clamp(1.35rem, 3.8vh, 2.2rem);
+  }
+
+  .orbit-counter b {
+    font-size: clamp(3.4rem, min(8vw, 13svh), 6.2rem);
+  }
+
+  .orbit-rail {
+    bottom: clamp(1.35rem, 3.8vh, 2.2rem);
+  }
+}
+
 @media (max-width: 1080px) {
   .about-head {
     grid-column: 1 / -1;
@@ -1483,19 +1543,27 @@ main {
   }
 
   .site-header {
-    gap: .8rem;
+    gap: .35rem;
+    padding: 0 clamp(.55rem, 2.8vw, 1rem);
   }
 
   .brand {
-    font-size: 1.05rem;
+    font-size: .94rem;
+    gap: .35rem;
+  }
+
+  .brand-sun {
+    width: 9px;
+    height: 9px;
   }
 
   .site-header nav {
-    gap: .9rem;
+    gap: .48rem;
   }
 
   .site-header nav a {
-    font-size: .84rem;
+    font-size: .74rem;
+    letter-spacing: 0;
   }
 
   .nav-gh {
@@ -1503,19 +1571,25 @@ main {
   }
 
   .header-actions {
-    gap: .5rem;
+    gap: .26rem;
+    flex-shrink: 0;
+  }
+
+  .languages,
+  .theme-options {
+    flex-shrink: 0;
   }
 
   .languages button {
-    padding: .3rem .48rem;
-    font-size: .76rem;
+    padding: .24rem .34rem;
+    font-size: .68rem;
   }
 
   .theme-options { gap: 0; }
-  .theme-options button { padding-inline: .36rem; font-size: .65rem; }
-
-  .frame-progress {
-    display: none;
+  .theme-options button {
+    min-height: 24px;
+    padding: .2rem .28rem;
+    font-size: .62rem;
   }
 
   .frame-corner {
@@ -1653,12 +1727,31 @@ main {
   }
 }
 
-@media (max-width: 360px) {
-  .languages button {
-    padding: .28rem .38rem;
+@media (max-width: 380px) {
+  .site-header {
+    gap: .3rem;
+    padding: 0 .6rem;
+  }
+
+  .brand {
+    font-size: .9rem;
   }
 
   .site-header nav {
-    gap: .7rem;
+    gap: .4rem;
+  }
+
+  .site-header nav a {
+    font-size: .72rem;
+  }
+
+  .languages button {
+    padding: .24rem .3rem;
+    font-size: .66rem;
+  }
+
+  .theme-options button {
+    padding: .2rem .28rem;
+    font-size: .6rem;
   }
 }

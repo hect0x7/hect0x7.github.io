@@ -539,7 +539,7 @@ export function createHome3D(canvas, opts = {}) {
       const targetAct = idle < 1.8 ? 1 : 0;
       st.pointerAct += (targetAct - st.pointerAct) * (1 - Math.exp(-dt * (targetAct ? 8.0 : 2.6)));
       st.morphPrev = st.morph;
-      if (st.morph < 1) st.morph = Math.min(1, st.morph + dt / 1.05);
+      if (st.morph < 1) st.morph = Math.min(1, st.morph + dt / 0.72);
       if (st.morph >= 1) st.motifA = st.motifB;
       st.flare *= Math.exp(-dt * 2.2);
       st.caKick *= Math.exp(-dt * 3.0);

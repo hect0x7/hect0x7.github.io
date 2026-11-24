@@ -89,6 +89,7 @@ const WORKS = [
 // 页面静态文案的三语言字典。
 const I18N = {
   zh: {
+    pageTitle: "hect0x7 · 作品集",
     skip: "跳到作品",
     navWorks: "作品",
     navAbout: "关于",
@@ -117,6 +118,7 @@ const I18N = {
     toTop: "回到顶部 ↑",
   },
   ja: {
+    pageTitle: "hect0x7 · 作品集",
     skip: "作品へスキップ",
     navWorks: "作品",
     navAbout: "について",
@@ -145,6 +147,7 @@ const I18N = {
     toTop: "トップへ ↑",
   },
   en: {
+    pageTitle: "hect0x7 · Portfolio",
     skip: "Skip to works",
     navWorks: "Works",
     navAbout: "About",
@@ -289,6 +292,7 @@ function splitTitle(el) {
 function applyLang(lang) {
   const dict = I18N[lang] || I18N.zh;
   document.documentElement.lang = HTML_LANG[lang] || "zh-CN";
+  if (dict.pageTitle) document.title = dict.pageTitle;
 
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");

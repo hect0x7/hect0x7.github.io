@@ -49,6 +49,7 @@ const st = {
   focused: -1,
   staticNearest: -1,
   active: -2,
+  navTarget: -1,
   lastY: -1,
   dirty: true,
   raf: 0,
@@ -59,6 +60,8 @@ let items = [];
 let cards = [];
 let engine = null;
 let failed = false;
+let scrollAnim = null;
+let suppressFocusScroll = false;
 
 /* ---------------- 结构与度量 ---------------- */
 
@@ -185,26 +188,38 @@ function nearestStaticCard() {
 
 /* ---------------- 轨道排布 ---------------- */
 
+function syncRail(center) {
+  if (center === st.center) return;
+  st.center = center;
+  if (nowEl) nowEl.textContent = pad2(center + 1);
+  rail.querySelectorAll(".rail-dot").forEach((b, i) => {
+    if (i === center) b.setAttribute("aria-current", "true");
+    else b.removeAttribute("aria-current");
+  });
+}
+
 function layoutOrbit() {
   const narrow = st.vw <= 720;
+  const mid = !narrow && st.vw <= 1120;
   const W = st.cardW;
-  const R = W * (narrow ? 1.95 : 2.65);
-  const step = narrow ? 33 : 30; // 相邻卡片的轨道夹角（度）
-  const rise = narrow ? 18 : 26; // 螺旋抬升（px / 卡）
+  const R = W * (narrow ? 1.58 : mid ? 2.18 : 2.65);
+  const step = narrow ? 34 : mid ? 32 : 30; // 相邻卡片的轨道夹角（度）
+  const rise = narrow ? 16 : mid ? 20 : 26; // 螺旋抬升（px / 卡）
   const enterZ = (1 - st.enter) * -900;
   const enterPitch = 4 + (1 - st.enter) * 18;
   const leaveY = st.leave * -18 * (st.svh / 100);
   const stageOp = clamp(1 - st.leave * 1.2);
+  const opSpan = narrow ? 1.38 : mid ? 1.52 : 1.67;
   items.forEach((li, i) => {
     const d = i - st.pos;
     const ad = Math.abs(d);
     const deg = d * step;
     const a = (deg * Math.PI) / 180;
     const x = Math.sin(a) * R;
-    const z = (Math.cos(a) - 1) * R - ad * (narrow ? 95 : 155) + enterZ;
+    const z = (Math.cos(a) - 1) * R - ad * (narrow ? 95 : mid ? 130 : 155) + enterZ;
     const yv = d * rise + leaveY;
     const s = 0.87 + Math.max(0, 1 - ad * 0.9) * 0.19;
-    const op = clamp((1.67 - ad) / 0.92) * stageOp;
+    const op = clamp((opSpan - ad) / 0.92) * stageOp;
     li.style.transform =
       `perspective(1500px) translate3d(${x.toFixed(1)}px, ${yv.toFixed(1)}px, ${z.toFixed(1)}px) ` +
       `rotateX(${enterPitch.toFixed(2)}deg) rotateY(${deg.toFixed(2)}deg) scale(${s.toFixed(4)}) translate(-50%, -50%)`;
@@ -214,15 +229,7 @@ function layoutOrbit() {
     li.style.setProperty("--card-op", op.toFixed(3));
     li.classList.toggle("is-center", ad < 0.18);
   });
-  const center = Math.round(st.pos);
-  if (center !== st.center) {
-    st.center = center;
-    if (nowEl) nowEl.textContent = pad2(center + 1);
-    rail.querySelectorAll(".rail-dot").forEach((b, i) => {
-      if (i === center) b.setAttribute("aria-current", "true");
-      else b.removeAttribute("aria-current");
-    });
-  }
+  syncRail(st.navTarget >= 0 ? st.navTarget : Math.round(st.posTarget));
 }
 
 /* ---------------- 激活作品 ---------------- */
@@ -232,7 +239,7 @@ function updateActive() {
   if (st.hovered >= 0) idx = st.hovered;
   else if (st.focused >= 0) idx = st.focused;
   else if (isStatic()) idx = st.staticNearest;
-  else if (st.enter > 0.55 && st.leave < 0.5) idx = Math.round(st.pos);
+  else if (st.enter > 0.55 && st.leave < 0.5) idx = st.navTarget >= 0 ? st.navTarget : Math.round(st.posTarget);
   if (idx === st.active) return;
   st.active = idx;
   cards.forEach((c, i) => c.classList.toggle("is-active", i === idx));
@@ -244,7 +251,7 @@ function updateActive() {
 function frame(t) {
   st.raf = 0;
   if (document.hidden) return;
-  const dt = st.lastT ? Math.min(0.05, (t - st.lastT) / 1000) : 1 / 60;
+  const dt = st.lastT ? Math.min(0.25, (t - st.lastT) / 1000) : 1 / 60;
   st.lastT = t;
 
   const y = scrollY;
@@ -256,7 +263,7 @@ function frame(t) {
   if (!isStatic()) {
     const diff = st.posTarget - st.pos;
     if (diff !== 0) {
-      st.pos = Math.abs(diff) < 0.002 ? st.posTarget : st.pos + diff * (1 - Math.exp(-dt * 11));
+      st.pos = Math.abs(diff) < 0.002 ? st.posTarget : st.pos + diff * (1 - Math.exp(-dt * 13));
       st.dirty = true;
     }
     if (st.dirty) layoutOrbit();
@@ -288,13 +295,67 @@ function stop() {
 
 /* ---------------- 交互 ---------------- */
 
-function scrollToWork(i, smooth = true) {
-  const behavior = smooth && !reduced ? "smooth" : "auto";
-  if (isStatic()) {
-    if (cards[i]) cards[i].scrollIntoView({ block: "center", behavior });
+function endJump() {
+  if (scrollAnim) {
+    cancelAnimationFrame(scrollAnim.raf);
+    scrollAnim = null;
+  }
+  st.navTarget = -1;
+  root.classList.remove("is-jumping");
+}
+
+function animateScrollTo(targetY, smooth = true) {
+  const to = clamp(Math.round(targetY), 0, st.max);
+  if (scrollAnim) {
+    cancelAnimationFrame(scrollAnim.raf);
+    scrollAnim = null;
+  }
+  const from = scrollY;
+  if (!smooth || reduced || Math.abs(to - from) < 2) {
+    root.classList.add("is-jumping");
+    window.scrollTo({ top: to, behavior: "instant" });
+    requestAnimationFrame(() => {
+      if (!scrollAnim) endJump();
+    });
+    start();
     return;
   }
-  window.scrollTo({ top: st.worksTop + st.svh * (0.2 + i * 0.7), behavior });
+  const dist = Math.abs(to - from);
+  const dur = clamp(280 + dist * 0.12, 340, 560);
+  const t0 = performance.now();
+  const anim = { raf: 0 };
+  scrollAnim = anim;
+  root.classList.add("is-jumping");
+  const step = (now) => {
+    if (scrollAnim !== anim) return;
+    const p = clamp((now - t0) / dur, 0, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    window.scrollTo({ top: from + (to - from) * ease, behavior: "instant" });
+    start();
+    if (p < 1) {
+      anim.raf = requestAnimationFrame(step);
+    } else {
+      window.scrollTo({ top: to, behavior: "instant" });
+      scrollAnim = null;
+      requestAnimationFrame(() => {
+        if (!scrollAnim) endJump();
+      });
+    }
+  };
+  anim.raf = requestAnimationFrame(step);
+}
+
+function scrollToWork(i, smooth = true) {
+  const idx = clamp(Math.round(i), 0, N - 1);
+  if (isStatic()) {
+    const behavior = smooth && !reduced ? "smooth" : "auto";
+    if (cards[idx]) cards[idx].scrollIntoView({ block: "center", behavior });
+    return;
+  }
+  st.navTarget = idx;
+  syncRail(idx);
+  const targetY = st.worksTop + st.svh * (0.2 + idx * 0.7);
+  animateScrollTo(targetY, smooth);
 }
 
 const indexOf = (el) => {
@@ -353,7 +414,7 @@ track.addEventListener("focusin", (e) => {
     start();
   }
   // 键盘聚焦时把该卡片转到轨道中央
-  if (!isStatic() && e.target.matches(":focus-visible")) scrollToWork(i);
+  if (!isStatic() && !suppressFocusScroll && e.target.matches(":focus-visible")) scrollToWork(i);
 });
 
 track.addEventListener("focusout", (e) => {
@@ -374,16 +435,30 @@ document.addEventListener("keydown", (e) => {
   if (isStatic() || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
   if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
   if (e.target.closest("input, select, textarea, [contenteditable]")) return;
-  if (!works.contains(e.target) && (scrollY < st.worksTop || scrollY >= st.worksTop + st.worksH - st.svh * 0.8)) return;
-  const current = Math.round(st.posTarget);
+  const worksVisible = st.enter > 0.5 && st.leave < 0.55;
+  if (!works.contains(e.target) && !worksVisible) return;
+  const current = st.navTarget >= 0 ? st.navTarget : Math.round(st.posTarget);
   const next = clamp(current + (e.key === "ArrowRight" ? 1 : -1), 0, N - 1);
   e.preventDefault();
   if (next === current) return;
+  suppressFocusScroll = true;
   if (track.contains(e.target)) cards[next].focus({ preventScroll: true });
   else if (rail.contains(e.target)) rail.querySelectorAll(".rail-dot")[next].focus({ preventScroll: true });
+  suppressFocusScroll = false;
   scrollToWork(next);
 });
 
+document.querySelectorAll('a[href="#works"]').forEach((link) => {
+  link.addEventListener("click", (e) => {
+    if (isStatic()) return;
+    e.preventDefault();
+    scrollToWork(0);
+    if (location.hash !== "#works") history.replaceState(null, "", "#works");
+  });
+});
+
+window.addEventListener("wheel", () => { if (scrollAnim || st.navTarget >= 0) endJump(); }, { passive: true });
+window.addEventListener("touchstart", () => { if (scrollAnim || st.navTarget >= 0) endJump(); }, { passive: true });
 window.addEventListener("scroll", start, { passive: true });
 
 // 指针 → 引擎（GL 约定：右、上为正）
