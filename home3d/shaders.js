@@ -20,6 +20,7 @@ const TARGET = `
 uniform float uIntroT;
 uniform vec3 uSunPos;
 uniform float uSunR;
+uniform float uHeroMode; // 0 = 1A 纯星尘赤环（无黑球）, 1 = 1B 樱白×枫红双季流沙光带
 uniform mat3 uDiskRot;
 uniform float uWorksW;
 uniform float uStarW;
@@ -42,6 +43,30 @@ float stag(float x, float s, float spread){ return smoothstep(0.0,1.0,clamp(x*(1
 
 Tgt diskT(int id, float t){
   float s0=rnd(id,0), s1=rnd(id,1), s2=rnd(id,2), s3=rnd(id,3), kind=rnd(id,4);
+  if (uHeroMode > 0.5) {
+    // 1B 定稿：樱白 × 枫红双季立体丝带星流（两股交织的斜向星河 + 飘散花屑，零黑球）
+    if (kind < 0.14) {
+      // 全画幅柔和深空散尘与花屑，填满左右呼吸感
+      vec3 sp = vec3((s0 - 0.5) * 11.2, (s1 - 0.5) * 5.8 + sin(s0 * 6.28 + t * 0.18) * 0.45, (s2 - 0.5) * 4.4);
+      float c = s3 < 0.48 ? (0.04 + s3 * 0.35) : (0.66 + (s3 - 0.48) * 0.65);
+      return Tgt(uDiskRot * sp * uSunR + uSunPos * vec3(0.35, 1.0, 1.0), c, 0.34 + 0.30 * s2, 0.9);
+    }
+    float stream = kind < 0.56 ? 0.0 : 1.0;
+    float u = s0 * 2.0 - 1.0; // [-1, 1] 贯穿整幅的斜向双螺旋星带
+    float phase = u * 3.8 - t * (0.26 + stream * 0.06) + stream * 3.14159;
+    float bandW = mix(0.42, 1.18, 0.5 + 0.5 * sin(u * 2.5 + stream * 1.4));
+    float rib = (s1 - 0.5) * bandW;
+    float twist = u * 1.8 + t * 0.20 + stream * 1.57;
+    float yWave = u * 0.95 + sin(phase) * 0.92 + rib * cos(twist) * 0.72;
+    float zWave = cos(phase * 0.9) * 1.15 + rib * sin(twist) * 0.78 + (s2 - 0.5) * 0.48;
+    vec3 p = vec3(u * 4.95 - 0.55, yWave, zWave);
+    // 樱雪银白（低 c）与红叶朱砂（高 c）两股织锦般交错
+    float c = stream < 0.5 ? (0.02 + s3 * 0.24) : (0.72 + s3 * 0.36);
+    float core = 1.0 - smoothstep(0.0, 0.5, abs(s1 - 0.5));
+    float edgeFade = 1.0 - smoothstep(0.76, 1.0, abs(u));
+    float b = (0.48 + 0.76 * core) * (0.35 + 0.65 * edgeFade);
+    return Tgt(uDiskRot * p * uSunR + uSunPos * vec3(0.38, 1.0, 1.0), c, b, 1.05);
+  }
   vec3 p; float c; float b;
   if (kind < 0.051) {
     // 紧贴赤日边缘的炽白光子内环（Photon Ring）
@@ -156,7 +181,8 @@ Tgt motifT(int m, int id, ivec2 tc, float t){
   if (m == 0) {
     vec3 n = cross(uTextRight, uTextUp);
     float sweep = fract(t*0.36)*1.7 - 0.85;
-    float glint = 1.0 + 0.42*exp(-pow((d.x - sweep)/0.14, 2.0));
+    float dSweep = (d.x - sweep)/0.14;
+    float glint = 1.0 + 0.42*exp(-(dSweep*dSweep));
     return Tgt(uTextCenter + (uTextRight*d.x + uTextUp*d.y)*uTextScale + n*d.z*uTextScale, c, 0.10*glint, 11.2);
   } else if (m == 6) {
     vec3 q = d.xyz + vec3(sin(t*0.05+d.w*30.0), cos(t*0.04+d.w*20.0), 0.0)*0.08;
@@ -323,7 +349,8 @@ void main(){
       vec3 dp = p - pu.xyz;
       float dd = length(dp);
       float R = age*5.2;
-      float f = exp(-pow((dd-R)/0.75, 2.0))*exp(-age*1.45)*36.0;
+      float dPulse = (dd - R)/0.75;
+      float f = exp(-(dPulse*dPulse))*exp(-age*1.45)*36.0;
       acc += dp/max(dd,1e-3)*f;
     }
   }
@@ -425,9 +452,9 @@ void main(){
   float leftSpace = smoothstep(-0.48, 0.18, ndcP.x);
   vec2 toSun = ((ndcP + 1.0)*0.5 - uSunScr.xy)*vec2(uAspect, 1.0);
   float discDistance = length(toSun)/max(uSunScr.z, 0.001);
-  float discMask = mix(0.09, 1.0, smoothstep(0.86, 1.16, discDistance));
+  float discMask = mix(mix(0.09, 1.0, smoothstep(0.86, 1.16, discDistance)), 1.0, step(0.5, uHeroMode));
   // 作品区左上角标题避让区：亮色水墨模式下更明显，避免高密度粒子直穿文字
-  float worksCorner = smoothstep(-0.20, -0.60, ndcP.x)*smoothstep(0.16, 0.56, ndcP.y);
+  float worksCorner = (1.0 - smoothstep(-0.60, -0.20, ndcP.x))*smoothstep(0.16, 0.56, ndcP.y);
   float worksReadability = 1.0 - worksCorner*mix(0.58, 0.88, uTheme);
   float readability = mix(mix(0.25, 1.0, leftSpace)*discMask, worksReadability, uWorksW);
   readability = mix(readability, 1.0, uStarW);
@@ -478,6 +505,7 @@ uniform float uTime;
 uniform float uHorizon;
 uniform vec3 uSunPos;
 uniform float uSunR;
+uniform float uHeroMode; // 0 = 1A 纯星尘赤环（无黑球）, 1 = 1B 樱白×枫红双季流沙光带
 uniform float uSunVis;
 uniform vec2 uRes;
 
@@ -526,7 +554,8 @@ void main(){
     c += vec3(0.044, 0.018, 0.037)*pow(smoothstep(-0.08, 0.68, n1), 2.0);
     float n2 = texture(uNoise, skyUv*vec2(4.0, 3.4) + vec2(0.37, 0.61)).g*2.0 - 1.0;
     c += vec3(0.012, 0.017, 0.032)*smoothstep(0.05, 0.72, n2)*0.52;
-    c += vec3(0.17, 0.036, 0.054)*exp(-max(ang - angR, 0.0)/(angR*1.12 + 0.015))*0.57*uSunVis;
+    float sunGlowMask = 1.0 - step(0.5, uHeroMode);
+    c += vec3(0.17, 0.036, 0.054)*exp(-max(ang - angR, 0.0)/(angR*1.12 + 0.015))*0.57*uSunVis*sunGlowMask;
     c += stars(rd)*(1.0 - 0.88*uHorizon*step(y, 0.0))*mix(0.42, 1.0, smoothstep(0.35, 0.73, vUv.x));
     if (uHorizon > 0.001) {
       float yp = max(y, 0.0);
@@ -560,7 +589,8 @@ void main(){
     paper *= 1.0 - 0.015*fib - 0.018*pulp;
     float wash = smoothstep(0.36, 0.78, texture(uNoise, skyUv*vec2(2.0, 1.4) + 0.23).g);
     paper = mix(paper, paper*vec3(0.92, 0.905, 0.885), wash*0.24);
-    paper = mix(paper, vec3(0.965, 0.89, 0.865), exp(-max(ang - angR, 0.0)/(angR*2.4 + 0.02))*0.18*uSunVis);
+    float sunGlowMaskL = 1.0 - step(0.5, uHeroMode);
+    paper = mix(paper, vec3(0.965, 0.89, 0.865), exp(-max(ang - angR, 0.0)/(angR*2.4 + 0.02))*0.18*uSunVis*sunGlowMaskL);
     if (uHorizon > 0.001) {
       float iy = 1.0/max(-y, 0.0015);
       float brush = texture(uNoise, vec2(rd.x*iy*0.018, iy*0.15 + uTime*0.008)).r*2.0 - 1.0;
@@ -645,73 +675,40 @@ void main(){
   float lightFacing = max(dot(angleVec, keyLight), 0.0);
   float crescent = smoothstep(0.03, 0.94, lightFacing);
   if (uTheme < 0.999) {
-    vec3 umbra = vec3(0.012, 0.009, 0.016);
-    if (r < 1.0 + aa) {
-      // 球面尘土仍有微弱地照，薄薄的弧面由右上角进入光区。
-      vec2 surface = vec2(asin(clamp(q.x, -1.0, 1.0)), q.y)*0.37;
-      vec4 rock = texture(uNoise, surface + vec2(uTime*0.005, 0.33));
-      float detail = rock.r*0.72 + texture(uNoise, surface*2.9).g*0.28;
-      umbra += vec3(0.042, 0.024, 0.042)*detail*(0.38 + 0.62*lightFacing)*pow(z + 0.12, 0.3);
-      float limb = exp(-z*(10.0 - 5.0*crescent));
-      umbra += mix(vec3(0.32, 0.039, 0.067), vec3(1.20, 0.29, 0.16), crescent)*limb;
-    }
+    // 1A：彻底移除厚重实心黑球，保留空灵通透的赤金日冕光环与极轻微暖雾
     vec3 corona = vec3(0.0);
-    if (r > 1.0 - aa) {
-      vec2 qc = q - uCorona*smoothstep(1.0, 1.85, r);
-      float a = atan(qc.y, qc.x)/TAU;
-      float drift = uTime*0.013;
-      float flow = texture(uNoise, vec2(a*3.0 - rr*0.15, rr*0.28 - drift)).r;
-      float fibres = texture(uNoise, vec2(a*10.0 + (flow - 0.5)*rr*0.28, rr*0.22 - drift)).g;
-      float stream = pow(smoothstep(0.27, 0.82, fibres*0.88 + flow*0.22), 1.7);
-      float leftFan = smoothstep(0.35, 1.0, dot(angleVec, vec2(-0.82, 0.572)));
-      float rightFan = smoothstep(0.45, 1.0, dot(angleVec, vec2(0.95, -0.312)));
-      float fan = max(leftFan, rightFan);
-      float plume = exp(-rr/(0.12 + 0.27*fan))*(0.05 + stream*(0.28 + 0.83*fan));
-      float hotRim = exp(-rr*46.0)*(0.19 + crescent*0.76);
-      float flare = pow(lightFacing, 42.0)*exp(-rr*9.5);
-      float loops = prominence(q, 2.02 + sin(uTime*0.17)*0.027, 0.20, 0.23);
-      loops += 0.57*prominence(q, -0.24, 0.12, 0.15);
-      corona = vec3(0.89, 0.118, 0.193)*plume;
-      corona += vec3(1.52, 0.52, 0.31)*hotRim;
-      corona += vec3(1.16, 0.28, 0.20)*(0.67*flare + 0.64*loops);
-      corona *= (1.0 + uFlare*1.45)*(1.0 - smoothstep(1.45, uExtent, r));
-    }
-    col += (umbra*dsc + corona*(1.0 - dsc))*(1.0 - uTheme);
-    alpha += dsc*(1.0 - uTheme);
+    vec2 qc = q - uCorona * smoothstep(0.85, 1.85, r);
+    float a = atan(qc.y, qc.x) / TAU;
+    float drift = uTime * 0.013;
+    float flow = texture(uNoise, vec2(a * 3.0 - rr * 0.15, rr * 0.28 - drift)).r;
+    float fibres = texture(uNoise, vec2(a * 10.0 + (flow - 0.5) * rr * 0.28, rr * 0.22 - drift)).g;
+    float stream = pow(smoothstep(0.27, 0.82, fibres * 0.88 + flow * 0.22), 1.7);
+    float ringBand = exp(-abs(r - 1.0) * 18.0) * (0.32 + crescent * 0.82);
+    float softMist = exp(-r * r * 1.45) * 0.08;
+    float plume = exp(-rr / 0.26) * (0.04 + stream * 0.42) * smoothstep(0.82, 1.06, r);
+    float flare = pow(lightFacing, 36.0) * exp(-abs(r - 1.02) * 11.0);
+    float loops = prominence(q, 2.02 + sin(uTime * 0.17) * 0.027, 0.20, 0.23) * smoothstep(0.88, 1.02, r);
+    corona = vec3(0.89, 0.14, 0.19) * (plume + softMist);
+    corona += vec3(1.48, 0.54, 0.32) * ringBand;
+    corona += vec3(1.18, 0.30, 0.22) * (0.62 * flare + 0.56 * loops);
+    corona *= (1.0 + uFlare * 1.35) * (1.0 - smoothstep(1.45, uExtent, r));
+    col += corona * (1.0 - uTheme);
   }
   if (uTheme > 0.001 && r < 1.46) {
-    // 白昼保留同一轮日食，以朱砂套印表现细弧与不规则的晕边。
-    vec4 ink = texture(uNoise, q*0.56 + 0.50);
-    vec4 fibres = texture(uNoise, q*2.9 + 0.27);
-    float edge = 1.0 + 0.009*(ink.r*2.0 - 1.0) + 0.005*(fibres.a*2.0 - 1.0);
-    float printMask = 1.0 - smoothstep(edge - aa, edge + aa, r);
-    float limb = exp(-z*(6.0 - 3.9*crescent));
-    float scatter = ink.g*0.65 + fibres.r*0.35;
-    vec3 inkShadow = mix(vec3(0.19, 0.075, 0.09), vec3(0.33, 0.12, 0.16), scatter);
-    vec3 inkRim = mix(vec3(0.61, 0.14, 0.18), vec3(0.88, 0.28, 0.18), crescent);
-    vec3 seal = mix(inkShadow, inkRim, limb*(0.47 + 0.53*crescent));
-    float crescentEdge = length(q + keyLight*0.115) + 0.017*(fibres.r - 0.5);
-    float printCrescent = smoothstep(0.985 - aa, 1.028 + aa, crescentEdge);
-    seal = mix(seal, mix(vec3(0.68, 0.11, 0.14), vec3(0.93, 0.36, 0.22), scatter), printCrescent*0.93);
-    float pores = smoothstep(0.63, 0.92, fibres.a - ink.g*0.12);
-    seal = mix(seal, vec3(0.94, 0.86, 0.80), pores*0.27);
-    float bleed = exp(-max(r - edge, 0.0)*24.0)*(0.06 + crescent*0.21);
-    float thread = prominence(q, 2.02, 0.20, 0.23)*0.16 + prominence(q, -0.24, 0.12, 0.15)*0.11;
-    float edgeWash = (bleed + thread + exp(-rr*11.0)*scatter*0.095)*(1.0 - printMask)*(1.0 - smoothstep(1.27, 1.46, r));
-    edgeWash *= 1.0 + 0.35*min(uFlare, 0.65);
-    col += (seal*printMask + inkRim*edgeWash)*uTheme;
-    alpha += (printMask + edgeWash)*uTheme;
-    dsc = mix(dsc, printMask, uTheme);
+    // 浅色版画：移除实心暗饼，改为极轻透的空心朱砂毛笔圆印
+    vec4 ink = texture(uNoise, q * 0.56 + 0.50);
+    vec4 fibres = texture(uNoise, q * 2.9 + 0.27);
+    float edge = 1.0 + 0.012 * (ink.r * 2.0 - 1.0) + 0.006 * (fibres.a * 2.0 - 1.0);
+    float brushRing = exp(-abs(r - edge) * 26.0) * (0.36 + 0.48 * crescent) * (0.72 + 0.28 * fibres.r);
+    float innerWash = exp(-abs(r - edge) * 9.0) * 0.08 * (1.0 - smoothstep(1.18, 1.42, r));
+    vec3 inkRim = mix(vec3(0.68, 0.15, 0.18), vec3(0.90, 0.30, 0.20), crescent);
+    float inkA = clamp((brushRing + innerWash) * (1.0 + 0.3 * min(uFlare, 0.6)), 0.0, 0.72);
+    col += inkRim * inkA * uTheme;
+    alpha += inkA * uTheme;
   }
   col *= vis; alpha *= vis;
-  if (dsc < 0.001 && (col.r + col.g + col.b + alpha) < 0.003) discard;
-  if (dsc*vis > 0.5) {
-    vec3 wp = uSunPos + (uCamR*q.x + uCamU*q.y - uCamF*z)*uSunRw;
-    vec4 cp = uVP*vec4(wp, 1.0);
-    gl_FragDepth = clamp((cp.z/cp.w)*0.5 + 0.5, 0.0, 1.0);
-  } else {
-    gl_FragDepth = 1.0;
-  }
+  if ((col.r + col.g + col.b + alpha) < 0.003) discard;
+  gl_FragDepth = 1.0;
   o = vec4(col, alpha);
 }`;
 

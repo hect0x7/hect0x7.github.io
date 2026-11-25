@@ -31,7 +31,7 @@
     })();
   </script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23c3272b'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=24">
 </head>
 <body>
   <a class="skip-link" href="#works" data-i18n="skip">跳到作品</a>
@@ -59,6 +59,21 @@
 
   <header class="site-header">
     <a class="brand" href="#top"><i class="brand-sun" aria-hidden="true"></i>hect0x7</a>
+    <!-- 自动播放顶栏微缩胶囊（仅启动后融入顶栏原生 Flex 流，零画布遮挡） -->
+    <div class="autoplay-dock" id="autoplayDock" data-state="idle" aria-hidden="true">
+      <button class="autoplay-toggle" id="autoplayToggle" type="button" aria-pressed="false" aria-label="自动播放">
+        <span class="transport-icon" aria-hidden="true"></span>
+      </button>
+      <div class="autoplay-readout">
+        <strong class="autoplay-state-label" id="autoplayStateLabel" aria-live="polite" data-i18n="autoplayStart">自动播放</strong>
+        <span class="autoplay-position" id="autoplayPosition">01 / 05</span>
+      </div>
+      <div class="autoplay-speed" role="group" aria-label="Speed">
+        <button type="button" data-autoplay-speed="1" class="is-on" aria-pressed="true">1×</button>
+        <button type="button" data-autoplay-speed="2" aria-pressed="false">2×</button>
+      </div>
+      <button class="autoplay-close" id="autoplayClose" type="button" aria-label="Close">×</button>
+    </div>
     <nav aria-label="Primary">
       <a href="#works" data-i18n="navWorks">作品</a>
       <a href="#about" data-i18n="navAbout">关于</a>
@@ -81,13 +96,6 @@
   <main>
     <section class="hero" id="top" aria-labelledby="heroTitle">
       <div class="hero-pin">
-        <div class="eclipse-chart" aria-hidden="true" data-depth="2">
-          <i class="chart-axis"></i>
-          <i class="chart-ring"></i>
-          <i class="chart-ticks"></i>
-          <span class="chart-label"><i></i><span data-i18n="sunLabel">赤日奇点</span></span>
-        </div>
-
         <div class="hero-copy" data-depth="4">
           <p class="eyebrow"><i></i><span data-i18n="eyebrow">PORTFOLIO / 作品集</span></p>
           <h1 class="hero-title" id="heroTitle" data-i18n-html="heroTitle" data-split>我 Vibe 了<br>一些<em>小作品</em>。</h1>
@@ -95,10 +103,30 @@
             <p class="lead" data-i18n="heroLead">从视觉实验到实用工具，这里收集我在闲暇时写下的作品。</p>
             <div class="hero-actions">
               <a class="scroll-cue" href="#works"><span data-i18n="scroll">探索作品</span><span aria-hidden="true">↓</span></a>
-              <button class="eclipse-pulse" type="button"><i aria-hidden="true"></i><span data-i18n="pulse">触发日耀</span></button>
+              <button class="autoplay-start" id="autoplayStart" type="button" aria-pressed="false">
+                <span class="transport-icon" aria-hidden="true"></span>
+                <span data-i18n="autoplayStart">自动播放</span>
+              </button>
             </div>
           </div>
         </div>
+
+        <aside class="hero-index" id="heroIndex" data-depth="4" aria-label="Selected Works">
+          <a class="hero-preview" id="heroPreviewLink" href="works/cosmic-spacetime/">
+            <img id="heroPreviewImg" src="works/cosmic-spacetime/cover.webp" alt="" loading="eager" decoding="async">
+            <span class="hero-preview-meta">
+              <b id="heroPreviewNum">05</b>
+              <span id="heroPreviewTitle">时空织物 · 从大爆炸到光锥</span>
+              <i aria-hidden="true">↗</i>
+            </span>
+          </a>
+          <div class="hero-index-head">
+            <span data-i18n="heroIndexTitle">精选目录 · INDEX</span>
+            <span><b data-works-count>05</b></span>
+          </div>
+          <ol class="hero-index-list" id="heroIndexList"></ol>
+        </aside>
+
         <div class="hero-foot" aria-hidden="true">
           <span class="hero-foot-scale"></span>
           <span><b data-works-count>00</b> <span data-i18n="metaWorks">收录作品</span></span>
@@ -138,7 +166,7 @@
       </div>
       <div class="about-foot">
         <dl class="about-meta">
-          <div><dt>GitHub</dt><dd><a href="https://github.com/hect0x7" target="_blank" rel="noopener">@hect0x7 <i aria-hidden="true">↗</i></a></dd></div>
+          <div><dt>GitHub</dt><dd><a href="https://github.com/hect0x7/hect0x7.github.io" target="_blank" rel="noopener">hect0x7.github.io <i aria-hidden="true">↗</i></a></dd></div>
           <div><dt data-i18n="metaWorks">收录作品</dt><dd data-works-count>00</dd></div>
           <div><dt data-i18n="metaLangs">语言</dt><dd>中 · 日 · EN</dd></div>
         </dl>
@@ -151,12 +179,11 @@
     <p class="footer-mark" aria-hidden="true">hect0x7</p>
     <div class="footer-row">
       <span>© <span id="year"></span> hect0x7</span>
-      <span class="footer-note" data-i18n="footerNote">赤日奇点 · 原生 WebGL 与 CSS 3D 绘制</span>
       <button class="to-top" type="button" data-i18n="toTop">回到顶部 ↑</button>
     </div>
   </footer>
 
-  <script src="works.js?v=12"></script>
-  <script type="module" src="home.js?v=9"></script>
+  <script src="works.js?v=19"></script>
+  <script type="module" src="home.js?v=18"></script>
 </body>
 </html>

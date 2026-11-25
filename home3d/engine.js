@@ -1,7 +1,7 @@
 // 赤日奇点 / Crimson Singularity —— 首页 WebGL2 引擎
 // 纯 WebGL2 + GLSL + 原生 ES module，无任何第三方依赖。
-import * as S from './shaders.js';
-import { LAYER, LAYER_COUNT, slugToLayer, buildStaticLayers, buildTextLayer, buildNoiseData } from './motifs.js';
+import * as S from './shaders.js?v=15';
+import { LAYER, LAYER_COUNT, slugToLayer, buildStaticLayers, buildTextLayer, buildNoiseData } from './motifs.js?v=12';
 
 const TEX_W = 256;
 const TEX_H = 256;
@@ -189,6 +189,7 @@ export function createHome3D(canvas, opts = {}) {
     pointerLast: -1e9,
     pulses: [],
     theme: opts.theme === 'light' ? 1 : 0,
+    heroMode: opts.heroMode === '1a' ? 0 : 1,
     motifA: LAYER.RING,
     motifB: LAYER.RING,
     morph: 1,
@@ -225,7 +226,7 @@ export function createHome3D(canvas, opts = {}) {
   const diskAxis = [diskRot[3], diskRot[4], diskRot[5]];
 
   const api = {
-    setScroll, setSections, setHeroAim, setPointer, pulse, setActiveWork, setTheme, setPaused, resize, destroy,
+    setScroll, setSections, setHeroAim, setHeroMode, setPointer, pulse, setActiveWork, setTheme, setPaused, resize, destroy,
   };
 
   function fail(err) {
@@ -568,6 +569,7 @@ export function createHome3D(canvas, opts = {}) {
     gl.uniform1f(u.uIntroT, st.introT);
     gl.uniform3fv(u.uSunPos, F.sunPos);
     gl.uniform1f(u.uSunR, F.sunR);
+    if (u.uHeroMode != null) gl.uniform1f(u.uHeroMode, st.heroMode);
     gl.uniformMatrix3fv(u.uDiskRot, false, diskRot);
     gl.uniform1f(u.uWorksW, F.worksW);
     gl.uniform1f(u.uStarW, F.starW);
@@ -657,6 +659,7 @@ export function createHome3D(canvas, opts = {}) {
       gl.uniform2f(P.u.uTanHalf, F.tanY * F.aspect, F.tanY);
       gl.uniform1f(P.u.uTheme, light); gl.uniform1f(P.u.uTime, st.time); gl.uniform1f(P.u.uHorizon, F.horizon);
       gl.uniform3fv(P.u.uSunPos, F.sunPos); gl.uniform1f(P.u.uSunR, F.sunR); gl.uniform1f(P.u.uSunVis, sunVis);
+      gl.uniform1f(P.u.uHeroMode, st.heroMode);
       gl.uniform2f(P.u.uRes, S0.w, S0.h);
       drawFullscreen();
     }
@@ -665,7 +668,7 @@ export function createHome3D(canvas, opts = {}) {
     // 日冕位于远平面，允许等于已清空的深度；只有日食暗面会写入更近的深度。
     gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.depthMask(true);
     gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    {
+    if (st.heroMode === 0) {
       const P = R.sun; gl.useProgram(P.p);
       const rw = F.sunR * st.ignite;
       const extent = 2.05;
@@ -920,6 +923,11 @@ export function createHome3D(canvas, opts = {}) {
     st.motifB = layer;
     st.morph = 0;
     st.morphPrev = 0;
+  }
+  function setHeroMode(mode) {
+    st.heroMode = mode === '1b' ? 1 : 0;
+    wake60(1400);
+    requestRender();
   }
   function setTheme(theme) {
     st.theme = theme === 'light' ? 1 : 0;

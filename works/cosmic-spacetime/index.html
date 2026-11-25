@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#05060b">
+  <title>时空织物 · 从大爆炸到光锥 — hect0x7</title>
+  <meta name="description" content="纵向深空潜入式 Three.js 宇宙叙事：从大爆炸膨胀钟、广义相对论弯曲流形、引力透镜爱因斯坦环，到闵可夫斯基时空光锥。">
+  <script>
+    (function () {
+      var d = document.documentElement, t, gl = false;
+      try { t = localStorage.getItem("theme"); } catch (e) {}
+      if (t !== "dark" && t !== "light") t = "dark";
+      d.setAttribute("data-theme", t);
+      var rm = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+      if (!/[?&]nogl(=|&|$)/.test(location.search)) {
+        try {
+          var c = document.createElement("canvas");
+          var g = c.getContext("webgl2");
+          gl = !!g;
+          var lose = g && g.getExtension("WEBGL_lose_context");
+          if (lose) lose.loseContext();
+        } catch (e) { gl = false; }
+      }
+      if (rm) d.classList.add("reduced-motion");
+      if (!gl) d.classList.add("layout-static");
+    })();
+  </script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23d94832'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css?v=9">
+</head>
+<body data-chapter="0">
+  <!-- 普朗克奇点开屏幕布 -->
+  <div class="boot-curtain" id="bootCurtain" aria-hidden="true">
+    <div class="boot-emblem">
+      <svg class="boot-ring" viewBox="0 0 120 120">
+        <circle class="boot-track" cx="60" cy="60" r="46" />
+        <circle class="boot-arc" id="bootArc" cx="60" cy="60" r="46" />
+      </svg>
+      <span class="boot-dot"></span>
+    </div>
+  </div>
+
+  <!-- 固定全屏无缝深空 3D 纵深舞台 -->
+  <div class="cosmos-stage" id="stageViewport" aria-hidden="true">
+    <canvas id="stageCanvas"></canvas>
+    <div class="static-backdrop">
+      <p class="static-note" data-i18n="staticFallback">当前为静态阅览模式（未启用 WebGL），仍可向下滚动阅读四幕叙事。</p>
+    </div>
+  </div>
+
+  <!-- 极简透明页眉 -->
+  <header class="quiet-header">
+    <a class="ghost-link" href="../../" data-i18n="backHome">← hect0x7</a>
+    <div class="quiet-switches">
+      <div class="text-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="zh" class="is-on" aria-pressed="true">中</button>
+        <button type="button" data-lang="ja" aria-pressed="false">日</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <span class="switch-sep" aria-hidden="true">/</span>
+      <div class="text-switch" role="group" aria-label="Theme">
+        <button type="button" data-theme-btn="dark" class="is-on" aria-pressed="true" data-i18n="themeDark">深空</button>
+        <button type="button" data-theme-btn="light" aria-pressed="false" data-i18n="themeLight">版画</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 右缘极细 4 幕纵深标尺（带连续滚动进度细丝） -->
+  <nav class="story-rail" id="chapterTabs" aria-label="Chapters">
+    <span class="rail-track" aria-hidden="true"><i id="railFill"></i></span>
+    <button type="button" class="rail-step is-active" data-stop="0" aria-current="step" aria-label="00 大爆炸">
+      <span class="rail-num">00</span><i></i>
+    </button>
+    <button type="button" class="rail-step" data-stop="1" aria-label="01 广义相对论">
+      <span class="rail-num">01</span><i></i>
+    </button>
+    <button type="button" class="rail-step" data-stop="2" aria-label="02 引力透镜">
+      <span class="rail-num">02</span><i></i>
+    </button>
+    <button type="button" class="rail-step" data-stop="3" aria-label="03 时空光锥">
+      <span class="rail-num">03</span><i></i>
+    </button>
+  </nav>
+
+  <!-- 真正可向下滚动的长叙事长卷（每幕自然流过镜头，幕间穿行深空星野） -->
+  <main class="scroll-story" id="exhibitShell" data-chapter="0">
+
+    <!-- 第 0 幕：创生与膨胀 -->
+    <section class="act-band act-band-0" id="act0" data-act="0" aria-labelledby="ch0Title">
+      <div class="act-sticky act-0">
+        <header class="act0-head">
+          <p class="chapter-kicker">00 · BIG BANG</p>
+          <h1 class="story-display" id="ch0Title" data-i18n-html="ch0Title">时空织物：<em>从大爆炸到光锥</em></h1>
+          <p class="story-prose" data-i18n="ch0Lead">一切始于一次微小的量子涨落。沿着这只光学玻璃膨胀钟向右滑动时间，看空间本身如何把星系彼此拉开，听右端 WMAP 探测器截获 138 亿年前的微波余温。</p>
+        </header>
+
+        <footer class="act0-scrubber">
+          <div class="timeline-ticks">
+            <button type="button" class="bare-tick" data-epoch="0.03" data-i18n="ep0">10⁻³²s 暴胀</button>
+            <button type="button" class="bare-tick" data-epoch="0.16" data-i18n="ep1">38万年 微波背景</button>
+            <button type="button" class="bare-tick" data-epoch="0.36" data-i18n="ep2">4亿年 首批恒星</button>
+            <button type="button" class="bare-tick" data-epoch="1.00" data-i18n="ep3">138亿年 今日</button>
+          </div>
+          <div class="scrubber-track-row">
+            <input type="range" id="epochSlider" class="hairline-range" aria-label="宇宙膨胀纪元" min="0.02" max="1" step="0.005" value="1">
+          </div>
+          <div class="whisper-bar">
+            <span class="whisper-stat"><em id="valAge">13.8 Gyr</em> · <span data-i18n="mScale">尺度</span> <em id="valScale">1.00×</em> · WMAP ΔT <em id="valDeltaT">+0 μK</em></span>
+            <div class="whisper-actions">
+              <button type="button" class="prose-action" id="btnReplay0" data-i18n="replayInflation">↺ 重演暴胀</button>
+              <span class="scroll-invite" data-i18n="scrollDive">向下滚动潜入深空 ↓</span>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+    <!-- 深空穿行留白带 -->
+    <div class="void-bridge" aria-hidden="true"></div>
+
+    <!-- 第 1 幕：广义相对论 -->
+    <section class="act-band act-band-1" id="act1" data-act="1" aria-labelledby="ch1Title">
+      <div class="act-sticky act-1">
+        <footer class="act1-caption">
+          <div class="caption-copy">
+            <p class="chapter-kicker">01 · GENERAL RELATIVITY</p>
+            <h2 class="story-heading" id="ch1Title" data-i18n-html="ch1Title">质量压弯时空，<br>同一束初速刻出<em>两条命运</em>。</h2>
+            <p class="story-prose" data-i18n="ch1Lead">在弯曲的时空漏斗上同时松手：旧宇宙的牛顿引力只会画回闭合的蓝椭圆，而广义相对论让轨道永不闭合，一圈圈旋转成赤金玫瑰。</p>
+          </div>
+
+          <div class="caption-gesture">
+            <div class="legend-whisper">
+              <span><i class="dot-newton"></i><span data-i18n="legNewton">牛顿闭合</span></span>
+              <span><i class="dot-gr"></i><span data-i18n="legGr">相对论进动</span> <em id="valShift">+30.0°</em>/<span data-i18n="perOrbit">圈</span></span>
+            </div>
+            <label class="inline-hairline">
+              <span data-i18n="lblRelStr">曲率深度</span>
+              <input type="range" id="relStrengthSlider" class="hairline-range" min="0.1" max="1.0" step="0.05" value="0.55">
+            </label>
+            <div class="whisper-actions">
+              <button type="button" class="prose-action is-primary" id="btnFireOrbit" data-i18n="fireOrbit">✦ 再发一束</button>
+              <button type="button" class="prose-action" id="btnWave" data-i18n="emitWave">◎ 引力波</button>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+    <!-- 深空穿行留白带 -->
+    <div class="void-bridge" aria-hidden="true"></div>
+
+    <!-- 第 2 幕：引力透镜 -->
+    <section class="act-band act-band-2" id="act2" data-act="2" aria-labelledby="ch2Title">
+      <div class="act-sticky act-2">
+        <div class="act2-left">
+          <p class="chapter-kicker">02 · GRAVITATIONAL LENSING</p>
+          <h2 class="story-heading" id="ch2Title" data-i18n-html="ch2Title">当一座星系<br>挡住<em>更远的星光</em>。</h2>
+          <p class="story-prose" data-i18n="ch2Lead">在画幅中央移动引力透镜。光线被迫绕开大质量星系，远方星系分裂成一正一倒两幅镜像；一旦三点共线，星光便合拢为一圈完整的爱因斯坦环。</p>
+
+          <div class="act2-controls">
+            <div class="whisper-actions">
+              <button type="button" class="prose-action" id="btnParity" aria-pressed="false" data-i18n="toggleParity">◎ 显示同源镜像</button>
+              <button type="button" class="prose-action" id="btnSnapRing" data-i18n="snapRing">◎ 合拢光环</button>
+            </div>
+            <div class="mass-inline" role="group" aria-label="Lens Mass">
+              <span class="inline-label" data-i18n="lensMassLabel">前景质量</span>
+              <button type="button" class="bare-tick is-active" data-mass="1.0">1.0×</button>
+              <button type="button" class="bare-tick" data-mass="1.6">1.6×</button>
+              <button type="button" class="bare-tick" data-mass="2.4">2.4×</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="act2-right">
+          <div class="colophon-note">
+            <span class="colophon-label">EINSTEIN RING · θE</span>
+            <strong class="colophon-figure" id="valThetaE">2.37″</strong>
+            <p class="colophon-line" id="valParityState" data-i18n="parityIdle">轻移透镜偏移光轴，凝视双像如何分裂与反转。</p>
+            <span class="colophon-sub"><span data-i18n="kickerAlign">共线</span> <em id="valAlign">100%</em> · β = θ − θE²/θ</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 深空穿行留白带 -->
+    <div class="void-bridge" aria-hidden="true"></div>
+
+    <!-- 第 3 幕：时空光锥终章 -->
+    <section class="act-band act-band-3" id="act3" data-act="3" aria-labelledby="ch3Title">
+      <div class="act-sticky act-3">
+        <div class="act3-epilogue">
+          <p class="chapter-kicker">03 · MINKOWSKI LIGHT CONE</p>
+          <h2 class="story-heading" id="ch3Title" data-i18n-html="ch3Title">亲手交换两件事的<em>先后</em>。</h2>
+          <p class="story-prose" data-i18n="ch3Lead">光速为宇宙划出了因果的边界。滑动你的相对速度，让左侧半透明同时面随之倾斜——当两起事件落在光锥之外，谁先谁后竟取决于观察者；唯有进入光锥之内，因果才不可逆转。</p>
+
+          <blockquote class="living-verdict is-spacelike" id="verdictBanner">
+            <span class="verdict-eyebrow" id="verdictRelation" data-i18n="relSpacelike">光锥之外 · 顺序可逆</span>
+            <strong class="verdict-sentence" id="verdictOrder" data-i18n="ordSimul">此刻：A 与 B 同时发生</strong>
+            <span class="verdict-clocks">
+              <i class="dot-a"></i>A <em id="valTA">+0.00</em>
+              <span class="clock-sep">·</span>
+              <i class="dot-b"></i>B <em id="valTB">+0.00</em>
+              <span class="clock-sep">·</span>
+              β = <em id="valBeta">0.00c</em>
+            </span>
+          </blockquote>
+
+          <div class="act3-scrubber">
+            <input type="range" id="betaSlider" class="hairline-range" aria-label="观察者相对速度" min="-0.75" max="0.75" step="0.01" value="0">
+            <div class="boost-ticks">
+              <span aria-hidden="true">−0.75c</span>
+              <button type="button" class="bare-tick" id="btnZeroBeta" data-i18n="restFrame">静止 0c</button>
+              <span aria-hidden="true">+0.75c</span>
+            </div>
+          </div>
+
+          <div class="preset-inline" role="group" aria-label="Causal Presets">
+            <button type="button" class="bare-tick is-active" data-preset="spacelike" data-i18n="preSpace">光锥外 (颠倒先后)</button>
+            <button type="button" class="bare-tick" data-preset="lightlike" data-i18n="preLight">光锥面 (光速)</button>
+            <button type="button" class="bare-tick" data-preset="timelike" data-i18n="preTime">未来光锥 (因果锁定)</button>
+          </div>
+
+          <div class="whisper-actions epilogue-links">
+            <button type="button" class="prose-action is-primary" id="btnRestartAll" data-i18n="restartBigBang">↺ 回到奇点重演</button>
+            <a class="prose-action" href="../../" data-i18n="backGallery">← 返回作品集</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="js/app.js?v=11"></script>
+</body>
+</html>

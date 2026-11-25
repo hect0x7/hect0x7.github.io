@@ -105,6 +105,28 @@ nav .logo {
   letter-spacing: 0.04em;
 }
 .portfolio-home:hover { color: var(--color-momiji); }
+.nav-studio-mobile {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border: 1px solid rgba(199,62,29,0.4);
+  border-radius: 999px;
+  color: var(--color-momiji);
+  background: rgba(199,62,29,0.06);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.nav-studio-mobile:hover {
+  background: var(--color-momiji);
+  color: #FAF8F5;
+}
+.nav-studio-mobile:focus-visible {
+  outline: 2px solid var(--color-momiji);
+  outline-offset: 2px;
+}
 nav .logo span {
   display: block;
   font-family: var(--font-en);
@@ -247,6 +269,54 @@ nav .lang-switch button.active {
   font-size: 18px;
   color: #F5EFE6;
   margin-top: 4px;
+}
+.hero-studio-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 12px 22px;
+  border: 1px solid rgba(200,169,81,0.55);
+  border-radius: 2px;
+  background: rgba(26,20,16,0.55);
+  backdrop-filter: blur(8px);
+  color: #F5EFE6;
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.hero-studio-cta .cta-badge {
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--color-gold);
+  padding-right: 10px;
+  border-right: 1px solid rgba(245,239,230,0.22);
+}
+.hero-studio-cta .cta-arrow {
+  color: var(--color-gold);
+  transition: transform 0.25s ease;
+}
+.hero-studio-cta:hover {
+  background: var(--color-momiji);
+  border-color: var(--color-momiji-light);
+  transform: translateY(-2px);
+}
+.hero-studio-cta:hover .cta-badge,
+.hero-studio-cta:hover .cta-arrow {
+  color: #FAF8F5;
+}
+.hero-studio-cta:hover .cta-arrow {
+  transform: translateX(4px);
+}
+.hero-studio-cta:focus-visible,
+.studio-btn:focus-visible,
+.studio-scene-card:focus-visible,
+.studio-outfit-card:focus-visible,
+.studio-thumb:focus-visible {
+  outline: 2px solid var(--color-momiji);
+  outline-offset: 2px;
 }
 .hero-scroll-hint {
   position: absolute; bottom: 30px; right: 40px;
@@ -831,6 +901,590 @@ section {
   z-index: 2;
 }
 
+/* ===== SECTION 5: INTERACTIVE FITTING STUDIO ===== */
+#studio {
+  background: var(--color-cream);
+  border-top: 1px solid var(--color-line);
+}
+.studio-shell {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+  gap: 40px;
+  align-items: start;
+}
+.studio-stage-col {
+  min-width: 0;
+}
+.studio-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.studio-mode-group,
+.studio-action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.studio-btn {
+  appearance: none;
+  border: 1px solid var(--color-line);
+  background: #FFFFFF;
+  color: var(--color-ink-soft);
+  font-family: var(--font-cn);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 8px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.studio-btn:hover {
+  border-color: var(--color-momiji);
+  color: var(--color-momiji);
+}
+.studio-btn.is-active {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-bg);
+}
+.studio-btn.is-accent {
+  background: var(--color-momiji);
+  border-color: var(--color-momiji);
+  color: #FAF8F5;
+}
+.studio-btn.is-accent:hover {
+  background: var(--color-momiji-deep);
+  border-color: var(--color-momiji-deep);
+  color: #FAF8F5;
+}
+.studio-btn[hidden] {
+  display: none;
+}
+
+.studio-single-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(26,20,16,0.12);
+}
+.studio-frame-wrap {
+  position: relative;
+  overflow: hidden;
+  background: #1A1410;
+  aspect-ratio: 2 / 3;
+}
+.studio-frame-wrap img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.28s ease;
+}
+.studio-frame-wrap img.is-fading {
+  opacity: 0.38;
+}
+.studio-frame-top {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  pointer-events: none;
+}
+.studio-plate-pill {
+  background: rgba(26,20,16,0.74);
+  backdrop-filter: blur(8px);
+  color: #FAF8F5;
+  border: 1px solid rgba(245,239,230,0.18);
+  padding: 5px 11px;
+  border-radius: 2px;
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+.studio-plate-pill.gold {
+  color: var(--color-gold-soft);
+}
+.studio-frame-caption {
+  padding: 16px 20px 18px;
+  background: #FFFFFF;
+  border-top: 1px solid var(--color-cream);
+  color: var(--color-ink);
+}
+.studio-frame-caption .cap-en {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-size: 12px;
+  color: var(--color-stone);
+  letter-spacing: 0.08em;
+}
+.studio-frame-caption .cap-title {
+  font-family: var(--font-jp);
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 3px;
+  line-height: 1.35;
+  color: var(--color-ink);
+}
+
+.studio-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.studio-compare-grid[hidden],
+.studio-single-wrap[hidden] {
+  display: none;
+}
+.studio-compare-card {
+  background: #FFFFFF;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.studio-compare-card.is-current {
+  border-color: var(--color-momiji);
+}
+.studio-compare-media {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  background: #1A1410;
+  overflow: hidden;
+}
+.studio-compare-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.studio-compare-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(26,20,16,0.82);
+  color: #FAF8F5;
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  padding: 4px 8px;
+  border-radius: 2px;
+}
+.studio-compare-badge.plan-b {
+  background: var(--color-momiji);
+}
+.studio-compare-meta {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.studio-compare-meta h4 {
+  font-family: var(--font-jp);
+  font-size: 14px;
+  color: var(--color-ink);
+  line-height: 1.35;
+}
+.studio-compare-meta .cmp-sub {
+  font-size: 11px;
+  color: var(--color-stone);
+}
+.studio-compare-meta .cmp-verdict {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink-soft);
+  padding-top: 6px;
+  border-top: 1px solid var(--color-cream);
+}
+
+.studio-filmstrip-box {
+  margin-top: 18px;
+  padding: 14px;
+  background: rgba(255,255,255,0.72);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+}
+.studio-filmstrip-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  color: var(--color-stone);
+  letter-spacing: 0.08em;
+}
+.studio-filmstrip-head .fs-count {
+  font-family: var(--font-en-sans);
+  color: var(--color-momiji);
+  font-weight: 600;
+}
+.studio-filmstrip {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 6px;
+}
+.studio-thumb {
+  appearance: none;
+  border: 2px solid transparent;
+  padding: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  background: #1A1410;
+  aspect-ratio: 2 / 3;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.studio-thumb:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-gold);
+}
+.studio-thumb.is-active {
+  border-color: var(--color-momiji);
+  box-shadow: 0 0 0 1px var(--color-momiji);
+}
+.studio-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.studio-thumb .thumb-code {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  background: rgba(26,20,16,0.72);
+  color: #FAF8F5;
+  font-family: var(--font-en-sans);
+  font-size: 9px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.studio-controls-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.studio-step-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.studio-step-label .step-kicker {
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--color-momiji);
+  text-transform: uppercase;
+}
+.studio-step-label .step-hint {
+  font-size: 12px;
+  color: var(--color-stone);
+}
+
+.studio-scene-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.studio-scene-card {
+  appearance: none;
+  text-align: left;
+  border: 1px solid var(--color-line);
+  background: #FFFFFF;
+  border-radius: 4px;
+  padding: 14px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.studio-scene-card:hover {
+  border-color: var(--color-momiji-light);
+  transform: translateY(-2px);
+}
+.studio-scene-card.is-active {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: #FAF8F5;
+}
+.studio-scene-card .sc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.studio-scene-card .sc-temp {
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-momiji);
+  background: rgba(199,62,29,0.1);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.studio-scene-card.is-active .sc-temp {
+  background: rgba(232,99,58,0.22);
+  color: var(--color-gold-soft);
+}
+.studio-scene-card .sc-en {
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-stone);
+  text-transform: uppercase;
+}
+.studio-scene-card.is-active .sc-en {
+  color: rgba(245,239,230,0.58);
+}
+.studio-scene-card .sc-name {
+  font-family: var(--font-jp);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.studio-scene-card.is-active .sc-name {
+  color: #FAF8F5;
+}
+.studio-scene-card .sc-note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-ink-soft);
+}
+.studio-scene-card.is-active .sc-note {
+  color: rgba(245,239,230,0.75);
+}
+
+.studio-outfit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.studio-outfit-card {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--color-line);
+  background: #FFFFFF;
+  border-radius: 4px;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+.studio-outfit-card:hover {
+  border-color: var(--color-momiji-light);
+  transform: translateX(3px);
+}
+.studio-outfit-card.is-active {
+  background: #FFFDFB;
+  border-color: var(--color-momiji);
+  box-shadow: inset 3px 0 0 var(--color-momiji), 0 8px 24px rgba(199,62,29,0.08);
+}
+.studio-outfit-main {
+  min-width: 0;
+}
+.studio-outfit-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.studio-outfit-title strong {
+  font-family: var(--font-jp);
+  font-size: 15px;
+  color: var(--color-ink);
+}
+.studio-outfit-swatches {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.studio-outfit-swatches i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1px solid rgba(26,20,16,0.16);
+  display: inline-block;
+}
+.studio-outfit-sub {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.studio-warmth {
+  flex-shrink: 0;
+  text-align: right;
+}
+.studio-warmth .w-label {
+  display: block;
+  font-size: 10px;
+  color: var(--color-stone);
+  letter-spacing: 0.08em;
+  margin-bottom: 5px;
+}
+.studio-warmth-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+.studio-warmth-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-line);
+}
+.studio-warmth-dots span.on {
+  background: var(--color-momiji);
+}
+
+.studio-readout {
+  background: #FFFFFF;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.studio-verdict-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-cream);
+}
+.studio-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.studio-status-pill::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.studio-status-pill.is-optimal {
+  background: rgba(74,93,58,0.12);
+  color: var(--color-moss);
+}
+.studio-status-pill.is-warm {
+  background: rgba(184,148,31,0.14);
+  color: #8A6B12;
+}
+.studio-status-pill.is-cool {
+  background: rgba(199,62,29,0.12);
+  color: var(--color-momiji-deep);
+}
+.studio-climate-meta {
+  font-family: var(--font-en-sans);
+  font-size: 11px;
+  color: var(--color-stone);
+  letter-spacing: 0.06em;
+}
+.studio-verdict-text {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--color-ink);
+}
+.studio-harmony-note {
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--color-ink-soft);
+  padding: 12px 14px;
+  background: var(--color-bg);
+  border-left: 2px solid var(--color-gold);
+}
+.studio-layers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.studio-layer-item {
+  background: var(--color-bg);
+  border: 1px solid rgba(217,207,194,0.65);
+  border-radius: 3px;
+  padding: 10px 12px;
+}
+.studio-layer-item .l-key {
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-stone);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.studio-layer-item .l-val {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+.studio-photo-tip {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--color-ink-soft);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.studio-photo-tip strong {
+  flex-shrink: 0;
+  font-family: var(--font-en-sans);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-momiji);
+  text-transform: uppercase;
+}
+.studio-readout-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-cream);
+}
+.studio-copy-status {
+  font-size: 12px;
+  color: var(--color-moss);
+  min-height: 18px;
+}
+
 /* ===== FOOTER ===== */
 footer {
   background: var(--color-bg-dark);
@@ -927,6 +1581,7 @@ footer {
   .color-palette-row:nth-child(even) { direction: ltr; }
   .photo-gallery { grid-template-columns: repeat(2, 1fr); }
   .calendar-tips { grid-template-columns: 1fr; }
+  .studio-shell { grid-template-columns: 1fr; gap: 32px; }
   .footer-content { grid-template-columns: 1fr 1fr; }
   .cal-grid { grid-template-columns: 100px repeat(3, minmax(190px, 1fr)); min-width: 670px; }
 }
@@ -936,6 +1591,7 @@ footer {
   .portfolio-home { padding-right: 10px; }
   nav .brand-cluster .logo { display: none; }
   nav .nav-links { display: none; }
+  .nav-studio-mobile { display: inline-flex; }
   section { padding: 80px 20px; }
   .hero { padding: 0 20px 60px; }
   .hero-bg {
@@ -944,9 +1600,15 @@ footer {
       url("assets/hero-v5.webp") 80% top / cover no-repeat;
   }
   .hero-content h1 { font-size: 48px; }
+  .hero-studio-cta { margin-top: 24px; width: 100%; justify-content: space-between; }
   .section-header { flex-direction: column; align-items: flex-start; }
   .region-grid { grid-template-columns: 1fr; }
   .photo-gallery { grid-template-columns: 1fr; }
+  .studio-scene-grid { grid-template-columns: 1fr; }
+  .studio-layers { grid-template-columns: 1fr; }
+  .studio-filmstrip { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .studio-compare-grid { grid-template-columns: 1fr; }
+  .studio-readout { padding: 18px; }
   .calendar-chart { padding: 24px; }
   .cal-grid { grid-template-columns: 90px repeat(3, 190px); min-width: 660px; font-size: 11px; }
   .cal-temp { min-height: 60px; }
@@ -990,7 +1652,9 @@ footer {
     <li><a href="#colors" data-i18n="nav_colors">色彩搭配</a></li>
     <li><a href="#calendar" data-i18n="nav_calendar">气温日历</a></li>
     <li><a href="#photo" data-i18n="nav_photo">拍照攻略</a></li>
+    <li><a href="#studio" data-i18n="nav_studio">搭配试衣</a></li>
   </ul>
+  <a class="nav-studio-mobile" href="#studio" data-i18n="nav_studio">搭配试衣</a>
   <div class="lang-switch">
     <button class="active" onclick="switchLang('zh', event)">中</button>
     <button onclick="switchLang('ja', event)">日</button>
@@ -1019,9 +1683,14 @@ footer {
       </div>
       <div class="meta-item">
         <div class="label" data-i18n="hero_meta3_label">STYLES</div>
-        <div class="value" data-i18n="hero_meta3_value">4套配色 · 20种搭配</div>
+        <div class="value" data-i18n="hero_meta3_value">4套配色 · 9组交互试衣</div>
       </div>
     </div>
+    <a class="hero-studio-cta" href="#studio">
+      <span class="cta-badge">NEW · 05</span>
+      <span data-i18n="hero_studio_cta">打开红叶搭配试衣间（3 场景 × 3 套装）</span>
+      <span class="cta-arrow" aria-hidden="true">→</span>
+    </a>
   </div>
   <div class="hero-scroll-hint" data-i18n="hero_scroll">SCROLL DOWN</div>
 </section>
@@ -1317,6 +1986,127 @@ footer {
   </div>
 </section>
 
+<!-- ===== SECTION 5: INTERACTIVE FITTING STUDIO ===== -->
+<section id="studio">
+  <div class="section-header reveal">
+    <div class="left">
+      <div class="eyebrow">
+        <span class="num">05</span>
+        <div class="line"></div>
+        <span data-i18n="studio_eyebrow">INTERACTIVE FITTING STUDIO</span>
+      </div>
+      <h2 data-i18n-html="studio_title">红叶搭配<em>试衣间</em></h2>
+    </div>
+    <p class="desc" data-i18n="studio_desc">自由组合 3 处典型红叶场景与 3 套秋日穿搭，实时切换预生成实景样片、并排对比 A/B 方案，并按当地气温核对体感舒适度与行李清单。</p>
+  </div>
+
+  <div class="studio-shell">
+    <!-- Left: Visual Lookbook Stage + Compare + Filmstrip -->
+    <div class="studio-stage-col reveal">
+      <div class="studio-toolbar">
+        <div class="studio-mode-group" role="group" aria-label="Preview mode">
+          <button type="button" class="studio-btn is-active" id="studioModeSingle" aria-pressed="true" data-i18n="studio_mode_single">单套预览</button>
+          <button type="button" class="studio-btn" id="studioModeCompare" aria-pressed="false" data-i18n="studio_mode_compare">A/B 并排对比</button>
+        </div>
+        <div class="studio-action-group">
+          <button type="button" class="studio-btn" id="studioPinA" data-i18n="studio_pin_a">锁定为方案 A</button>
+          <button type="button" class="studio-btn" id="studioSwapAB" hidden data-i18n="studio_swap_ab">交换 A / B</button>
+          <button type="button" class="studio-btn" id="studioShuffle" data-i18n="studio_shuffle">随机一套</button>
+        </div>
+      </div>
+
+      <!-- Single Look Frame -->
+      <div class="studio-single-wrap" id="studioSingleWrap">
+        <div class="studio-single-card">
+          <div class="studio-frame-wrap">
+            <img id="studioMainImg" src="assets/studio/studio_kyoto_camel-coat.webp" width="1024" height="1536" alt="京都古寺石阶 · 驼色长款羊毛大衣" decoding="async">
+            <div class="studio-frame-top">
+              <span class="studio-plate-pill" id="studioSceneBadge">KYOTO · ~12°C</span>
+              <span class="studio-plate-pill gold" id="studioLookIndex">LOOK 01 / 09</span>
+            </div>
+          </div>
+          <div class="studio-frame-caption">
+            <div class="cap-en" id="studioCapEn">KYOTO TEMPLE PATH × CAMEL WOOL OVERCOAT</div>
+            <div class="cap-title" id="studioCapTitle">京都古寺石阶 × 驼色长款羊毛大衣</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- A/B Side-by-Side Compare View -->
+      <div class="studio-compare-grid" id="studioCompareGrid" hidden>
+        <article class="studio-compare-card" id="studioCompareA">
+          <div class="studio-compare-media">
+            <img id="studioCompareImgA" src="assets/studio/studio_kyoto_camel-coat.webp" width="1024" height="1536" alt="" decoding="async">
+            <span class="studio-compare-badge" id="studioBadgeA">PLAN A · PINNED</span>
+          </div>
+          <div class="studio-compare-meta">
+            <h4 id="studioCmpTitleA"></h4>
+            <div class="cmp-sub" id="studioCmpSubA"></div>
+            <div class="cmp-verdict" id="studioCmpVerdictA"></div>
+          </div>
+        </article>
+        <article class="studio-compare-card is-current" id="studioCompareB">
+          <div class="studio-compare-media">
+            <img id="studioCompareImgB" src="assets/studio/studio_tokyo_moss-jacket.webp" width="1024" height="1536" alt="" decoding="async">
+            <span class="studio-compare-badge plan-b" id="studioBadgeB">PLAN B · ACTIVE</span>
+          </div>
+          <div class="studio-compare-meta">
+            <h4 id="studioCmpTitleB"></h4>
+            <div class="cmp-sub" id="studioCmpSubB"></div>
+            <div class="cmp-verdict" id="studioCmpVerdictB"></div>
+          </div>
+        </article>
+      </div>
+
+      <!-- 3x3 Contact Sheet Filmstrip -->
+      <div class="studio-filmstrip-box">
+        <div class="studio-filmstrip-head">
+          <span data-i18n="studio_filmstrip_label">3 × 3 预生成胶片底片 · 点击任意格直达</span>
+          <span class="fs-count" id="studioFilmstripCount">01 / 09</span>
+        </div>
+        <div class="studio-filmstrip" id="studioFilmstrip" role="group" aria-label="All 9 combinations"></div>
+      </div>
+    </div>
+
+    <!-- Right: Scene Selector + Outfit Selector + Climate/Styling Readout -->
+    <div class="studio-controls-col reveal reveal-delay-1">
+      <div class="studio-group">
+        <div class="studio-step-label">
+          <span class="step-kicker" data-i18n="studio_step1_kicker">STEP 01 · 选择场景</span>
+          <span class="step-hint" data-i18n="studio_step1_hint">背景光影与 11 月参考气温</span>
+        </div>
+        <div class="studio-scene-grid" id="studioSceneGrid" role="group" aria-label="Scene selector"></div>
+      </div>
+
+      <div class="studio-group">
+        <div class="studio-step-label">
+          <span class="step-kicker" data-i18n="studio_step2_kicker">STEP 02 · 选择服装</span>
+          <span class="step-hint" data-i18n="studio_step2_hint">色板与保暖等级</span>
+        </div>
+        <div class="studio-outfit-list" id="studioOutfitList" role="group" aria-label="Outfit selector"></div>
+      </div>
+
+      <div class="studio-readout" aria-live="polite">
+        <div class="studio-verdict-bar">
+          <span class="studio-status-pill is-optimal" id="studioStatusPill"></span>
+          <span class="studio-climate-meta" id="studioClimateMeta"></span>
+        </div>
+        <p class="studio-verdict-text" id="studioVerdictText"></p>
+        <div class="studio-harmony-note" id="studioHarmonyNote"></div>
+        <div class="studio-layers" id="studioLayers"></div>
+        <div class="studio-photo-tip">
+          <strong data-i18n="studio_photo_tip_label">PHOTO TIP</strong>
+          <span id="studioPhotoTip"></span>
+        </div>
+        <div class="studio-readout-actions">
+          <button type="button" class="studio-btn is-accent" id="studioCopyPacking" data-i18n="studio_copy_packing">复制本套行李清单</button>
+          <span class="studio-copy-status" id="studioCopyStatus" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== FOOTER ===== -->
 <footer>
   <div class="footer-content">
@@ -1331,6 +2121,7 @@ footer {
         <li><a href="#colors" data-i18n="nav_colors">色彩搭配</a></li>
         <li><a href="#calendar" data-i18n="nav_calendar">气温日历</a></li>
         <li><a href="#photo" data-i18n="nav_photo">拍照攻略</a></li>
+        <li><a href="#studio" data-i18n="nav_studio">搭配试衣</a></li>
       </ul>
     </div>
     <div class="footer-col">
@@ -1371,6 +2162,7 @@ const i18n = {
     nav_colors: "色彩搭配",
     nav_calendar: "气温日历",
     nav_photo: "拍照攻略",
+    nav_studio: "搭配试衣",
     hero_issue: "VOL.01 / AUTUMN 2026",
     hero_title: '紅葉季の<br>穿搭<span class="accent">手帖</span>',
     hero_subtitle: "从京都古寺到北海道山野，一份关于秋天色彩与温度的穿搭美学指南",
@@ -1379,7 +2171,8 @@ const i18n = {
     hero_meta2_label: "REGIONS",
     hero_meta2_value: "5大地域 · 30处景点",
     hero_meta3_label: "STYLES",
-    hero_meta3_value: "4套配色 · 20种搭配",
+    hero_meta3_value: "4套配色 · 9组交互试衣",
+    hero_studio_cta: "打开红叶搭配试衣间（3 场景 × 3 套装）",
     hero_scroll: "向下滚动",
     region_eyebrow: "REGIONAL STYLE",
     region_title: "地区<em>穿搭推荐</em>",
@@ -1483,6 +2276,21 @@ const i18n = {
     photo4_outfit: "穿搭建议：厚实大衣搭配红色围巾，在雪景红叶中格外醒目。温泉旅馆可准备浴衣外搭。",
     photo5_outfit: "穿搭建议：户外风格穿搭，冲锋衣或抓绒外套，搭配登山靴。苔藓绿色系融入自然。",
     photo6_outfit: "穿搭建议：大地色系层叠穿搭，与古寺沉稳氛围呼应。棉麻质地围巾增添柔和感。",
+    studio_eyebrow: "INTERACTIVE FITTING STUDIO",
+    studio_title: "红叶搭配<em>试衣间</em>",
+    studio_desc: "自由组合 3 处典型红叶场景与 3 套秋日穿搭，实时切换预生成实景样片、并排对比 A/B 方案，并按当地气温核对体感舒适度与行李清单。",
+    studio_mode_single: "单套预览",
+    studio_mode_compare: "A/B 并排对比",
+    studio_pin_a: "锁定为方案 A",
+    studio_swap_ab: "交换 A / B",
+    studio_shuffle: "随机一套",
+    studio_filmstrip_label: "3 × 3 预生成胶片底片 · 点击任意格直达",
+    studio_step1_kicker: "STEP 01 · 选择场景",
+    studio_step1_hint: "背景光影与 11 月参考气温",
+    studio_step2_kicker: "STEP 02 · 选择服装",
+    studio_step2_hint: "色板与保暖等级",
+    studio_photo_tip_label: "拍摄建议",
+    studio_copy_packing: "复制本套行李清单",
     footer_brand: "紅葉穿搭手帖",
     footer_desc: "一份关于日本红叶季穿搭美学的数字手帖。将秋天的色彩与温度，穿成一首行走的诗。",
     footer_col1: "CONTENTS",
@@ -1500,6 +2308,7 @@ const i18n = {
     nav_colors: "カラーガイド",
     nav_calendar: "気温カレンダー",
     nav_photo: "撮影スポット",
+    nav_studio: "試着スタジオ",
     hero_issue: "VOL.01 / AUTUMN 2026",
     hero_title: '紅葉季の<br>スタイル<span class="accent">手帖</span>',
     hero_subtitle: "京都の古寺から北海道の山野まで、秋の色彩と温度を纏うスタイル美学のガイド",
@@ -1508,7 +2317,8 @@ const i18n = {
     hero_meta2_label: "REGIONS",
     hero_meta2_value: "5大地域 · 30箇所",
     hero_meta3_label: "STYLES",
-    hero_meta3_value: "4配色 · 20スタイル",
+    hero_meta3_value: "4配色 · 9組の試着ルック",
+    hero_studio_cta: "紅葉フィッティング・スタジオへ（3 景 × 3 着）",
     hero_scroll: "スクロール",
     region_eyebrow: "REGIONAL STYLE",
     region_title: "地域別<em>スタイル</em>",
@@ -1612,6 +2422,21 @@ const i18n = {
     photo4_outfit: "スタイル提案：厚手コートに赤マフラー、雪景紅葉に映える。温泉旅館では浴衣の上羽織を。",
     photo5_outfit: "スタイル提案：アウトドアスタイル、マウンテンパーカーかフリース、トレッキングブーツで。モスグリーンで自然に溶け込む。",
     photo6_outfit: "スタイル提案：アースカラーのレイヤードで、古寺の落ち着いた雰囲気に。コットンリネンマフラーで柔らかさを。",
+    studio_eyebrow: "INTERACTIVE FITTING STUDIO",
+    studio_title: "紅葉コーデ<em>試着室</em>",
+    studio_desc: "3 つの紅葉ロケーションと 3 通りの秋スタイルを自在に組み合わせ、事前生成ルックの即時切替、A/B 並列比較、気温適合度と持ち物リストを確認できます。",
+    studio_mode_single: "単独プレビュー",
+    studio_mode_compare: "A/B 並列比較",
+    studio_pin_a: "案 A に固定",
+    studio_swap_ab: "A / B 入替",
+    studio_shuffle: "ランダム提案",
+    studio_filmstrip_label: "3 × 3 コンタクトシート · クリックで直接切替",
+    studio_step1_kicker: "STEP 01 · ロケーション選択",
+    studio_step1_hint: "背景光と 11 月の目安気温",
+    studio_step2_kicker: "STEP 02 · スタイル選択",
+    studio_step2_hint: "配色パレットと保温レベル",
+    studio_photo_tip_label: "撮影メモ",
+    studio_copy_packing: "このコーデの持ち物リストをコピー",
     footer_brand: "紅葉スタイル手帖",
     footer_desc: "日本の紅葉シーズンのスタイル美学に関するデジタル手帖。秋の色彩と温度を、歩く詩のように纏う。",
     footer_col1: "CONTENTS",
@@ -1629,6 +2454,7 @@ const i18n = {
     nav_colors: "Colors",
     nav_calendar: "Climate",
     nav_photo: "Photo Spots",
+    nav_studio: "Fitting Studio",
     hero_issue: "VOL.01 / AUTUMN 2026",
     hero_title: 'Autumn Leaves<br>Style <span class="accent">Journal</span>',
     hero_subtitle: "From Kyoto's ancient temples to Hokkaido's mountain wilderness — a style guide to the colors and temperatures of autumn",
@@ -1637,7 +2463,8 @@ const i18n = {
     hero_meta2_label: "REGIONS",
     hero_meta2_value: "5 Regions · 30 Spots",
     hero_meta3_label: "STYLES",
-    hero_meta3_value: "4 Palettes · 20 Looks",
+    hero_meta3_value: "4 Palettes · 9 Interactive Looks",
+    hero_studio_cta: "Open Interactive Fitting Studio (3 Scenes × 3 Outfits)",
     hero_scroll: "SCROLL DOWN",
     region_eyebrow: "REGIONAL STYLE",
     region_title: "Regional <em>Style Guide</em>",
@@ -1741,6 +2568,21 @@ const i18n = {
     photo4_outfit: "Style tip: Heavy coat with red scarf stands out against snow and foliage. Bring a yukata layer for the onsen inn.",
     photo5_outfit: "Style tip: Outdoor style — shell jacket or fleece with hiking boots. Moss green blends into nature.",
     photo6_outfit: "Style tip: Earth-tone layers echo the temple's serene atmosphere. Cotton-linen scarf adds softness.",
+    studio_eyebrow: "INTERACTIVE FITTING STUDIO",
+    studio_title: "Interactive <em>Fitting Studio</em>",
+    studio_desc: "Combine 3 signature autumn locations with 3 tailored outfits to inspect pre-rendered lookbook plates, compare A/B pairings side by side, and check climate comfort with a copyable packing list.",
+    studio_mode_single: "Single Look",
+    studio_mode_compare: "Compare A/B",
+    studio_pin_a: "Pin as Plan A",
+    studio_swap_ab: "Swap A / B",
+    studio_shuffle: "Shuffle Look",
+    studio_filmstrip_label: "3 × 3 Pre-Rendered Contact Sheet · Click any frame",
+    studio_step1_kicker: "STEP 01 · SELECT SCENE",
+    studio_step1_hint: "Lighting & typical November temperature",
+    studio_step2_kicker: "STEP 02 · SELECT OUTFIT",
+    studio_step2_hint: "Palette swatches & warmth rating",
+    studio_photo_tip_label: "PHOTO TIP",
+    studio_copy_packing: "Copy Packing Checklist",
     footer_brand: "MOMIJI STYLE",
     footer_desc: "A digital journal of Japanese autumn foliage style aesthetics. Wear the colors and temperatures of autumn like a walking poem.",
     footer_col1: "CONTENTS",
@@ -1753,32 +2595,755 @@ const i18n = {
   }
 };
 
+// ===== FITTING STUDIO DATA & ENGINE =====
+const STUDIO_SCENES = [
+  {
+    id: 'kyoto',
+    tempC: 12,
+    tempBadge: '~12°C',
+    code: 'KYOTO',
+    en: 'KYOTO TEMPLE PATH',
+    name: { zh: '京都古寺石阶', ja: '京都・古寺の石段', en: 'Kyoto Temple Path' },
+    note: { zh: '深红枫林 · 苔阶暖光', ja: '深紅の紅葉・苔段の斜光', en: 'Crimson maple · mossy steps' }
+  },
+  {
+    id: 'tokyo',
+    tempC: 15,
+    tempBadge: '~15°C',
+    code: 'TOKYO',
+    en: 'TOKYO GINKGO AVENUE',
+    name: { zh: '东京银杏大道', ja: '東京・神宮外苑並木', en: 'Tokyo Ginkgo Avenue' },
+    note: { zh: '金黄长廊 · 晴朗逆光', ja: '黄金並木・晴天の逆光', en: 'Golden canopy · crisp sun' }
+  },
+  {
+    id: 'hokkaido',
+    tempC: 5,
+    tempBadge: '~5°C',
+    code: 'HOKKAIDO',
+    en: 'HOKKAIDO MISTY LAKE',
+    name: { zh: '北海道湖畔山野', ja: '北海道・定山渓の湖畔', en: 'Hokkaido Misty Lake' },
+    note: { zh: '晨雾冷风 · 残雪秋林', ja: '朝霧の冷気・冠雪の遠景', en: 'Cool mist · snow-dusted ridge' }
+  }
+];
+
+const STUDIO_OUTFITS = [
+  {
+    id: 'camel-coat',
+    warmth: 5,
+    en: 'CAMEL WOOL OVERCOAT',
+    swatches: ['#B68652', '#F2EDE2', '#3B2820'],
+    name: { zh: '驼色长款羊毛大衣', ja: 'キャメルウールコート', en: 'Camel Wool Overcoat' },
+    sub: {
+      zh: '驼色双排扣大衣 · 米白高领羊绒 · 深棕阔腿裤',
+      ja: 'キャメルコート・アイボリータートル・深茶ワイドパンツ',
+      en: 'Camel wool coat · ivory turtleneck · espresso wide trousers'
+    },
+    layers: {
+      zh: { outer: '驼色中长款羊毛大衣', mid: '米白坑条羊绒高领毛衣', bottom: '深棕羊毛阔腿裤 + 切尔西短靴 + 焦糖斜挎包' },
+      ja: { outer: 'キャメルダブルウールコート', mid: 'アイボリーリブタートルニット', bottom: '濃茶ワイドパンツ＋チェルシーブーツ＋レザーバッグ' },
+      en: { outer: 'Tailored camel wool overcoat', mid: 'Ivory ribbed cashmere turtleneck', bottom: 'Espresso wool trousers + Chelsea boots + cognac bag' }
+    }
+  },
+  {
+    id: 'moss-jacket',
+    warmth: 4,
+    en: 'MOSS FIELD JACKET',
+    swatches: ['#4A5D3A', '#DDD2BE', '#49392F'],
+    name: { zh: '苔藓绿工装夹克', ja: 'モスグリーンフィールドジャケット', en: 'Moss Waxed Field Jacket' },
+    sub: {
+      zh: '苔藓绿油蜡夹克 · 燕麦针织 · 格纹围巾与灯芯绒裤',
+      ja: 'モスジャケット・オートミールニット・チェックマフラー',
+      en: 'Moss field jacket · oatmeal knit · plaid scarf & corduroy'
+    },
+    layers: {
+      zh: { outer: '苔藓绿灯芯绒领防风夹克', mid: '燕麦色美利奴圆领毛衣 + 格纹羊毛围巾', bottom: '深炭棕打褶灯芯绒长裤 + 麂皮德比鞋' },
+      ja: { outer: 'モスグリーンワックスジャケット', mid: 'オートミールニット＋チェック柄ウールマフラー', bottom: 'ダークブラウンコーデュロイパンツ＋スエード革靴' },
+      en: { outer: 'Moss waxed cotton field jacket', mid: 'Oatmeal merino knit + plaid wool scarf', bottom: 'Charcoal-brown corduroy trousers + suede derbies' }
+    }
+  },
+  {
+    id: 'crimson-knit',
+    warmth: 3,
+    en: 'MAPLE CABLE CARDIGAN',
+    swatches: ['#8E2C1B', '#F4EDE0', '#4A3124'],
+    name: { zh: '枫红粗棒针织开衫', ja: '紅葉ケーブルカーディガン', en: 'Maple Cable Cardigan' },
+    sub: {
+      zh: '枫红麻花开衫 · 暖白牛津衬衫 · 深栗A字毛呢裙',
+      ja: '紅葉ニットカーデ・生成りシャツ・栗色Aラインスカート',
+      en: 'Maple cable cardigan · ecru oxford · chestnut midi skirt'
+    },
+    layers: {
+      zh: { outer: '枫红粗棒麻花羊毛开衫', mid: '暖米白牛津纺长袖衬衫', bottom: '深栗色毛呢A字长裙 + 堆堆袜与乐福鞋 + 编织托特' },
+      ja: { outer: '深紅ケーブル編みカーディガン', mid: '生成りオックスフォードシャツ', bottom: '栗色ウールAラインスカート＋リブソックス＆ローファー' },
+      en: { outer: 'Chunky maple cable cardigan', mid: 'Warm ecru oxford shirt', bottom: 'Chestnut wool midi skirt + ribbed socks & loafers' }
+    }
+  }
+];
+
+const STUDIO_MATRIX = {
+  'kyoto__camel-coat': {
+    status: 'optimal',
+    verdictLabel: { zh: '气候高适配', ja: '気候に最適', en: 'Climate Ideal' },
+    verdictText: {
+      zh: '京都 11 月中下旬午后约 12°C，寺庙林荫与石阶偏阴凉。中长款羊毛大衣敞开穿着刚好平衡步行的微热与傍晚降温。',
+      ja: '11月の京都は日陰の参道が冷え込みますが、12°C前後にウールコートの前開きスタイルは歩行時の体温調整に最適です。',
+      en: 'Around 12°C in shaded Kyoto temple lanes, an open camel wool coat over a turtleneck keeps warmth balanced from noon walks to dusk.'
+    },
+    harmony: {
+      zh: '配色解析：驼色与深棕把视觉重心稳住，让高饱和红枫留在画面上方自然成框，人物与古寺木构色调统一。',
+      ja: '配色メモ：キャメルと濃茶が重心を落ち着かせ、頭上の深紅の紅葉と古寺の木肌を引き立てます。',
+      en: 'Color harmony: Warm camel and espresso anchor the frame so overhead crimson maples stand out without competing with your outfit.'
+    },
+    photoTip: {
+      zh: '在石阶中段侧身回看，50mm 焦段带入石灯笼与上方红枫枝叶，大衣敞开更显修长比例。',
+      ja: '石段の中ほどで少し振り返り、50mm 相当で石灯籠と紅葉の枝を前ボケに入れると立体感が出ます。',
+      en: 'Pause mid-staircase with a 50mm lens, letting overhanging maple branches frame the top third while the coat drapes open.'
+    },
+    extraPack: { zh: '便携折叠伞 · 轻薄羊绒围巾（夜枫备用）', ja: '折りたたみ傘・薄手マフラー（夜間拝観用）', en: 'Compact umbrella · light scarf for evening illumination' }
+  },
+  'kyoto__moss-jacket': {
+    status: 'optimal',
+    verdictLabel: { zh: '气候高适配', ja: '気候に最適', en: 'Climate Ideal' },
+    verdictText: {
+      zh: '防风油蜡夹克配格纹围巾很适合京都多步行、上下石阶的行程，早晚起风时系紧围巾即可应对 8–14°C 温差。',
+      ja: '防風ジャケットとマフラーの組み合わせは、坂道や石段の多い京都散策で 8〜14°C の寒暖差に柔軟に対応できます。',
+      en: 'A wind-resistant field jacket and scarf handle Kyoto’s 8–14°C swings well while staying agile on temple steps.'
+    },
+    harmony: {
+      zh: '配色解析：苔藓绿与红叶呈经典自然补色，同时呼应石阶青苔，整体既有层次又不张扬。',
+      ja: '配色メモ：モスグリーンは紅葉の補色として映えつつ、石段の苔とも自然に馴染みます。',
+      en: 'Color harmony: Moss green creates a calm complementary contrast against crimson leaves while echoing the mossy stonework.'
+    },
+    photoTip: {
+      zh: '利用古寺朱墙或红枫做浅景深背景，低角度拍出灯芯绒长裤垂坠感与石阶延伸线。',
+      ja: '紅葉を背景に少し低めの位置から撮り、コーデュロイの落ち感と石段の奥行きを活かします。',
+      en: 'Shoot slightly low along the stone path so the pleated corduroy lines echo the perspective toward the temple gate.'
+    },
+    extraPack: { zh: '吸湿排汗打底衫 · 备用厚袜', ja: '吸湿インナー・替えの厚手ソックス', en: 'Breathable base layer · spare cushioned socks' }
+  },
+  'kyoto__crimson-knit': {
+    status: 'optimal',
+    verdictLabel: { zh: '午间舒适 · 傍晚添衣', ja: '日中快適・夕方羽織推奨', en: 'Comfortable Day · Cool Dusk' },
+    verdictText: {
+      zh: '粗棒针织开衫配衬衫在京都晴朗午后舒适轻盈；若计划看清水寺或永观堂夜枫，建议随身带一件轻薄风衣或羊绒披肩。',
+      ja: '晴れた日中の散策には軽やかで快適です。夜間ライトアップへ行く場合は薄手コートか大判ストールを携帯すると安心です。',
+      en: 'Ideal for sunlit Kyoto afternoons; pack a light overcoat or shawl if staying out for evening temple illuminations.'
+    },
+    harmony: {
+      zh: '配色解析：以暖米白衬衫隔开枫红开衫与周边红叶，深栗裙摆收住暖色调，形成「同色呼应而不撞糊」的呼吸感。',
+      ja: '配色メモ：生成りシャツが紅葉と赤ニットの間に抜けを作り、栗色スカートが全体を品よく締めます。',
+      en: 'Color harmony: The crisp ecru shirt separates the maple cardigan from surrounding foliage so the shared red reads intentional.'
+    },
+    photoTip: {
+      zh: '站在深色木构寺门或青苔石墙前拍摄，避免身后整片高饱和红叶与开衫重叠。',
+      ja: '暗い木造の門や苔むした石垣を背に立つと、深紅のカーディガンが背景に埋もれません。',
+      en: 'Position yourself against dark cedar architecture or mossy walls rather than solid red foliage behind your shoulders.'
+    },
+    extraPack: { zh: '保暖打底裤袜 · 大号羊绒披肩（夜枫用）', ja: '保温タイツ・大判カシミヤストール', en: 'Thermal tights · packable cashmere wrap for night viewing' }
+  },
+  'tokyo__camel-coat': {
+    status: 'warm',
+    verdictLabel: { zh: '午间偏暖 · 建议敞开穿', ja: '日中はやや暖かめ', en: 'Slightly Warm at Noon' },
+    verdictText: {
+      zh: '东京 11 月晴天午后常达 15–17°C，长款羊毛大衣配合高领针织在日照下略偏暖；可将内搭换成薄款针织或敞开穿着方便进出地铁脱穿。',
+      ja: '東京の晴れた午後は 15〜17°C まで上がることがあり、厚手タートル＋コートは少し暖かめ。電車移動も見据え前開きが便利です。',
+      en: 'Sunny Tokyo afternoons can reach 15–17°C. Wear the coat open or swap to a lighter fine-gauge knit for warm subway rides.'
+    },
+    harmony: {
+      zh: '配色解析：暖驼色与金色银杏同属暖金大地色系，配合深棕阔腿裤压住明度，呈现利落的都市秋日层次。',
+      ja: '配色メモ：キャメルと黄金の銀杏が同系色で響き合い、濃茶パンツが都会的な輪郭を整えます。',
+      en: 'Color harmony: Camel harmonizes with golden ginkgo leaves while dark espresso trousers add crisp urban definition.'
+    },
+    photoTip: {
+      zh: '利用银杏大道纵深透视站在人行道中线偏左，逆光下大衣边缘会出现柔和金边。',
+      ja: '並木道のパースを活かし歩道のやや左に立つと、逆光でコートの輪郭に柔らかな光が回ります。',
+      en: 'Use the avenue’s vanishing point and shoot gently backlit so afternoon sun catches the wool coat’s silhouette.'
+    },
+    extraPack: { zh: '轻薄替換内搭 T 恤 · 墨镜（晴日防眩）', ja: '薄手の替えインナー・サングラス', en: 'Light cotton tee swap · sunglasses for crisp glare' }
+  },
+  'tokyo__moss-jacket': {
+    status: 'optimal',
+    verdictLabel: { zh: '气候高适配', ja: '気候に最適', en: 'Climate Ideal' },
+    verdictText: {
+      zh: '15°C 左右的东京街头与公园步行量较大，油蜡夹克挡风利落，进咖啡馆或商场时取下围巾与外套都很轻便。',
+      ja: '15°C 前後の東京街歩きに最適。カフェや商業施設に入る際もマフラーとジャケットの着脱が軽快です。',
+      en: 'Spot-on for 15°C Tokyo walks—blocks avenue breezes outside and layers off effortlessly inside cafés and galleries.'
+    },
+    harmony: {
+      zh: '配色解析：沉稳苔藓绿在满目金黄银杏中显得格外清爽，格纹围巾把暖黄背景与深棕裤装自然衔接起来。',
+      ja: '配色メモ：黄金色の並木に落ち着いたモスグリーンが映え、チェックマフラーが背景とボトムを繋ぎます。',
+      en: 'Color harmony: Moss green cools and balances bright ginkgo gold, while the plaid scarf bridges yellow leaves and brown corduroy.'
+    },
+    photoTip: {
+      zh: '走动中抓拍迈步瞬间，让脚下落叶与大道远景车流形成都市慢生活节奏。',
+      ja: '歩く瞬間を連写で切り取ると、足元の落ち葉と並木道の奥行きが自然なスナップになります。',
+      en: 'Capture a relaxed walking stride along the leaf-strewn sidewalk with the ginkgo arcade stretching into soft bokeh.'
+    },
+    extraPack: { zh: '轻便斜挎包或帆布袋 · 润唇膏与护手霜', ja: '軽量トート・リップ＆ハンドクリーム', en: 'Light day tote · lip balm for dry autumn air' }
+  },
+  'tokyo__crimson-knit': {
+    status: 'optimal',
+    verdictLabel: { zh: '气候高适配', ja: '気候に最適', en: 'Climate Ideal' },
+    verdictText: {
+      zh: '开衫叠穿牛津衬衫恰好匹配东京 15°C 晴朗午后，室内不闷热、室外不单薄，适合神宫外苑逛完顺路去青山咖啡街。',
+      ja: '15°C 前後の晴れた東京にぴったりの軽快さ。神宮外苑から青山エリアのカフェ巡りまで一日中快適に過ごせます。',
+      en: 'Tailor-made for a sunny 15°C Tokyo afternoon—breathable indoors and cozy outdoors from Meiji Jingu Gaien to Aoyama cafés.'
+    },
+    harmony: {
+      zh: '配色解析：枫红针织是金色银杏大道里最鲜明却不刺眼的焦点，搭配暖白衬衫与深栗裙装，胶片感很强。',
+      ja: '配色メモ：黄金の銀杏並木に深紅ニットが主役として映え、生成りシャツと栗色スカートがフィルム写真のように纏まります。',
+      en: 'Color harmony: Deep maple crimson pops effortlessly against luminous yellow ginkgo leaves, grounded by warm ecru and chestnut.'
+    },
+    photoTip: {
+      zh: '选上午 9–10 点或下午 3 点斜射光，拍出粗棒针织肌理与地上银杏叶影。',
+      ja: '午前 9〜10 時または午後 3 時の斜光を選ぶと、ケーブル編みの立体感と葉影がきれいに出ます。',
+      en: 'Shoot around 9:30 AM or 3:00 PM when angled sunlight sculpts the chunky cable knit texture.'
+    },
+    extraPack: { zh: '轻薄防风围巾（日落后备用）· 舒适鞋垫', ja: '薄手ストール（日没後用）・インソール', en: 'Light scarf for post-sunset breeze · walking insoles' }
+  },
+  'hokkaido__camel-coat': {
+    status: 'optimal',
+    verdictLabel: { zh: '气候高适配', ja: '寒冷地に最適', en: 'Cold-Weather Ready' },
+    verdictText: {
+      zh: '北海道 11 月湖畔与山谷约 3–7°C 且湿冷有风。长款羊毛大衣配高领羊绒与切尔西靴构成了稳妥的防寒基础，内加发热打底即可从容出行。',
+      ja: '3〜7°C の冷え込む北海道の湖畔でも、ロングウールコートとタートル、ブーツの組み合わせに保温インナーを加えれば安心です。',
+      en: 'At 3–7°C by a misty Hokkaido lake, the full-length camel wool coat, cashmere turtleneck, and boots form a reliable cold-weather base.'
+    },
+    harmony: {
+      zh: '配色解析：北海道阴天晨雾与冷灰湖面偏清冷，暖驼色与米白提亮面色，让人物在冷峻山水中显得柔和温暖。',
+      ja: '配色メモ：霧と湖の寒色トーンの中で、暖かなキャメルとアイボリーが顔周りを明るく見せます。',
+      en: 'Color harmony: Warm camel and ivory lift the cool slate tones of misty water and snow-dusted ridges.'
+    },
+    photoTip: {
+      zh: '靠在深色木质观景栏杆旁，利用湖面晨雾与远方雪顶做留白，大衣扣上或半敞都利落。',
+      ja: '濡れた木柵のそばに立ち、朝霧の湖面と冠雪の山並みを背景に広く取ると静謐な雰囲気になります。',
+      en: 'Frame against the dark timber overlook with misty water and snowy peaks behind for calm Nordic-like contrast.'
+    },
+    extraPack: { zh: '发热内衣套装 · 羊毛手套 · 防滑鞋底贴与暖宝宝', ja: '保温インナー上下・ウール手袋・カイロ', en: 'Thermal base layers · wool gloves · hand warmers' }
+  },
+  'hokkaido__moss-jacket': {
+    status: 'cool',
+    verdictLabel: { zh: '微凉 · 建议加强内层保暖', ja: 'やや肌寒い・防寒インナー推奨', en: 'Chilly · Add Thermal Mid-Layer' },
+    verdictText: {
+      zh: '油蜡夹克防风力出色，但在 5°C 左右的北海道山野单配普通毛衣会偏凉。建议内加抓绒背心或高领发热打底，并备上手套。',
+      ja: '防風性は高いものの 5°C 前後の北海道では少し心許ないため、インナーダウンや発熱インナー、手袋の併用をおすすめします。',
+      en: 'The waxed jacket blocks wind well, but 5°C mountain mist calls for a packable down vest or thermal base layer underneath.'
+    },
+    harmony: {
+      zh: '配色解析：苔藓绿夹克与灯芯绒材质自带山野户外气质，与落叶松林和湿润木栈道高度契合。',
+      ja: '配色メモ：モスグリーンとコーデュロイの質感が落葉松林と濡れた木道に自然に溶け込みます。',
+      en: 'Color harmony: Waxed moss cotton and textured corduroy feel completely native beside larch forests and damp timber decks.'
+    },
+    photoTip: {
+      zh: '把格纹围巾绕实一圈增加颈部体积感，侧身望向湖面雾气更有旅拍故事感。',
+      ja: 'マフラーを首元にしっかり巻き、湖面の霧へ視線を外すと旅の記録らしい一枚になります。',
+      en: 'Wrap the plaid scarf high for cozy volume and look off-frame toward the lake mist for candid travel framing.'
+    },
+    extraPack: { zh: '轻薄羽绒内胆/抓绒马甲 · 保暖手套 · 羊毛厚袜', ja: 'インナーダウンベスト・防寒手袋・厚手ウール靴下', en: 'Packable down vest · warm gloves · thick wool socks' }
+  },
+  'hokkaido__crimson-knit': {
+    status: 'cool',
+    verdictLabel: { zh: '偏凉 · 需外加防风大衣', ja: '寒い・防風アウター必須', en: 'Too Cool Alone · Outer Coat Needed' },
+    verdictText: {
+      zh: '5°C 且有湿气与山风的北海道湖畔，单穿针织开衫与乐福鞋会明显偏冷。这套更适合作为温泉旅馆室内或短时拍照造型，外行务必叠穿厚羊毛大衣/羽绒并换加绒短靴。',
+      ja: '5°C の湿った冷気ではカーディガン単体とローファーは冷え込みます。移動時は厚手コートと防寒ブーツを重ね、撮影時のみ羽織を脱ぐ運用がおすすめです。',
+      en: 'Too brisk to wear solo in 5°C misty mountain air. Treat this as a layered indoor/photo look—wear a heavy windproof coat and lined boots in transit.'
+    },
+    harmony: {
+      zh: '配色解析：视觉上非常出片——枫红针织在灰白晨雾与深色湖水之间形成强烈视觉锚点，与红叶远山呼应。',
+      ja: '配色メモ：写真映えは抜群。霧と暗い湖面の中で深紅のニットが鮮やかなアクセントになります。',
+      en: 'Color harmony: Visually striking—the maple cardigan creates a rich warm focal point against misty water and distant frost.'
+    },
+    photoTip: {
+      zh: '采取「外套保温 + 拍照 3 分钟脱下」策略，选有红枫探枝的木栏角落快速出片。',
+      ja: '移動中はコートを着て、紅葉が掛かる木柵の角で撮影時だけ脱ぐと体調を崩さず撮れます。',
+      en: 'Keep your heavy coat on between spots and step out for quick frames under the red maple overhang by the railing.'
+    },
+    extraPack: { zh: '防风厚羽绒/羊毛外衣（必带）· 加绒打底袜 · 围巾手套与暖贴', ja: '防風ダウン/厚手コート（必須）・裏起毛タイツ・手袋・カイロ', en: 'Heavy windproof outer coat (essential) · fleece-lined tights · gloves & heat packs' }
+  }
+};
+
+const STUDIO_UI = {
+  zh: {
+    warmth: '保暖',
+    planA: '方案 A · 已锁定',
+    planB: '方案 B · 当前选择',
+    pinnedToast: '已将当前搭配锁定为方案 A，可继续切换方案 B 并排对比',
+    swappedToast: '已交换方案 A 与方案 B',
+    copiedToast: '已复制本套行李清单到剪贴板',
+    copyFail: '复制未生效，请手动长按复制',
+    layerOuter: '外层 OUTER',
+    layerMid: '中层 MID',
+    layerBottom: '下装与鞋履',
+    climateFmt: (s, o) => `参考气温 ${s.tempBadge} · 保暖 ${o.warmth}/5`,
+    packHeader: (s, o) => `【紅葉穿搭手帖 · 行李清单】\n场景：${s.name.zh}（${s.tempBadge}）\n搭配：${o.name.zh}（保暖 ${o.warmth}/5）`,
+    packExtra: '气候补充建议'
+  },
+  ja: {
+    warmth: '保温',
+    planA: '案 A · 固定中',
+    planB: '案 B · 選択中',
+    pinnedToast: '現在のコーデを案 A に固定しました。続けて案 B を選んで比較できます',
+    swappedToast: '案 A と案 B を入れ替えました',
+    copiedToast: 'このコーデの持ち物リストをコピーしました',
+    copyFail: 'クリップボードへのコピーに失敗しました',
+    layerOuter: 'アウター',
+    layerMid: 'ミドル層',
+    layerBottom: 'ボトム＆靴',
+    climateFmt: (s, o) => `目安気温 ${s.tempBadge} · 保温 ${o.warmth}/5`,
+    packHeader: (s, o) => `【紅葉スタイル手帖・持ち物リスト】\n場所：${s.name.ja}（${s.tempBadge}）\n装い：${o.name.ja}（保温 ${o.warmth}/5）`,
+    packExtra: '気候に応じた追加アイテム'
+  },
+  en: {
+    warmth: 'WARMTH',
+    planA: 'PLAN A · PINNED',
+    planB: 'PLAN B · ACTIVE',
+    pinnedToast: 'Pinned current look as Plan A. Pick another scene or outfit for Plan B.',
+    swappedToast: 'Swapped Plan A and Plan B',
+    copiedToast: 'Packing checklist copied to clipboard',
+    copyFail: 'Clipboard unavailable in this browser',
+    layerOuter: 'OUTER LAYER',
+    layerMid: 'MID LAYER',
+    layerBottom: 'BOTTOM & FOOTWEAR',
+    climateFmt: (s, o) => `Typical ${s.tempBadge} · Warmth ${o.warmth}/5`,
+    packHeader: (s, o) => `[Momiji Style Journal · Packing List]\nScene: ${s.name.en} (${s.tempBadge})\nOutfit: ${o.name.en} (Warmth ${o.warmth}/5)`,
+    packExtra: 'Climate-adjusted extras'
+  }
+};
+
+let currentLang = 'zh';
+const studioState = {
+  scene: 'kyoto',
+  outfit: 'camel-coat',
+  mode: 'single',
+  planA: { scene: 'kyoto', outfit: 'camel-coat' },
+  preloaded: false,
+  toastKey: ''
+};
+
+function studioImageSrc(sceneId, outfitId) {
+  return `assets/studio/studio_${sceneId}_${outfitId}.webp`;
+}
+
+function getScene(id) {
+  return STUDIO_SCENES.find(s => s.id === id) || STUDIO_SCENES[0];
+}
+
+function getOutfit(id) {
+  return STUDIO_OUTFITS.find(o => o.id === id) || STUDIO_OUTFITS[0];
+}
+
+function getCombo(sceneId, outfitId) {
+  return STUDIO_MATRIX[`${sceneId}__${outfitId}`];
+}
+
+function getLookNumber(sceneId, outfitId) {
+  const sIdx = STUDIO_SCENES.findIndex(s => s.id === sceneId);
+  const oIdx = STUDIO_OUTFITS.findIndex(o => o.id === outfitId);
+  return sIdx * STUDIO_OUTFITS.length + oIdx + 1;
+}
+
+function preloadStudioMatrix() {
+  if (studioState.preloaded) return;
+  studioState.preloaded = true;
+  STUDIO_SCENES.forEach(s => {
+    STUDIO_OUTFITS.forEach(o => {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = studioImageSrc(s.id, o.id);
+    });
+  });
+}
+
+function setStudioToast(key) {
+  const el = document.getElementById('studioCopyStatus');
+  if (!el) return;
+  studioState.toastKey = key || '';
+  const ui = STUDIO_UI[currentLang] || STUDIO_UI.zh;
+  el.textContent = studioState.toastKey ? (ui[studioState.toastKey] || '') : '';
+  clearTimeout(setStudioToast._timer);
+  if (studioState.toastKey) {
+    setStudioToast._timer = setTimeout(() => {
+      studioState.toastKey = '';
+      el.textContent = '';
+    }, 3600);
+  }
+}
+
+function renderStudio() {
+  const lang = currentLang;
+  const ui = STUDIO_UI[lang] || STUDIO_UI.zh;
+  const scene = getScene(studioState.scene);
+  const outfit = getOutfit(studioState.outfit);
+  const combo = getCombo(scene.id, outfit.id);
+  const lookNo = String(getLookNumber(scene.id, outfit.id)).padStart(2, '0');
+
+  // 1. Toolbar state
+  const btnSingle = document.getElementById('studioModeSingle');
+  const btnCompare = document.getElementById('studioModeCompare');
+  const btnSwap = document.getElementById('studioSwapAB');
+  const singleWrap = document.getElementById('studioSingleWrap');
+  const compareGrid = document.getElementById('studioCompareGrid');
+
+  if (btnSingle && btnCompare && singleWrap && compareGrid) {
+    const isCompare = studioState.mode === 'compare';
+    btnSingle.classList.toggle('is-active', !isCompare);
+    btnSingle.setAttribute('aria-pressed', String(!isCompare));
+    btnCompare.classList.toggle('is-active', isCompare);
+    btnCompare.setAttribute('aria-pressed', String(isCompare));
+    if (btnSwap) btnSwap.hidden = !isCompare;
+    singleWrap.hidden = isCompare;
+    compareGrid.hidden = !isCompare;
+  }
+
+  // 2. Main single image stage
+  const mainImg = document.getElementById('studioMainImg');
+  const nextSrc = studioImageSrc(scene.id, outfit.id);
+  if (mainImg) {
+    if (mainImg.getAttribute('src') !== nextSrc) {
+      mainImg.classList.add('is-fading');
+      mainImg.src = nextSrc;
+      const clearFade = () => mainImg.classList.remove('is-fading');
+      if (mainImg.complete) {
+        requestAnimationFrame(clearFade);
+      } else {
+        mainImg.onload = clearFade;
+        mainImg.onerror = clearFade;
+      }
+    }
+    mainImg.alt = `${scene.name[lang]} · ${outfit.name[lang]}`;
+  }
+
+  const sceneBadge = document.getElementById('studioSceneBadge');
+  const lookIndex = document.getElementById('studioLookIndex');
+  const capEn = document.getElementById('studioCapEn');
+  const capTitle = document.getElementById('studioCapTitle');
+  const fsCount = document.getElementById('studioFilmstripCount');
+  if (sceneBadge) sceneBadge.textContent = `${scene.code} · ${scene.tempBadge}`;
+  if (lookIndex) lookIndex.textContent = `LOOK ${lookNo} / 09`;
+  if (capEn) capEn.textContent = `${scene.en} × ${outfit.en}`;
+  if (capTitle) capTitle.textContent = `${scene.name[lang]} × ${outfit.name[lang]}`;
+  if (fsCount) fsCount.textContent = `${lookNo} / 09`;
+
+  // 3. A/B Compare cards
+  const sceneA = getScene(studioState.planA.scene);
+  const outfitA = getOutfit(studioState.planA.outfit);
+  const comboA = getCombo(sceneA.id, outfitA.id);
+
+  const cmpImgA = document.getElementById('studioCompareImgA');
+  const cmpImgB = document.getElementById('studioCompareImgB');
+  if (cmpImgA) {
+    cmpImgA.src = studioImageSrc(sceneA.id, outfitA.id);
+    cmpImgA.alt = `${sceneA.name[lang]} · ${outfitA.name[lang]}`;
+  }
+  if (cmpImgB) {
+    cmpImgB.src = nextSrc;
+    cmpImgB.alt = `${scene.name[lang]} · ${outfit.name[lang]}`;
+  }
+  const badgeA = document.getElementById('studioBadgeA');
+  const badgeB = document.getElementById('studioBadgeB');
+  if (badgeA) badgeA.textContent = ui.planA;
+  if (badgeB) badgeB.textContent = ui.planB;
+
+  const cmpTitleA = document.getElementById('studioCmpTitleA');
+  const cmpSubA = document.getElementById('studioCmpSubA');
+  const cmpVerdictA = document.getElementById('studioCmpVerdictA');
+  if (cmpTitleA) cmpTitleA.textContent = `${sceneA.name[lang]} × ${outfitA.name[lang]}`;
+  if (cmpSubA) cmpSubA.textContent = ui.climateFmt(sceneA, outfitA);
+  if (cmpVerdictA) cmpVerdictA.textContent = comboA.verdictLabel[lang];
+
+  const cmpTitleB = document.getElementById('studioCmpTitleB');
+  const cmpSubB = document.getElementById('studioCmpSubB');
+  const cmpVerdictB = document.getElementById('studioCmpVerdictB');
+  if (cmpTitleB) cmpTitleB.textContent = `${scene.name[lang]} × ${outfit.name[lang]}`;
+  if (cmpSubB) cmpSubB.textContent = ui.climateFmt(scene, outfit);
+  if (cmpVerdictB) cmpVerdictB.textContent = combo.verdictLabel[lang];
+
+  // 4. Scene buttons
+  const sceneGrid = document.getElementById('studioSceneGrid');
+  if (sceneGrid) {
+    sceneGrid.innerHTML = STUDIO_SCENES.map(s => {
+      const active = s.id === scene.id;
+      return `
+        <button type="button" class="studio-scene-card${active ? ' is-active' : ''}" data-scene="${s.id}" aria-pressed="${active}">
+          <div class="sc-top">
+            <span class="sc-en">${s.code}</span>
+            <span class="sc-temp">${s.tempBadge}</span>
+          </div>
+          <div class="sc-name">${s.name[lang]}</div>
+          <div class="sc-note">${s.note[lang]}</div>
+        </button>`;
+    }).join('');
+  }
+
+  // 5. Outfit cards
+  const outfitList = document.getElementById('studioOutfitList');
+  if (outfitList) {
+    outfitList.innerHTML = STUDIO_OUTFITS.map(o => {
+      const active = o.id === outfit.id;
+      const dots = Array.from({ length: 5 }, (_, idx) => `<span class="${idx < o.warmth ? 'on' : ''}"></span>`).join('');
+      const swatches = o.swatches.map(hex => `<i style="background:${hex}"></i>`).join('');
+      return `
+        <button type="button" class="studio-outfit-card${active ? ' is-active' : ''}" data-outfit="${o.id}" aria-pressed="${active}">
+          <div class="studio-outfit-main">
+            <div class="studio-outfit-title">
+              <strong>${o.name[lang]}</strong>
+              <span class="studio-outfit-swatches" aria-hidden="true">${swatches}</span>
+            </div>
+            <div class="studio-outfit-sub">${o.sub[lang]}</div>
+          </div>
+          <div class="studio-warmth" aria-label="${ui.warmth} ${o.warmth}/5">
+            <span class="w-label">${ui.warmth} ${o.warmth}/5</span>
+            <span class="studio-warmth-dots" aria-hidden="true">${dots}</span>
+          </div>
+        </button>`;
+    }).join('');
+  }
+
+  // 6. 3x3 Contact Sheet Filmstrip
+  const filmstrip = document.getElementById('studioFilmstrip');
+  if (filmstrip) {
+    let idx = 0;
+    const html = [];
+    STUDIO_SCENES.forEach(s => {
+      STUDIO_OUTFITS.forEach(o => {
+        idx += 1;
+        const active = s.id === scene.id && o.id === outfit.id;
+        const code = String(idx).padStart(2, '0');
+        html.push(`
+          <button type="button" class="studio-thumb${active ? ' is-active' : ''}" data-scene="${s.id}" data-outfit="${o.id}" aria-pressed="${active}" aria-label="${code} ${s.name[lang]} × ${o.name[lang]}" title="${s.name[lang]} × ${o.name[lang]}">
+            <img src="${studioImageSrc(s.id, o.id)}" width="1024" height="1536" alt="" loading="lazy" decoding="async">
+            <span class="thumb-code">${code}</span>
+          </button>`);
+      });
+    });
+    filmstrip.innerHTML = html.join('');
+  }
+
+  // 7. Readout panel
+  const statusPill = document.getElementById('studioStatusPill');
+  const climateMeta = document.getElementById('studioClimateMeta');
+  const verdictText = document.getElementById('studioVerdictText');
+  const harmonyNote = document.getElementById('studioHarmonyNote');
+  const layersBox = document.getElementById('studioLayers');
+  const photoTip = document.getElementById('studioPhotoTip');
+
+  if (statusPill) {
+    statusPill.className = `studio-status-pill is-${combo.status}`;
+    statusPill.textContent = combo.verdictLabel[lang];
+  }
+  if (climateMeta) climateMeta.textContent = ui.climateFmt(scene, outfit);
+  if (verdictText) verdictText.textContent = combo.verdictText[lang];
+  if (harmonyNote) harmonyNote.textContent = combo.harmony[lang];
+  if (photoTip) photoTip.textContent = combo.photoTip[lang];
+  if (layersBox) {
+    const l = outfit.layers[lang];
+    layersBox.innerHTML = `
+      <div class="studio-layer-item"><div class="l-key">${ui.layerOuter}</div><div class="l-val">${l.outer}</div></div>
+      <div class="studio-layer-item"><div class="l-key">${ui.layerMid}</div><div class="l-val">${l.mid}</div></div>
+      <div class="studio-layer-item"><div class="l-key">${ui.layerBottom}</div><div class="l-val">${l.bottom}</div></div>`;
+  }
+  const toastEl = document.getElementById('studioCopyStatus');
+  if (toastEl) {
+    toastEl.textContent = studioState.toastKey ? (ui[studioState.toastKey] || '') : '';
+  }
+}
+
+function buildPackingText() {
+  const lang = currentLang;
+  const ui = STUDIO_UI[lang] || STUDIO_UI.zh;
+  const scene = getScene(studioState.scene);
+  const outfit = getOutfit(studioState.outfit);
+  const combo = getCombo(scene.id, outfit.id);
+  const l = outfit.layers[lang];
+  return [
+    ui.packHeader(scene, outfit),
+    `- ${ui.layerOuter}: ${l.outer}`,
+    `- ${ui.layerMid}: ${l.mid}`,
+    `- ${ui.layerBottom}: ${l.bottom}`,
+    `- ${ui.packExtra}: ${combo.extraPack[lang]}`
+  ].join('\n');
+}
+
+async function copyPackingList() {
+  const text = buildPackingText();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      setStudioToast('copiedToast');
+      return;
+    }
+  } catch (err) {
+    // Fallback below
+  }
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    setStudioToast(ok ? 'copiedToast' : 'copyFail');
+  } catch (err) {
+    setStudioToast('copyFail');
+  }
+}
+
+function initStudio() {
+  const sceneGrid = document.getElementById('studioSceneGrid');
+  const outfitList = document.getElementById('studioOutfitList');
+  const filmstrip = document.getElementById('studioFilmstrip');
+  const btnSingle = document.getElementById('studioModeSingle');
+  const btnCompare = document.getElementById('studioModeCompare');
+  const btnPinA = document.getElementById('studioPinA');
+  const btnSwap = document.getElementById('studioSwapAB');
+  const btnShuffle = document.getElementById('studioShuffle');
+  const btnCopy = document.getElementById('studioCopyPacking');
+
+  if (sceneGrid) {
+    sceneGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-scene]');
+      if (!btn) return;
+      studioState.scene = btn.getAttribute('data-scene');
+      preloadStudioMatrix();
+      renderStudio();
+    });
+  }
+
+  if (outfitList) {
+    outfitList.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-outfit]');
+      if (!btn) return;
+      studioState.outfit = btn.getAttribute('data-outfit');
+      preloadStudioMatrix();
+      renderStudio();
+    });
+  }
+
+  if (filmstrip) {
+    filmstrip.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-scene][data-outfit]');
+      if (!btn) return;
+      studioState.scene = btn.getAttribute('data-scene');
+      studioState.outfit = btn.getAttribute('data-outfit');
+      preloadStudioMatrix();
+      renderStudio();
+    });
+  }
+
+  if (btnSingle) {
+    btnSingle.addEventListener('click', () => {
+      studioState.mode = 'single';
+      renderStudio();
+    });
+  }
+
+  if (btnCompare) {
+    btnCompare.addEventListener('click', () => {
+      studioState.mode = 'compare';
+      if (studioState.planA.scene === studioState.scene && studioState.planA.outfit === studioState.outfit) {
+        const altOutfit = STUDIO_OUTFITS.find(o => o.id !== studioState.outfit) || STUDIO_OUTFITS[1];
+        studioState.outfit = altOutfit.id;
+      }
+      preloadStudioMatrix();
+      renderStudio();
+    });
+  }
+
+  if (btnPinA) {
+    btnPinA.addEventListener('click', () => {
+      studioState.planA = { scene: studioState.scene, outfit: studioState.outfit };
+      studioState.mode = 'compare';
+      preloadStudioMatrix();
+      renderStudio();
+      setStudioToast('pinnedToast');
+    });
+  }
+
+  if (btnSwap) {
+    btnSwap.addEventListener('click', () => {
+      const prevA = { ...studioState.planA };
+      studioState.planA = { scene: studioState.scene, outfit: studioState.outfit };
+      studioState.scene = prevA.scene;
+      studioState.outfit = prevA.outfit;
+      renderStudio();
+      setStudioToast('swappedToast');
+    });
+  }
+
+  if (btnShuffle) {
+    btnShuffle.addEventListener('click', () => {
+      const pool = [];
+      STUDIO_SCENES.forEach(s => {
+        STUDIO_OUTFITS.forEach(o => {
+          if (s.id !== studioState.scene || o.id !== studioState.outfit) {
+            pool.push({ scene: s.id, outfit: o.id });
+          }
+        });
+      });
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      studioState.scene = pick.scene;
+      studioState.outfit = pick.outfit;
+      preloadStudioMatrix();
+      renderStudio();
+    });
+  }
+
+  if (btnCopy) {
+    btnCopy.addEventListener('click', copyPackingList);
+  }
+
+  const studioSection = document.getElementById('studio');
+  if (studioSection && 'IntersectionObserver' in window) {
+    const preloadObs = new IntersectionObserver((entries) => {
+      if (entries.some(en => en.isIntersecting)) {
+        preloadStudioMatrix();
+        preloadObs.disconnect();
+      }
+    }, { rootMargin: '320px 0px' });
+    preloadObs.observe(studioSection);
+  }
+
+  renderStudio();
+}
+
 // ===== LANGUAGE SWITCHING =====
 function switchLang(lang, evt) {
+  currentLang = i18n[lang] ? lang : 'zh';
   const target = evt ? evt.target : null;
   document.querySelectorAll('.lang-switch button').forEach(btn => {
     btn.classList.remove('active');
+    if (!target && btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${currentLang}'`)) {
+      btn.classList.add('active');
+    }
   });
   if (target) {
     target.classList.add('active');
   }
 
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : (lang === 'ja' ? 'ja' : 'en');
+  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : (currentLang === 'ja' ? 'ja' : 'en');
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (i18n[lang] && i18n[lang][key]) {
-      el.textContent = i18n[lang][key];
+    if (i18n[currentLang] && i18n[currentLang][key]) {
+      el.textContent = i18n[currentLang][key];
     }
   });
 
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
     const key = el.getAttribute('data-i18n-html');
-    if (i18n[lang] && i18n[lang][key]) {
-      el.innerHTML = i18n[lang][key];
+    if (i18n[currentLang] && i18n[currentLang][key]) {
+      el.innerHTML = i18n[currentLang][key];
     }
   });
+
+  renderStudio();
 }
+
+initStudio();
 
 // ===== LOADER =====
 window.addEventListener('load', () => {

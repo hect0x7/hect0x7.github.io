@@ -8,8 +8,11 @@ const $ = (sel) => document.querySelector(sel);
 const hero = $(".hero");
 const heroPin = $(".hero-pin");
 const heroTitle = $("#heroTitle");
-const chart = $(".eclipse-chart");
-const pulseButton = $(".eclipse-pulse");
+const heroIndexList = $("#heroIndexList");
+const heroPreviewLink = $("#heroPreviewLink");
+const heroPreviewImg = $("#heroPreviewImg");
+const heroPreviewNum = $("#heroPreviewNum");
+const heroPreviewTitle = $("#heroPreviewTitle");
 const works = $("#works");
 const worksPin = $(".works-pin");
 const track = $("#workGrid");
@@ -91,9 +94,8 @@ function measureChars() {
   if (reduced || !heroTitle) return;
   heroPin.style.setProperty("--e", "0");
   const pin = heroPin.getBoundingClientRect();
-  const lens = chart.getBoundingClientRect();
-  const cx = lens.left + lens.width / 2;
-  const cy = lens.top + lens.height / 2;
+  const cx = pin.left + pin.width * 0.56;
+  const cy = pin.top + pin.height * 0.48;
   heroTitle.querySelectorAll(".ch").forEach((ch) => {
     const r = ch.getBoundingClientRect();
     ch.style.setProperty("--dx", clamp((r.left + r.width / 2 - cx) / pin.width, -0.6, 0.6).toFixed(3));
@@ -120,12 +122,7 @@ function measure() {
 
 function sendSections() {
   if (!engine) return;
-  const pin = heroPin.getBoundingClientRect();
-  const lens = chart.getBoundingClientRect();
-  engine.setHeroAim(
-    (lens.left + lens.width / 2 - pin.left) / pin.width,
-    (lens.top + lens.height / 2 - pin.top) / pin.height,
-  );
+  engine.setHeroAim(0.56, 0.48);
   const P = (y) => clamp(y / st.max);
   const heroSpan = isStatic() ? st.svh * 0.35 : Math.max(0, st.heroH - st.svh);
   const heroEnd = P(heroSpan);
@@ -192,6 +189,8 @@ function syncRail(center) {
   if (center === st.center) return;
   st.center = center;
   if (nowEl) nowEl.textContent = pad2(center + 1);
+  const posEl = $("#autoplayPosition");
+  if (posEl) posEl.textContent = `${pad2(center + 1)} / ${pad2(N)}`;
   rail.querySelectorAll(".rail-dot").forEach((b, i) => {
     if (i === center) b.setAttribute("aria-current", "true");
     else b.removeAttribute("aria-current");
@@ -477,17 +476,6 @@ window.addEventListener("pointerdown", (e) => {
   engine.pulse(nx, ny);
 }, { passive: true });
 
-let pulseTimer = 0;
-pulseButton.addEventListener("click", () => {
-  if (!engine) return;
-  const lens = chart.getBoundingClientRect();
-  const [nx, ny] = norm({ clientX: lens.left + lens.width / 2, clientY: lens.top + lens.height / 2 });
-  engine.pulse(nx, ny);
-  pulseButton.classList.add("is-firing");
-  clearTimeout(pulseTimer);
-  pulseTimer = setTimeout(() => pulseButton.classList.remove("is-firing"), 500);
-});
-
 let resizeTimer = 0;
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimer);
@@ -498,10 +486,16 @@ window.addEventListener("resize", () => {
   }, 120);
 });
 
-document.addEventListener("visibilitychange", () => {
+function syncEnginePause() {
   if (engine) engine.setPaused(document.hidden);
-  if (document.hidden) stop();
-  else {
+}
+
+document.addEventListener("visibilitychange", () => {
+  syncEnginePause();
+  if (document.hidden) {
+    if (typeof ap !== "undefined" && ap.state === "playing") pauseAutoplay("paused");
+    stop();
+  } else {
     st.dirty = true;
     start();
   }
@@ -511,11 +505,269 @@ document.addEventListener("home:theme", (e) => {
   if (engine) engine.setTheme(e.detail.theme);
 });
 
+/* ---------------- 首屏右侧交互作品索引与封面预览 ---------------- */
+let heroPreviewIdx = Math.max(0, WORKS.length - 1);
+let lastHoverPulse = 0;
+
+function currentLangKey() {
+  const l = (document.documentElement.lang || "zh").toLowerCase();
+  if (l.startsWith("ja")) return "ja";
+  if (l.startsWith("en")) return "en";
+  return "zh";
+}
+
+function workTitle(w, lang) {
+  return (w.title && (w.title[lang] || w.title.zh)) || w.slug;
+}
+
+function workHref(w) {
+  return w.href || `works/${w.slug}/`;
+}
+
+function selectHeroPreview(idx, withPulse = false) {
+  const w = WORKS[idx];
+  if (!w) return;
+  heroPreviewIdx = idx;
+  const lang = currentLangKey();
+  const num = String(idx + 1).padStart(2, "0");
+  const title = workTitle(w, lang);
+  if (heroPreviewLink) heroPreviewLink.href = workHref(w);
+  if (heroPreviewImg) {
+    heroPreviewImg.src = w.cover;
+    heroPreviewImg.alt = title;
+  }
+  if (heroPreviewNum) heroPreviewNum.textContent = num;
+  if (heroPreviewTitle) heroPreviewTitle.textContent = title;
+  if (heroIndexList) {
+    heroIndexList.querySelectorAll(".hero-index-item").forEach((li, i) => {
+      li.classList.toggle("is-active", i === idx);
+    });
+  }
+  if (withPulse && engine) {
+    const now = performance.now();
+    if (now - lastHoverPulse > 420) {
+      lastHoverPulse = now;
+      engine.pulse(0.32, 0.14 - idx * 0.08);
+    }
+  }
+}
+
+function renderHeroIndex() {
+  if (!heroIndexList || !Array.isArray(WORKS)) return;
+  const lang = currentLangKey();
+  heroIndexList.innerHTML = "";
+  WORKS.forEach((w, i) => {
+    const li = document.createElement("li");
+    li.className = "hero-index-item" + (i === heroPreviewIdx ? " is-active" : "");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "hero-index-btn";
+    btn.innerHTML =
+      `<span class="hero-index-num">${String(i + 1).padStart(2, "0")}</span>` +
+      `<span class="hero-index-title"></span>` +
+      `<span class="hero-index-year">${w.year || ""}</span>`;
+    btn.querySelector(".hero-index-title").textContent = workTitle(w, lang);
+    btn.addEventListener("mouseenter", () => selectHeroPreview(i, true));
+    btn.addEventListener("focus", () => selectHeroPreview(i, false));
+    btn.addEventListener("click", () => scrollToWork(i, true));
+    li.appendChild(btn);
+    heroIndexList.appendChild(li);
+  });
+  selectHeroPreview(clamp(heroPreviewIdx, 0, WORKS.length - 1), false);
+}
+
 document.addEventListener("home:render", () => {
+  renderHeroIndex();
+  if (typeof syncAutoplayUi === "function") syncAutoplayUi();
   collect();
   measure();
   start();
   setTimeout(measureChars, 1600); // 入场动画结束后重测字符位置
+});
+
+/* ---------------- 自动播放巡览（参考作品 1） ---------------- */
+const autoplayStartBtn = $("#autoplayStart");
+const autoplayDock = $("#autoplayDock");
+const autoplayToggleBtn = $("#autoplayToggle");
+const autoplayStateLabel = $("#autoplayStateLabel");
+const autoplayPosEl = $("#autoplayPosition");
+const autoplayCloseBtn = $("#autoplayClose");
+
+const ap = {
+  state: "idle", // idle | playing | paused | ended
+  speed: 1,
+  stepIdx: 0,
+  raf: 0,
+  holdTimer: 0,
+};
+
+function apText(key) {
+  const lang = currentLangKey();
+  return (typeof I18N !== "undefined" && I18N[lang] && I18N[lang][key]) || "";
+}
+
+function getAutoplayWaypoints() {
+  const list = [];
+  for (let i = 0; i < N; i++) {
+    list.push({
+      label: `${String(i + 1).padStart(2, "0")} / ${String(N).padStart(2, "0")}`,
+      moveMs: i === 0 ? 1500 : 1200,
+      holdMs: 2400,
+      getY: () => {
+        if (isStatic() && cards[i]) {
+          const r = cards[i].getBoundingClientRect();
+          return clamp(scrollY + r.top + r.height / 2 - innerHeight / 2, 0, st.max);
+        }
+        return clamp(st.worksTop + st.svh * (0.2 + i * 0.7), 0, st.max);
+      },
+    });
+  }
+  list.push({
+    label: "ABOUT",
+    moveMs: 1400,
+    holdMs: 0,
+    getY: () => clamp(st.aboutTop, 0, st.max),
+  });
+  return list;
+}
+
+function syncAutoplayUi() {
+  const playing = ap.state === "playing";
+  root.classList.toggle("is-autoplaying", playing);
+  if (autoplayStartBtn) autoplayStartBtn.setAttribute("aria-pressed", String(playing));
+  if (autoplayToggleBtn) {
+    autoplayToggleBtn.setAttribute("aria-pressed", String(playing));
+    autoplayToggleBtn.setAttribute("aria-label", apText(playing ? "autoplayPaused" : "autoplayStart") || "Autoplay");
+  }
+  if (autoplayDock) {
+    autoplayDock.dataset.state = ap.state;
+    autoplayDock.setAttribute("aria-hidden", ap.state === "idle" ? "true" : "false");
+  }
+  if (autoplayStateLabel) {
+    const key =
+      ap.state === "playing" ? "autoplayPlaying" :
+      ap.state === "paused" ? "autoplayPaused" :
+      ap.state === "ended" ? "autoplayEnded" : "autoplayStart";
+    autoplayStateLabel.textContent = apText(key);
+  }
+}
+
+function clearAutoplayTimers() {
+  if (ap.raf) { cancelAnimationFrame(ap.raf); ap.raf = 0; }
+  if (ap.holdTimer) { clearTimeout(ap.holdTimer); ap.holdTimer = 0; }
+}
+
+function pauseAutoplay(nextState = "paused") {
+  clearAutoplayTimers();
+  if (ap.state === "idle" && nextState === "paused") return;
+  ap.state = nextState;
+  syncAutoplayUi();
+}
+
+function runAutoplayStep(idx) {
+  const steps = getAutoplayWaypoints();
+  if (ap.state !== "playing" || idx >= steps.length) {
+    ap.state = "ended";
+    syncAutoplayUi();
+    return;
+  }
+  ap.stepIdx = idx;
+  const step = steps[idx];
+  if (autoplayPosEl) autoplayPosEl.textContent = step.label;
+
+  const startY = scrollY;
+  const targetY = step.getY();
+  if (reduced) {
+    window.scrollTo({ top: targetY, behavior: "instant" });
+    if (idx >= steps.length - 1) {
+      ap.state = "ended";
+      syncAutoplayUi();
+    } else {
+      ap.holdTimer = setTimeout(() => runAutoplayStep(idx + 1), Math.max(800, step.holdMs / ap.speed));
+    }
+    return;
+  }
+
+  let progress = 0;
+  let lastT = performance.now();
+
+  const tick = (now) => {
+    if (ap.state !== "playing") return;
+    const dt = Math.min(64, Math.max(0, now - lastT));
+    lastT = now;
+    const dur = Math.max(240, step.moveMs / ap.speed);
+    progress = clamp(progress + dt / dur, 0, 1);
+    const e = progress < 0.5 ? 4 * progress * progress * progress : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    window.scrollTo({ top: startY + (targetY - startY) * e, behavior: "instant" });
+    if (progress < 1) {
+      ap.raf = requestAnimationFrame(tick);
+    } else {
+      ap.raf = 0;
+      if (idx >= steps.length - 1) {
+        ap.state = "ended";
+        syncAutoplayUi();
+      } else {
+        ap.holdTimer = setTimeout(() => runAutoplayStep(idx + 1), Math.max(500, step.holdMs / ap.speed));
+      }
+    }
+  };
+  ap.raf = requestAnimationFrame(tick);
+}
+
+function startOrResumeAutoplay() {
+  clearAutoplayTimers();
+  measure();
+  const steps = getAutoplayWaypoints();
+  let startIdx = 0;
+  if (ap.state === "paused" && ap.stepIdx < steps.length) {
+    // 若暂停时仍在奔向当前目标（距离 > 6px），继续完成当前项而不是跳过
+    if (steps[ap.stepIdx].getY() - scrollY > 6) {
+      startIdx = ap.stepIdx;
+    } else {
+      const next = steps.findIndex((s) => s.getY() > scrollY + 40);
+      startIdx = next >= 0 ? next : 0;
+    }
+  } else if (scrollY > st.worksTop && scrollY < st.aboutTop - 60) {
+    const next = steps.findIndex((s) => s.getY() > scrollY + 40);
+    startIdx = next >= 0 ? next : 0;
+  }
+  ap.state = "playing";
+  syncAutoplayUi();
+  runAutoplayStep(startIdx);
+}
+
+function toggleAutoplay() {
+  if (ap.state === "playing") pauseAutoplay("paused");
+  else startOrResumeAutoplay();
+}
+
+if (autoplayStartBtn) autoplayStartBtn.addEventListener("click", toggleAutoplay);
+if (autoplayToggleBtn) autoplayToggleBtn.addEventListener("click", toggleAutoplay);
+if (autoplayCloseBtn) autoplayCloseBtn.addEventListener("click", () => pauseAutoplay("idle"));
+document.querySelectorAll("[data-autoplay-speed]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    ap.speed = Number(btn.dataset.autoplaySpeed) === 2 ? 2 : 1;
+    document.querySelectorAll("[data-autoplay-speed]").forEach((b) => {
+      const on = Number(b.dataset.autoplaySpeed) === ap.speed;
+      b.classList.toggle("is-on", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
+  });
+});
+
+// 手动滚轮、触摸、键盘导航或点击页面立即温柔让权给用户
+const interruptIfPlaying = (e, allowOverDock = false) => {
+  if (ap.state !== "playing") return;
+  if (!allowOverDock && e && e.target && e.target.closest && e.target.closest("#autoplayStart, #autoplayDock")) return;
+  pauseAutoplay("paused");
+};
+window.addEventListener("wheel", (e) => interruptIfPlaying(e, true), { passive: true });
+window.addEventListener("touchstart", (e) => interruptIfPlaying(e, false), { passive: true });
+window.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse") interruptIfPlaying(e, false); }, { passive: true });
+window.addEventListener("keydown", (e) => {
+  if (["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "PageDown", "PageUp", "Home", "End", "Space", " "].includes(e.key)) {
+    interruptIfPlaying(e, true);
+  }
 });
 
 /* ---------------- 引擎 ---------------- */
@@ -554,7 +806,7 @@ async function bootEngine() {
   if (root.classList.contains("no-gl")) return;
   let mod;
   try {
-    mod = await import("./home3d/engine.js");
+    mod = await import("./home3d/engine.js?v=15");
   } catch (err) {
     degrade(err);
     return;
@@ -564,6 +816,7 @@ async function bootEngine() {
     instance = mod.createHome3D(document.getElementById("cosmos"), {
       works: WORKS.map((w) => ({ slug: w.slug, cover: w.cover })),
       theme: resolveTheme(root.dataset.theme),
+      heroMode: "1b",
       reducedMotion: reduced,
       onReady: () => {
         if (!failed) root.classList.add("gl-ready");
@@ -575,7 +828,6 @@ async function bootEngine() {
     return;
   }
   if (failed) {
-    // onFail 在构造期间被同步调用
     if (instance) {
       try { instance.destroy(); } catch (destroyErr) { console.warn("[home] destroy 异常：", destroyErr); }
     }
@@ -584,13 +836,14 @@ async function bootEngine() {
   engine = instance;
   sendSections();
   engine.setScroll(clamp(scrollY / st.max));
-  st.active = -2; // 唤醒一帧重新下发激活作品
+  st.active = -2;
   start();
-  if (document.hidden) engine.setPaused(true);
+  syncEnginePause();
 }
 
 /* ---------------- 启动 ---------------- */
 
+renderHeroIndex();
 collect();
 measure();
 start();
